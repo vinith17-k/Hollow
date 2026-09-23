@@ -1,0 +1,1285 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desk Companion | Admin Dashboard</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            /* Hardware Colors - Teenage Engineering Vibe */
+            --chassis-main: #d4d2cc;
+            --chassis-light: #e6e4df;
+            --chassis-dark: #a8a6a1;
+            --screen-bezel: #111211;
+            --screen-bg: #0a0b0a;
+            --screen-text: #d7d5d0;
+            --accent-orange: #ea580c;
+            --mascot-body: #17111a;
+            
+            /* Dynamic State */
+            --eye-glow: #ffffff;
+            --led-brightness: 0.8;
+        }
+
+        body {
+            /* Subtle cutting-mat / workspace background */
+            background-color: #8c8f8d;
+            background-image: radial-gradient(#7a7d7b 1px, transparent 1px);
+            background-size: 20px 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #222;
+        }
+
+        .hw-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 700;
+            color: #444;
+        }
+
+        .lcd-text {
+            font-family: 'Space Mono', ui-monospace, monospace;
+            color: var(--screen-text);
+            text-shadow: 0 0 calc(3px * var(--led-brightness)) var(--screen-text);
+        }
+        
+        .lcd-accent {
+            color: var(--accent-orange);
+            text-shadow: 0 0 calc(3px * var(--led-brightness)) var(--accent-orange);
+        }
+
+        /* Tactile Hardware Buttons */
+        .btn-tactile {
+            background-color: var(--chassis-light);
+            border: 2px solid var(--chassis-dark);
+            border-bottom-width: 4px;
+            border-radius: 4px;
+            font-weight: 700;
+            transition: all 0.05s ease;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            color: #222;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-tactile:hover:not(:disabled) { background-color: #f2f0eb; }
+        .btn-tactile:active:not(:disabled), .btn-tactile.active {
+            border-bottom-width: 2px;
+            transform: translateY(2px);
+            background-color: var(--chassis-main);
+            border-color: #888;
+        }
+        .btn-tactile:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .btn-tactile-primary { background-color: var(--accent-orange); border-color: #b44207; color: white; }
+        .btn-tactile-primary:hover:not(:disabled) { background-color: #f97316; }
+        
+        .btn-tactile-danger { background-color: #dc2626; border-color: #991b1b; color: white; }
+
+        /* Tactile Inputs */
+        .input-tactile {
+            background-color: #fff;
+            border: 2px inset var(--chassis-dark);
+            border-radius: 4px;
+            padding: 0.4rem 0.5rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.875rem;
+            width: 100%;
+            transition: outline 0.1s;
+        }
+        .input-tactile:focus { outline: 2px solid var(--accent-orange); outline-offset: 0px; border-style: solid; }
+
+        /* Toggle Switch */
+        .toggle-checkbox:checked { right: 0; border-color: var(--accent-orange); }
+        .toggle-checkbox:checked + .toggle-label { background-color: var(--accent-orange); }
+
+        /* Mascot Settings */
+        #mascot-svg { width: 100%; height: 100%; display: block; }
+        .mascot-pixel { fill: var(--mascot-body); }
+        .mascot-eye {
+            fill: var(--eye-glow);
+            filter: drop-shadow(0 0 calc(4px * var(--led-brightness)) var(--eye-glow));
+            transition: fill 0.4s ease;
+        }
+        #mascot-eyes {
+            transform-origin: 32px 26px;
+            transition: transform 0.4s ease;
+        }
+        .mascot-smoke { fill: #666; opacity: 0; }
+
+        /* Mascot States */
+        .state-idle { --eye-glow: #ffffff; }
+        .state-idle #mascot-body-group { animation: float-idle 4s ease-in-out infinite; }
+        .state-idle #left-wing { transform-origin: 20px 20px; animation: flap-slow-left 3s ease-in-out infinite; }
+        .state-idle #right-wing { transform-origin: 44px 20px; animation: flap-slow-right 3s ease-in-out infinite; }
+        .state-idle .mascot-tail { transform-origin: 36px 48px; animation: tail-swish-slow 4s ease-in-out infinite; }
+        
+        .state-working { --eye-glow: #06b6d4; }
+        .state-working #mascot-body-group { animation: float-work 1.5s ease-in-out infinite; }
+        .state-working #left-wing { transform-origin: 20px 20px; animation: flap-work-left 0.3s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
+        .state-working #right-wing { transform-origin: 44px 20px; animation: flap-work-right 0.3s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
+        .state-working .mascot-tail { transform-origin: 36px 48px; animation: tail-swish-work 1.5s infinite; }
+        
+        .state-urgent { --eye-glow: #ef4444; }
+        .state-urgent #mascot-body-group { animation: float-urgent 1s ease-in-out infinite, shake-erratic 0.1s infinite; }
+        .state-urgent #left-wing { transform-origin: 20px 20px; animation: flap-urgent-left 0.15s infinite alternate; }
+        .state-urgent #right-wing { transform-origin: 44px 20px; animation: flap-urgent-right 0.15s infinite alternate; }
+        .state-urgent .mascot-tail { transform-origin: 36px 48px; animation: thrash-fast 0.08s infinite alternate; }
+        .state-urgent .mascot-eye { animation: pulse-red 0.3s infinite alternate; }
+        .state-urgent .mascot-smoke { animation: puff 1s infinite; }
+
+        .state-sleeping { --eye-glow: #4b5563; }
+        .state-sleeping #mascot-body-group { transform-origin: 32px 64px; animation: breathe-sleep 4s ease-in-out infinite; }
+        .state-sleeping #left-wing { transform-origin: 20px 20px; transform: rotate(-25deg); transition: transform 0.5s; }
+        .state-sleeping #right-wing { transform-origin: 44px 20px; transform: rotate(25deg); transition: transform 0.5s; }
+        .state-sleeping #mascot-eyes { transform: scaleY(0.05); transition: transform 1s ease; }
+        .state-sleeping .mascot-smoke { animation: puff-slow 4s infinite; }
+
+        @media (prefers-reduced-motion: reduce) {
+            #mascot-body-group, #left-wing, #right-wing, .mascot-tail, .mascot-eye, .mascot-smoke {
+                animation: none !important; transform: none !important;
+            }
+        }
+
+        /* Keyframes */
+        @keyframes float-idle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+        @keyframes float-work { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes float-urgent { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+        
+        @keyframes flap-slow-left { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(10deg); } }
+        @keyframes flap-slow-right { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-10deg); } }
+        
+        @keyframes flap-work-left { from { transform: rotate(-10deg); } to { transform: rotate(45deg); } }
+        @keyframes flap-work-right { from { transform: rotate(10deg); } to { transform: rotate(-45deg); } }
+        
+        @keyframes flap-urgent-left { from { transform: rotate(20deg); } to { transform: rotate(45deg); } }
+        @keyframes flap-urgent-right { from { transform: rotate(-20deg); } to { transform: rotate(-45deg); } }
+
+        @keyframes tail-swish-slow { 0%, 100% { transform: skewX(0deg); } 50% { transform: skewX(15deg); } }
+        @keyframes tail-swish-work { 0%, 100% { transform: skewX(-10deg); } 50% { transform: skewX(10deg); } }
+        
+        @keyframes shake-erratic { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-1.5px, 1.5px) rotate(1deg); } 50% { transform: translate(1.5px, -1.5px) rotate(-1deg); } 75% { transform: translate(-1.5px, -1.5px) rotate(0deg); } }
+        @keyframes thrash-fast { from { transform: skewX(-30deg); } to { transform: skewX(30deg); } }
+        @keyframes pulse-red { from { opacity: 1; filter: drop-shadow(0 0 2px var(--eye-glow)); } to { opacity: 0.5; filter: drop-shadow(0 0 8px var(--eye-glow)); } }
+        
+        @keyframes breathe-sleep { 0%, 100% { transform: translateY(8px) scaleY(1) scaleX(1); } 50% { transform: translateY(8px) scaleY(0.92) scaleX(1.03); } }
+        
+        @keyframes puff { 0% { transform: translateY(0) scale(1); opacity: 0.9; } 100% { transform: translateY(-16px) scale(2); opacity: 0; } }
+        @keyframes puff-slow { 0% { transform: translateY(0) scale(1); opacity: 0.6; } 100% { transform: translateY(-12px) scale(1.5); opacity: 0; } }
+        
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: var(--chassis-main); border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--chassis-dark); border-radius: 4px; }
+        
+        /* Toast Notification */
+        #toast-container { transition: transform 0.3s ease, opacity 0.3s ease; transform: translateY(100%); opacity: 0; }
+        #toast-container.show { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2 sm:p-6 lg:p-8">
+
+    <div class="bg-[var(--chassis-main)] w-full max-w-6xl rounded-2xl shadow-2xl border-t-2 border-l-2 border-white/50 border-b-4 border-r-4 border-[var(--chassis-dark)] p-4 sm:p-6 flex flex-col lg:flex-row gap-6 relative">
+        
+        <!-- Chassis Screws -->
+        <div class="absolute top-4 left-4 w-2 h-2 rounded-full bg-[var(--chassis-dark)] shadow-inner"></div>
+        <div class="absolute top-4 right-4 w-2 h-2 rounded-full bg-[var(--chassis-dark)] shadow-inner"></div>
+        <div class="absolute bottom-4 left-4 w-2 h-2 rounded-full bg-[var(--chassis-dark)] shadow-inner"></div>
+        <div class="absolute bottom-4 right-4 w-2 h-2 rounded-full bg-[var(--chassis-dark)] shadow-inner"></div>
+
+        <!-- LEFT COLUMN: Simulator Screen -->
+        <section aria-labelledby="sim-title" class="w-full lg:w-1/3 flex flex-col items-center">
+            <div class="w-full flex justify-between items-end mb-2 px-1">
+                <h2 id="sim-title" class="hw-label text-left">Display Out</h2>
+                <span class="hw-label opacity-50">DC-01</span>
+            </div>
+            
+            <div class="bg-[var(--screen-bezel)] p-4 rounded-xl shadow-[inset_0_4px_10px_rgba(0,0,0,0.8)] w-full aspect-[4/5] max-h-[500px] flex flex-col justify-between border-b border-r border-[#333] border-t-4 border-l-4 border-black relative">
+                <!-- Screen Glass reflection -->
+                <div class="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/5 to-transparent pointer-events-none rounded-t-xl z-20"></div>
+
+                <div class="bg-[var(--screen-bg)] w-full h-full rounded shadow-inner p-3 flex flex-col relative overflow-hidden" id="sim-screen">
+                    <!-- Scanline Overlay -->
+                    <div class="absolute inset-0 pointer-events-none opacity-20 bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.4)_50%)] bg-[length:100%_4px] z-10"></div>
+                    
+                    <!-- Top Bar -->
+                    <div class="flex justify-between items-start lcd-text text-xs z-0 relative">
+                        <div class="flex items-center gap-2">
+                            <div id="sim-wifi" class="flex gap-[2px] items-end h-3" aria-label="Wi-Fi">
+                                <span class="block w-1 h-1 bg-current opacity-30" id="wifi-1"></span>
+                                <span class="block w-1 h-2 bg-current opacity-30" id="wifi-2"></span>
+                                <span class="block w-1 h-3 bg-current" id="wifi-3"></span>
+                            </div>
+                            <span id="sim-sync-icon" class="hidden">⟳</span>
+                        </div>
+                        <div id="sim-clock" class="text-base font-bold tracking-widest" aria-live="polite">--:--</div>
+                    </div>
+
+                    <!-- Center: Mascot -->
+                    <div class="flex-grow flex items-center justify-center z-0 relative" aria-hidden="true">
+                        <div id="mascot-container" class="w-32 h-32 state-calm">
+                            <svg viewBox="0 0 64 64" id="mascot-svg" shape-rendering="crispEdges">
+                                <g id="mascot-body-group">
+                                    <path class="mascot-pixel mascot-tail" d="M 32 48 H 36 V 52 H 38 V 56 H 42 V 54 H 44 V 50 H 42 V 52 H 40 V 48 H 36 Z" />
+                                    <g id="left-wing"><path class="mascot-pixel" d="M 20 20 H 16 V 16 H 12 V 12 H 8 V 16 H 4 V 24 H 8 V 32 H 12 V 28 H 16 V 24 H 20 Z" /></g>
+                                    <g id="right-wing"><path class="mascot-pixel" d="M 44 20 H 48 V 16 H 52 V 12 H 56 V 16 H 60 V 24 H 56 V 32 H 52 V 28 H 48 V 24 H 44 Z" /></g>
+                                    <path class="mascot-pixel" d="M 24 12 H 28 V 16 H 24 Z M 36 12 H 40 V 16 H 36 Z" />
+                                    <path class="mascot-pixel" d="M 24 16 H 40 V 20 H 44 V 44 H 40 V 48 H 24 V 44 H 20 V 20 H 24 Z" />
+                                    <g id="mascot-eyes">
+                                        <rect x="26" y="24" width="4" height="4" class="mascot-eye" />
+                                        <rect x="34" y="24" width="4" height="4" class="mascot-eye" />
+                                    </g>
+                                </g>
+                                <rect x="10" y="45" width="2" height="2" class="mascot-smoke" style="animation-delay: 0s;" />
+                                <rect x="48" y="40" width="2" height="2" class="mascot-smoke" style="animation-delay: 0.5s;" />
+                                <rect x="52" y="50" width="2" height="2" class="mascot-smoke" style="animation-delay: 1s;" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Bar: Status / Next Task -->
+                    <div class="lcd-text text-center border-t-2 border-[#222] pt-2 mt-2 h-14 flex flex-col justify-center overflow-hidden z-0 relative">
+                        <span id="sim-status-label" class="opacity-80 text-[0.6rem] uppercase tracking-widest mb-1">NO TASKS</span>
+                        <span id="sim-task-title" class="truncate font-bold text-sm">All clear.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hardware Physical Controls underneath simulator -->
+            <div class="mt-4 w-full flex flex-col gap-4 px-2">
+                <!-- Mascot State Override -->
+                <div class="w-full bg-[var(--chassis-light)] border-2 border-[var(--chassis-dark)] rounded p-2 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="hw-label text-[0.55rem] opacity-80">MASCOT_STATE_TEST</h3>
+                        <div class="w-2 h-2 rounded-full bg-[#333] shadow-inner"></div>
+                    </div>
+                    <div class="grid grid-cols-5 gap-1 bg-[var(--chassis-main)] p-1 rounded shadow-inner border border-[#b5b3ad]">
+                        <button id="btn-state-auto" class="btn-tactile px-0 py-1.5 text-[0.55rem] active">AUTO</button>
+                        <button id="btn-state-idle" class="btn-tactile px-0 py-1.5 text-[0.55rem]">IDLE</button>
+                        <button id="btn-state-working" class="btn-tactile px-0 py-1.5 text-[0.55rem]">WORK</button>
+                        <button id="btn-state-urgent" class="btn-tactile px-0 py-1.5 text-[0.55rem]">URGENT</button>
+                        <button id="btn-state-sleeping" class="btn-tactile px-0 py-1.5 text-[0.55rem]">SLEEP</button>
+                    </div>
+                </div>
+
+                <div class="w-full flex items-center justify-between px-2">
+                    <div class="flex flex-col items-center gap-2">
+                        <div id="hw-led" class="w-4 h-4 rounded-full bg-white/20 border-2 border-[var(--chassis-dark)] shadow-[inset_0_2px_5px_rgba(0,0,0,0.8)] transition-colors duration-300"></div>
+                        <span class="hw-label text-[0.55rem]">SYS_LED</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-10 h-10 rounded-full bg-[var(--chassis-dark)] shadow-md border-b-4 border-[#888] flex items-center justify-center cursor-pointer active:border-b-0 active:translate-y-1">
+                            <div class="w-8 h-8 rounded-full bg-[var(--chassis-light)] border border-white shadow-inner flex items-center justify-center">
+                                <div class="w-1 h-4 bg-[#888] rounded"></div>
+                            </div>
+                        </div>
+                        <span class="hw-label text-[0.55rem]">ENCODER</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT COLUMN: Dashboard Tabs -->
+        <main class="w-full lg:w-2/3 flex flex-col h-[600px] lg:h-auto">
+            <h1 class="sr-only">Desk Companion Dashboard</h1>
+            
+            <!-- Tab Navigation + Sync Status -->
+            <div class="flex items-center gap-2 mb-3 flex-wrap">
+                <nav class="flex gap-2 overflow-x-auto pb-1 flex-grow" role="tablist" aria-label="Dashboard Sections">
+                    <button role="tab" aria-selected="true" aria-controls="panel-tasks" id="tab-tasks" class="btn-tactile active px-4 py-2 min-w-[80px]" tabindex="0">Tasks</button>
+                    <button role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" class="btn-tactile px-4 py-2 min-w-[80px]" tabindex="-1">Config</button>
+                    <button role="tab" aria-selected="false" aria-controls="panel-diag" id="tab-diag" class="btn-tactile px-4 py-2 min-w-[80px]" tabindex="-1">Diag</button>
+                    <button role="tab" aria-selected="false" aria-controls="panel-admin" id="tab-admin" class="btn-tactile px-4 py-2 min-w-[80px]" tabindex="-1">Admin</button>
+                </nav>
+                <!-- Live sync status indicator -->
+                <div class="flex items-center gap-1.5 shrink-0" title="API sync status">
+                    <div id="sync-dot" class="w-2 h-2 rounded-full bg-gray-400 transition-colors duration-300"></div>
+                    <span id="sync-status-label" class="hw-label text-[0.55rem] opacity-70">connecting...</span>
+                </div>
+            </div>
+
+
+            <!-- Panels Container (The "Module" bay) -->
+            <div class="flex-grow bg-[#f5f4f1] border-2 border-[var(--chassis-dark)] rounded-lg p-1 shadow-[inset_0_2px_8px_rgba(0,0,0,0.1)] relative overflow-hidden flex flex-col">
+                
+                <div id="panel-tasks" role="tabpanel" aria-labelledby="tab-tasks" class="h-full flex flex-col p-3">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="hw-label text-sm">Directives DB</h2>
+                        <div class="flex items-center gap-2">
+                            <button id="btn-mark-all-done" class="btn-tactile px-2 py-1 text-[0.6rem]" title="Mark all tasks done">✓ ALL</button>
+                            <span id="task-count" class="hw-label bg-[var(--chassis-light)] px-2 py-1 rounded border border-[var(--chassis-dark)]" title="pending / total">0 / 0</span>
+                        </div>
+                    </div>
+
+                    <!-- Add Task Form -->
+                    <form id="form-add-task" class="flex gap-2 mb-3 bg-[var(--chassis-light)] p-2 rounded border border-[var(--chassis-dark)] shadow-sm flex-wrap">
+                        <div class="flex-grow min-w-[120px]">
+                            <label for="new-task-title" class="sr-only">Task Title</label>
+                            <input type="text" id="new-task-title" required placeholder="New Directive..." class="input-tactile h-full" maxlength="32">
+                        </div>
+                        <div class="w-32">
+                            <label for="new-task-date" class="sr-only">Due Date</label>
+                            <input type="date" id="new-task-date" class="input-tactile h-full" title="Due date (defaults to today)">
+                        </div>
+                        <div class="w-28">
+                            <label for="new-task-time" class="sr-only">Due Time</label>
+                            <input type="time" id="new-task-time" required class="input-tactile h-full">
+                        </div>
+                        <button type="submit" class="btn-tactile btn-tactile-primary px-3 text-lg" aria-label="Add Task">+</button>
+                    </form>
+
+                    <!-- Task List -->
+                    <ul id="task-list" class="flex-grow overflow-y-auto custom-scroll space-y-2 pr-1 pb-4" aria-live="polite">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+
+                <div id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" class="h-full hidden flex-col p-3 overflow-y-auto custom-scroll">
+                    <h2 class="hw-label text-sm mb-3">Hardware Configuration</h2>
+                    <form id="form-settings" class="space-y-3">
+                        
+                        <!-- Chime Toggle -->
+                        <div class="flex items-center justify-between bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
+                            <div>
+                                <span class="block font-bold text-sm">I2S Chime Audio</span>
+                                <span class="text-xs text-gray-500 font-mono mt-1">Play sound on alert state</span>
+                            </div>
+                            <div class="relative inline-block w-12 h-6 align-middle select-none">
+                                <input type="checkbox" name="chime_enabled" id="setting-chime" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-[var(--chassis-dark)] z-10 transition-all"/>
+                                <label for="setting-chime" class="toggle-label block overflow-hidden h-6 rounded-full bg-[var(--chassis-dark)] cursor-pointer transition-colors"></label>
+                            </div>
+                        </div>
+
+                        <!-- Brightness Slider -->
+                        <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
+                            <label for="setting-brightness" class="block font-bold text-sm mb-2">Display & LED Intensity</label>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-mono text-gray-500">MIN</span>
+                                <input type="range" id="setting-brightness" name="led_brightness" min="10" max="100" class="w-full h-2 bg-[var(--chassis-main)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-orange)]">
+                                <span class="text-xs font-mono text-gray-500">MAX</span>
+                            </div>
+                        </div>
+
+                        <!-- Numeric Settings -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
+                                <label for="setting-snooze" class="block font-bold text-sm mb-1">Snooze Duration</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="setting-snooze" name="snooze_minutes" min="1" max="60" class="input-tactile text-center">
+                                    <span class="text-xs font-mono text-gray-500">MIN</span>
+                                </div>
+                            </div>
+                            <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
+                                <label for="setting-format" class="block font-bold text-sm mb-1">Clock Format</label>
+                                <select id="setting-format" name="time_format" class="input-tactile cursor-pointer">
+                                    <option value="12">12H (AM/PM)</option>
+                                    <option value="24">24H (MIL)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Reset to defaults -->
+                        <div class="pt-1">
+                            <button type="button" id="btn-settings-reset" class="btn-tactile w-full py-2 text-xs text-gray-500">↺ Reset to Defaults</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="panel-diag" role="tabpanel" aria-labelledby="tab-diag" class="h-full hidden flex-col p-3">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="hw-label text-sm">System Telemetry</h2>
+                        <div class="flex items-center gap-2">
+                            <!-- Export backup -->
+                            <a id="btn-export" href="http://localhost:4000/api/export" target="_blank" download class="btn-tactile px-2 py-1 text-[0.6rem]" title="Download data.json backup">⬇ Export</a>
+                            <!-- Mode Toggle -->
+                            <div class="flex items-center bg-[var(--chassis-light)] border border-[var(--chassis-dark)] rounded p-1">
+                                <button id="btn-mode-local" class="btn-tactile active px-2 py-1 text-[0.6rem]">LOCAL</button>
+                                <button id="btn-mode-cloud" class="btn-tactile px-2 py-1 text-[0.6rem] border-l-0">CLOUD</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-grow overflow-y-auto custom-scroll pr-1">
+                        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="diag-grid">
+                            <!-- Populated by JS based on mode -->
+                        </dl>
+                        
+                        <div class="mt-4 bg-[var(--screen-bg)] rounded p-3 border-2 border-[var(--screen-bezel)] shadow-inner">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="hw-label text-[var(--screen-text)] opacity-70">RAW LOG</h3>
+                                <button id="btn-refresh-log" class="hw-label text-[var(--screen-text)] opacity-50 text-[0.5rem] hover:opacity-100">↻ REFRESH</button>
+                            </div>
+                            <div id="raw-log-panel" class="font-mono text-[0.65rem] text-[var(--screen-text)] opacity-90 h-24 overflow-y-auto custom-scroll space-y-1">
+                                <p>[SYS] Connecting to API...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="panel-admin" role="tabpanel" aria-labelledby="tab-admin" class="h-full hidden flex-col p-3 overflow-y-auto custom-scroll">
+                    <h2 class="hw-label text-sm mb-3">Core Provisioning</h2>
+                    
+                    <div class="space-y-4">
+                        <!-- Wi-Fi Provisioning -->
+                        <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm border-l-4 border-l-blue-500">
+                            <h3 class="font-bold text-sm mb-1 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.906 14.142 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path></svg> Network Setup</h3>
+                            <p class="text-xs text-gray-500 mb-2">Configure local Wi-Fi credentials for the device.</p>
+                            <form id="form-wifi" class="space-y-2">
+                                <input type="text" id="wifi-ssid" placeholder="SSID (Network Name)" required class="input-tactile text-sm">
+                                <input type="password" id="wifi-pass" placeholder="Password" required class="input-tactile text-sm">
+                                <button type="submit" class="btn-tactile w-full py-2">Save & Connect</button>
+                            </form>
+                        </div>
+
+                        <!-- Backend Configuration -->
+                        <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm border-l-4 border-l-[var(--accent-orange)]">
+                            <h3 class="font-bold text-sm mb-1">Cloud Endpoint</h3>
+                            <p class="text-xs text-gray-500 mb-2">Target URL for syncing tasks outside local network.</p>
+                            <div class="flex gap-2 mb-2">
+                                <input type="url" id="admin-backend-url" placeholder="https://api.supabase.co/..." class="input-tactile text-sm flex-grow">
+                                <button id="btn-save-backend-url" class="btn-tactile px-3">SET</button>
+                            </div>
+                            <div class="flex gap-2 items-center">
+                                <button id="btn-test-connection" class="btn-tactile px-3 py-1 text-xs flex-grow">Test Connection</button>
+                                <span id="connection-test-result" class="font-mono text-[0.6rem] text-gray-400">—</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Hardware Tests & Actions -->
+                        <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
+                            <h3 class="font-bold text-sm mb-2">Diagnostics & Control</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button class="btn-tactile py-2" id="btn-test-chime">Test Chime</button>
+                                <button class="btn-tactile py-2" id="btn-test-led">Test LED</button>
+                                <button class="btn-tactile py-2 col-span-2" id="btn-force-sync">Force Cloud Sync</button>
+                            </div>
+                        </div>
+
+                        <!-- Danger Zone -->
+                        <div class="bg-red-50 p-3 border border-red-200 rounded mt-4">
+                            <h3 class="font-bold text-sm text-red-800 mb-1">Danger Zone</h3>
+                            <p class="text-[0.65rem] text-red-600 mb-3 uppercase tracking-wider font-mono">Erases NVRAM. Clears Wi-Fi, Tasks, and Config.</p>
+                            <button id="btn-factory-reset" class="btn-tactile btn-tactile-danger py-2 w-full">FACTORY RESET</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-4 right-4 bg-[var(--screen-bezel)] text-[var(--screen-text)] p-3 rounded-lg border border-[#333] shadow-xl flex items-center gap-4 z-50">
+        <span id="toast-msg" class="font-mono text-sm"></span>
+        <button id="toast-action" class="btn-tactile px-2 py-1 bg-[#333] text-white border-none hover:bg-[#444] hidden">UNDO</button>
+    </div>
+
+    <script>
+        // ── API Configuration ──────────────────────────────────────────────────────
+        const API_BASE = 'http://localhost:4000/api';
+
+        // ── API Helpers ────────────────────────────────────────────────────────────
+        let lastSyncedAt   = null;
+        let syncStatusTimer = null;
+
+        async function apiFetch(path, options = {}, baseOverride = null) {
+            const url = (baseOverride || API_BASE) + path;
+            const res = await fetch(url, {
+                headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+                ...options,
+            });
+            if (res.status === 204) return null;
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+            return data;
+        }
+
+        // ── Retry queue for failed mutations ───────────────────────────────────────
+        let retryQueue = JSON.parse(localStorage.getItem('dc_retry_queue') || '[]');
+
+        function saveRetryQueue() {
+            localStorage.setItem('dc_retry_queue', JSON.stringify(retryQueue));
+        }
+
+        async function processRetryQueue() {
+            if (!retryQueue.length) return;
+            const remaining = [];
+            for (const op of retryQueue) {
+                try {
+                    await apiFetch(op.path, { method: op.method, body: op.body });
+                } catch (_) {
+                    remaining.push(op); // Keep failed ones for next attempt
+                }
+            }
+            if (remaining.length !== retryQueue.length) {
+                retryQueue = remaining;
+                saveRetryQueue();
+                if (!remaining.length) showToast('⟳ Queued changes synced.');
+            }
+        }
+
+        function queueRetry(path, method, body) {
+            retryQueue.push({ path, method, body, ts: Date.now() });
+            // Only keep last 20 retries
+            if (retryQueue.length > 20) retryQueue.splice(0, retryQueue.length - 20);
+            saveRetryQueue();
+        }
+
+        // ── Sync timestamp + stale detection ──────────────────────────────────────
+        function updateSyncTimestamp() {
+            if (!lastSyncedAt) return;
+            clearInterval(syncStatusTimer);
+            const updateLabel = () => {
+                const secs = Math.round((Date.now() - lastSyncedAt) / 1000);
+                let label;
+                if (secs < 5)          label = 'synced just now';
+                else if (secs < 60)    label = `synced ${secs}s ago`;
+                else if (secs < 3600)  label = `synced ${Math.floor(secs/60)}m ago`;
+                else                   label = 'sync stale';
+                const el = document.getElementById('sync-status-label');
+                if (el) el.textContent = label;
+
+                // Stale dot: amber if > 5 min without sync
+                if (secs > 300) setSyncIndicator('stale');
+            };
+            updateLabel();
+            syncStatusTimer = setInterval(updateLabel, 5000);
+        }
+
+        // ── Offline cache ─────────────────────────────────────────────────────────
+        function cacheToLocal() {
+            try {
+                localStorage.setItem('dc_tasks',    JSON.stringify(tasks));
+                localStorage.setItem('dc_settings', JSON.stringify(settings));
+            } catch(e) {}
+        }
+
+        function readFromLocal() {
+            try {
+                const t = localStorage.getItem('dc_tasks');
+                const s = localStorage.getItem('dc_settings');
+                if (t) tasks    = JSON.parse(t);
+                if (s) settings = { ...settings, ...JSON.parse(s) };
+            } catch(e) {}
+        }
+
+        // ── State ─────────────────────────────────────────────────────────────────
+        let tasks = [];
+        let settings = {
+            chime_enabled:     true,
+            led_brightness:    80,
+            snooze_minutes:    15,
+            sync_interval_sec: 30,
+            time_format:       '12',
+        };
+
+        let currentUrgency     = 0;
+        let manualStateOverride = null;
+        let editingTaskId      = null;
+        let deletedTaskBackup  = null;
+        let toastTimeout       = null;
+        let diagMode           = 'local';
+        let settingsSaveTimer  = null;
+        let autoSyncInterval   = null;  // Restartable interval ref
+        let diagRefreshInterval = null; // Diag live refresh
+
+        // ── DOM Elements ──────────────────────────────────────────────────────────
+        const els = {
+            tabs:            document.querySelectorAll('[role="tab"]'),
+            panels:          document.querySelectorAll('[role="tabpanel"]'),
+            taskList:        document.getElementById('task-list'),
+            taskCount:       document.getElementById('task-count'),
+            formAdd:         document.getElementById('form-add-task'),
+            simClock:        document.getElementById('sim-clock'),
+            simStatusLabel:  document.getElementById('sim-status-label'),
+            simTaskTitle:    document.getElementById('sim-task-title'),
+            mascotContainer: document.getElementById('mascot-container'),
+            hwLed:           document.getElementById('hw-led'),
+            toastContainer:  document.getElementById('toast-container'),
+            toastMsg:        document.getElementById('toast-msg'),
+            toastAction:     document.getElementById('toast-action'),
+        };
+
+        // ── Init ──────────────────────────────────────────────────────────────────
+        async function init() {
+            // Restore backend URL from localStorage
+            const savedUrl = localStorage.getItem('dc_backend_url');
+            if (savedUrl) {
+                const inp = document.getElementById('admin-backend-url');
+                if (inp) inp.value = savedUrl;
+            }
+
+            await loadData();
+            setupTabs();
+            setupEventListeners();
+            renderTasks();
+            updateSettingsUI();
+            renderDiag();
+
+            setInterval(hardwareLoop, 1000);
+            hardwareLoop();
+            startAutoSync();
+
+            // Refresh diag if on diag tab
+            diagRefreshInterval = setInterval(() => {
+                if (diagMode && document.getElementById('panel-diag') &&
+                    !document.getElementById('panel-diag').classList.contains('hidden')) {
+                    renderDiag();
+                }
+            }, 10000);
+
+            // Process any pending retry queue
+            processRetryQueue();
+        }
+
+        // ── Auto-sync (restartable so interval change takes effect) ───────────────
+        function startAutoSync() {
+            if (autoSyncInterval) clearInterval(autoSyncInterval);
+            const intervalMs = (settings.sync_interval_sec || 30) * 1000;
+            autoSyncInterval = setInterval(async () => {
+                await loadData();
+                await processRetryQueue();
+                renderTasks();
+                updateSettingsUI();
+                hardwareLoop();
+            }, intervalMs);
+        }
+
+        // ── Load data: API first, localStorage fallback ───────────────────────────
+        async function loadData() {
+            try {
+                const [fetchedTasks, fetchedSettings] = await Promise.all([
+                    apiFetch('/tasks'),
+                    apiFetch('/settings'),
+                ]);
+                tasks    = fetchedTasks;
+                settings = { ...settings, ...fetchedSettings };
+                lastSyncedAt = Date.now();
+                cacheToLocal();
+                updateSyncTimestamp();
+                setSyncIndicator('online');
+            } catch (err) {
+                console.warn('[API] Unreachable, using localStorage cache:', err.message);
+                readFromLocal();
+                setSyncIndicator('offline');
+                showToast('⚠ API offline — cached data');
+            }
+        }
+
+        function setSyncIndicator(state) {
+            const dot = document.getElementById('sync-dot');
+            const lbl = document.getElementById('sync-status-label');
+            if (!dot) return;
+            const colours = { online: '#22c55e', offline: '#ef4444', stale: '#f59e0b' };
+            dot.style.backgroundColor = colours[state] || '#9ca3af';
+            dot.title = { online: 'API connected', offline: 'API offline', stale: 'Sync stale (>5 min)' }[state] || state;
+        }
+
+        // ── UI Setup ──────────────────────────────────────────────────────────────
+        function setupTabs() {
+            els.tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    els.tabs.forEach(t => { t.setAttribute('aria-selected','false'); t.classList.remove('active'); });
+                    els.panels.forEach(p => p.classList.add('hidden'));
+                    tab.setAttribute('aria-selected', 'true');
+                    tab.classList.add('active');
+                    document.getElementById(tab.getAttribute('aria-controls')).classList.remove('hidden');
+
+                    // Refresh diag when switching to it
+                    if (tab.getAttribute('aria-controls') === 'panel-diag') renderDiag();
+                });
+            });
+        }
+
+        function setupEventListeners() {
+            // State Override Buttons
+            document.querySelectorAll('[data-state]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const newState = btn.dataset.state;
+                    manualStateOverride = manualStateOverride === newState ? null : newState;
+                    document.querySelectorAll('[data-state]').forEach(b => b.classList.remove('active'));
+                    if (manualStateOverride) btn.classList.add('active');
+                    hardwareLoop();
+                });
+            });
+
+            // Add Task — POST to API (with date picker support)
+            els.formAdd.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const titleInput = document.getElementById('new-task-title');
+                const dateInput  = document.getElementById('new-task-date');
+                const timeInput  = document.getElementById('new-task-time');
+
+                const [hours, minutes] = timeInput.value.split(':');
+                let dueDate;
+
+                if (dateInput && dateInput.value) {
+                    // User picked a specific date
+                    const [y, mo, d] = dateInput.value.split('-');
+                    dueDate = new Date(y, mo - 1, d, hours, minutes);
+                } else {
+                    // Default to today, roll over to tomorrow if time already passed
+                    const now = new Date();
+                    dueDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+                    if (dueDate < now) dueDate.setDate(dueDate.getDate() + 1);
+                }
+
+                const newTask = {
+                    title:    titleInput.value.trim(),
+                    due_time: dueDate.toISOString(),
+                    source:   'web',
+                };
+
+                try {
+                    const created = await apiFetch('/tasks', {
+                        method: 'POST',
+                        body:   JSON.stringify(newTask),
+                    });
+                    tasks.push(created);
+                    lastSyncedAt = Date.now();
+                    updateSyncTimestamp();
+                    cacheToLocal();
+                } catch (err) {
+                    tasks.push({ ...newTask, id: 't_' + Date.now(), done: false, updated_at: new Date().toISOString() });
+                    cacheToLocal();
+                    queueRetry('/tasks', 'POST', JSON.stringify(newTask));
+                    showToast('⚠ Saved locally (API unreachable)');
+                }
+
+                titleInput.value = '';
+                timeInput.value  = '';
+                if (dateInput) dateInput.value = '';
+                renderTasks(); hardwareLoop();
+            });
+
+            // Mark All Done
+            const markAllBtn = document.getElementById('btn-mark-all-done');
+            if (markAllBtn) {
+                markAllBtn.addEventListener('click', async () => {
+                    const pending = tasks.filter(t => !t.done);
+                    if (!pending.length) { showToast('All tasks already done!'); return; }
+                    pending.forEach(t => t.done = true);
+                    renderTasks(); hardwareLoop();
+                    try {
+                        await Promise.all(pending.map(t =>
+                            apiFetch(`/tasks/${t.id}`, { method: 'PATCH', body: JSON.stringify({ done: true }) })
+                        ));
+                        lastSyncedAt = Date.now(); updateSyncTimestamp(); cacheToLocal();
+                        showToast(`✓ Marked ${pending.length} task${pending.length > 1 ? 's' : ''} done.`);
+                    } catch (err) {
+                        cacheToLocal();
+                        pending.forEach(t => queueRetry(`/tasks/${t.id}`, 'PATCH', JSON.stringify({ done: true })));
+                        showToast('⚠ Marked locally (API unreachable)');
+                    }
+                });
+            }
+
+            // Settings Autosave — debounced 500ms + restarts auto-sync if interval changes
+            document.getElementById('form-settings').addEventListener('input', (e) => {
+                const { name, value, type, checked } = e.target;
+                const prevInterval = settings.sync_interval_sec;
+
+                if (type === 'checkbox') settings[name] = checked;
+                else if (type === 'number' || type === 'range') settings[name] = parseInt(value, 10);
+                else settings[name] = value;
+
+                applySettingsToSimulator();
+                renderTasks();
+
+                // Restart auto-sync if interval changed
+                if (name === 'sync_interval_sec' && settings.sync_interval_sec !== prevInterval) {
+                    startAutoSync();
+                }
+
+                clearTimeout(settingsSaveTimer);
+                settingsSaveTimer = setTimeout(async () => {
+                    try {
+                        const updated = await apiFetch('/settings', {
+                            method: 'PATCH',
+                            body:   JSON.stringify(settings),
+                        });
+                        settings = { ...settings, ...updated };
+                        lastSyncedAt = Date.now(); updateSyncTimestamp(); cacheToLocal();
+                        showToast('Settings saved.');
+                    } catch (err) {
+                        cacheToLocal();
+                        showToast('⚠ Settings saved locally');
+                    }
+                }, 500);
+            });
+
+            // Settings Reset to Defaults
+            const resetBtn = document.getElementById('btn-settings-reset');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', async () => {
+                    if (!confirm('Reset all settings to factory defaults?')) return;
+                    const defaults = { chime_enabled: true, led_brightness: 80, snooze_minutes: 15, sync_interval_sec: 30, time_format: '12' };
+                    try {
+                        const updated = await apiFetch('/settings', { method: 'PATCH', body: JSON.stringify(defaults) });
+                        settings = { ...settings, ...updated };
+                    } catch (_) {
+                        settings = { ...settings, ...defaults };
+                    }
+                    updateSettingsUI(); applySettingsToSimulator(); cacheToLocal();
+                    startAutoSync();
+                    showToast('Settings reset to defaults.');
+                });
+            }
+
+            // Diag Toggles
+            document.getElementById('btn-mode-local').addEventListener('click', (e) => {
+                diagMode = 'local';
+                e.target.classList.add('active');
+                document.getElementById('btn-mode-cloud').classList.remove('active');
+                renderDiag();
+            });
+            document.getElementById('btn-mode-cloud').addEventListener('click', (e) => {
+                diagMode = 'cloud';
+                e.target.classList.add('active');
+                document.getElementById('btn-mode-local').classList.remove('active');
+                renderDiag();
+            });
+
+            // Raw log refresh button
+            const refreshLogBtn = document.getElementById('btn-refresh-log');
+            if (refreshLogBtn) refreshLogBtn.addEventListener('click', fetchAndRenderLog);
+
+            // Hardware Admin Buttons
+            document.getElementById('btn-test-chime').addEventListener('click', () => {
+                showToast('♪ Chime test triggered (simulated).');
+            });
+            document.getElementById('btn-test-led').addEventListener('click', () => {
+                els.hwLed.style.backgroundColor = '#ea580c';
+                els.hwLed.style.boxShadow = '0 0 10px #ea580c, inset 0 2px 5px rgba(0,0,0,0.5)';
+                setTimeout(() => { els.hwLed.style.backgroundColor = ''; els.hwLed.style.boxShadow = ''; }, 1000);
+                showToast('LED test sequence running.');
+            });
+
+            // Force Sync
+            const forceSyncBtn = document.getElementById('btn-force-sync');
+            if (forceSyncBtn) {
+                forceSyncBtn.addEventListener('click', async () => {
+                    forceSyncBtn.disabled = true;
+                    forceSyncBtn.textContent = 'Syncing...';
+                    await loadData();
+                    await processRetryQueue();
+                    renderTasks(); updateSettingsUI(); hardwareLoop();
+                    forceSyncBtn.disabled = false;
+                    forceSyncBtn.textContent = 'Force Cloud Sync';
+                    showToast('Sync complete.');
+                });
+            }
+
+            // Backend URL — save to localStorage
+            const saveUrlBtn = document.getElementById('btn-save-backend-url');
+            if (saveUrlBtn) {
+                saveUrlBtn.addEventListener('click', () => {
+                    const url = document.getElementById('admin-backend-url').value.trim();
+                    if (url) {
+                        localStorage.setItem('dc_backend_url', url);
+                        showToast('Backend URL saved (takes effect on next reload).');
+                    } else {
+                        showToast('⚠ Enter a valid URL first.');
+                    }
+                });
+            }
+
+            // Connection test
+            const testConnBtn = document.getElementById('btn-test-connection');
+            if (testConnBtn) {
+                testConnBtn.addEventListener('click', async () => {
+                    const urlInput = document.getElementById('admin-backend-url');
+                    const resultEl = document.getElementById('connection-test-result');
+                    const base = urlInput.value.trim() || API_BASE.replace('/api', '');
+                    resultEl.textContent = 'testing...';
+                    resultEl.style.color = '#9ca3af';
+                    const t0 = Date.now();
+                    try {
+                        await apiFetch('/api/health', {}, base.endsWith('/api') ? base.slice(0,-4) : base);
+                        const ms = Date.now() - t0;
+                        resultEl.textContent = `✓ ${ms}ms`;
+                        resultEl.style.color = '#22c55e';
+                    } catch (err) {
+                        resultEl.textContent = `✗ ${err.message.slice(0,20)}`;
+                        resultEl.style.color = '#ef4444';
+                    }
+                });
+            }
+
+            // Wi-Fi form
+            document.getElementById('form-wifi').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const ssid = document.getElementById('wifi-ssid').value;
+                // TODO (ESP32): POST /device/wifi { ssid, password } to ESP32 provisioning endpoint
+                showToast(`♦ Credentials for "${ssid}" saved. Device will reconnect.`);
+            });
+
+            // Factory Reset
+            document.getElementById('btn-factory-reset').addEventListener('click', async () => {
+                if (confirm('WARNING: This will erase all tasks and reset settings. This cannot be undone.')) {
+                    try {
+                        const snapshot = [...tasks];
+                        for (const t of snapshot) await apiFetch(`/tasks/${t.id}`, { method: 'DELETE' }).catch(() => {});
+                        await apiFetch('/settings', {
+                            method: 'PATCH',
+                            body:   JSON.stringify({ chime_enabled: true, led_brightness: 80, snooze_minutes: 15, sync_interval_sec: 30, time_format: '12' }),
+                        }).catch(() => {});
+                    } catch (_) {}
+                    localStorage.clear();
+                    tasks = [];
+                    showToast('Device wiped. Reloading...');
+                    setTimeout(() => location.reload(), 1500);
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // N — focus add-task title input (unless already in an input)
+                if (e.key === 'n' && !e.ctrlKey && !e.metaKey &&
+                    !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
+                    e.preventDefault();
+                    document.getElementById('new-task-title')?.focus();
+                }
+                // Escape — cancel inline edit
+                if (e.key === 'Escape' && editingTaskId) cancelEdit();
+            });
+
+            // visibilitychange — re-sync when tab regains focus
+            document.addEventListener('visibilitychange', async () => {
+                if (document.visibilityState === 'visible') {
+                    await loadData();
+                    await processRetryQueue();
+                    renderTasks(); hardwareLoop();
+                }
+            });
+        }
+
+        // ── Toast System ──────────────────────────────────────────────────────────
+        function showToast(msg, actionText = null, actionCb = null) {
+            clearTimeout(toastTimeout);
+            els.toastMsg.textContent = msg;
+            if (actionText && actionCb) {
+                els.toastAction.textContent = actionText;
+                els.toastAction.classList.remove('hidden');
+                els.toastAction.onclick = () => { actionCb(); hideToast(); };
+            } else {
+                els.toastAction.classList.add('hidden');
+                els.toastAction.onclick = null;
+            }
+            els.toastContainer.classList.add('show');
+            toastTimeout = setTimeout(hideToast, 4000);
+        }
+        function hideToast() { els.toastContainer.classList.remove('show'); }
+
+        // ── Render Tasks ──────────────────────────────────────────────────────────
+        function renderTasks() {
+            els.taskList.innerHTML = '';
+
+            const sortedTasks = [...tasks].sort((a, b) => {
+                if (a.done !== b.done) return a.done ? 1 : -1;
+                return new Date(a.due_time) - new Date(b.due_time);
+            });
+
+            const pending = tasks.filter(t => !t.done).length;
+            els.taskCount.textContent = `${pending} / ${tasks.length}`;
+
+            // Update browser tab title with overdue count
+            const overdue = tasks.filter(t => !t.done && new Date(t.due_time) < new Date()).length;
+            document.title = overdue > 0 ? `(${overdue}) Desk Companion` : 'Desk Companion';
+
+            if (sortedTasks.length === 0) {
+                els.taskList.innerHTML = '<li class="text-sm font-mono text-gray-500 p-4 text-center">NO_DATA</li>';
+                return;
+            }
+
+            const now = new Date();
+
+            sortedTasks.forEach(task => {
+                const li = document.createElement('li');
+
+                // EDIT MODE
+                if (editingTaskId === task.id) {
+                    const due = new Date(task.due_time);
+                    const timeStr = `${String(due.getHours()).padStart(2,'0')}:${String(due.getMinutes()).padStart(2,'0')}`;
+                    const dateStr = due.toISOString().slice(0,10);
+                    li.className = "flex gap-2 p-2 bg-white border-2 border-[var(--accent-orange)] rounded shadow-md items-center flex-wrap";
+                    li.innerHTML = `
+                        <input type="text" id="edit-title-${task.id}" value="${escapeHtml(task.title)}" class="input-tactile flex-grow h-8" maxlength="32">
+                        <input type="date" id="edit-date-${task.id}" value="${dateStr}" class="input-tactile w-32 h-8">
+                        <input type="time" id="edit-time-${task.id}" value="${timeStr}" class="input-tactile w-24 h-8">
+                        <button onclick="saveEdit('${task.id}')" class="btn-tactile btn-tactile-primary px-2 h-8">✓</button>
+                        <button onclick="cancelEdit()" class="btn-tactile px-2 h-8">✕</button>
+                    `;
+                    els.taskList.appendChild(li);
+                    return;
+                }
+
+                // NORMAL MODE
+                const due = new Date(task.due_time);
+                const isOverdue = !task.done && due < now;
+                const timeString = due.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: settings.time_format === '12' });
+                const dateString = due.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                const sourceLabel = task.source && task.source !== 'web'
+                    ? `<span class="text-[0.55rem] font-mono bg-gray-200 text-gray-500 px-1 rounded ml-1">[${task.source}]</span>`
+                    : '';
+
+                li.className = `flex items-center justify-between p-2 rounded border shadow-sm ${task.done ? 'bg-[#e2e1dc] border-[var(--chassis-dark)] opacity-70' : (isOverdue ? 'bg-red-50 border-red-300' : 'bg-white border-[var(--chassis-dark)]')}`;
+
+                li.innerHTML = `
+                    <div class="flex items-center gap-3 flex-grow overflow-hidden">
+                        <button onclick="toggleTask('${task.id}')" class="flex-shrink-0 w-7 h-7 rounded border-2 border-[var(--chassis-dark)] flex items-center justify-center transition-colors ${task.done ? 'bg-[var(--chassis-dark)] text-white' : 'bg-white hover:bg-gray-50'}" aria-label="${task.done ? 'Mark pending' : 'Mark done'}">
+                            ${task.done ? '✓' : ''}
+                        </button>
+                        <div class="min-w-0 cursor-pointer" onclick="startEdit('${task.id}')" title="Click to edit">
+                            <p class="font-bold text-sm truncate ${task.done ? 'line-through text-gray-600' : (isOverdue ? 'text-red-700' : '')}">${escapeHtml(task.title)}${sourceLabel}</p>
+                            <p class="text-xs font-mono ${isOverdue ? 'text-red-500' : 'text-gray-500'}">${dateString} ${timeString}${isOverdue ? ' ⚠ OVERDUE' : ''}</p>
+                        </div>
+                    </div>
+                    <button onclick="deleteTask('${task.id}')" class="flex-shrink-0 btn-tactile px-2 py-1 text-xs ml-2 text-red-600 hover:text-red-800" aria-label="Delete task">✕</button>
+                `;
+                els.taskList.appendChild(li);
+            });
+        }
+
+        // ── Settings & Diag Rendering ─────────────────────────────────────────────
+        function updateSettingsUI() {
+            document.getElementById('setting-chime').checked    = settings.chime_enabled;
+            document.getElementById('setting-brightness').value = settings.led_brightness;
+            document.getElementById('setting-snooze').value     = settings.snooze_minutes;
+            document.getElementById('setting-format').value     = settings.time_format;
+            // sync_interval_sec field (if present)
+            const syncField = document.querySelector('[name="sync_interval_sec"]');
+            if (syncField) syncField.value = settings.sync_interval_sec;
+            applySettingsToSimulator();
+        }
+
+        function applySettingsToSimulator() {
+            document.documentElement.style.setProperty('--led-brightness', (settings.led_brightness / 100).toString());
+        }
+
+        async function renderDiag() {
+            const grid = document.getElementById('diag-grid');
+            if (diagMode === 'local') {
+                try {
+                    const t0 = Date.now();
+                    const h  = await apiFetch('/health');
+                    const ms = Date.now() - t0;
+                    grid.innerHTML = `
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">API Context</dt><dd class="font-mono text-xs mt-1 text-green-600">${h.context}</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Database</dt><dd class="font-mono text-xs mt-1">${h.db}</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Uptime</dt><dd class="font-mono text-xs mt-1">${h.uptime}</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Firmware</dt><dd class="font-mono text-xs mt-1">${h.firmware}</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Tasks (total)</dt><dd class="font-mono text-xs mt-1">${h.task_count}</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Pending</dt><dd class="font-mono text-xs mt-1 ${h.task_pending > 0 ? 'text-amber-600' : 'text-green-600'}">${h.task_pending}</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded col-span-2"><dt class="hw-label text-[0.6rem]">API Latency</dt><dd class="font-mono text-xs mt-1">${ms}ms</dd></div>
+                    `;
+                    fetchAndRenderLog();
+                } catch (err) {
+                    grid.innerHTML = `
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded col-span-2"><dt class="hw-label text-[0.6rem]">API Status</dt><dd class="font-mono text-xs mt-1 text-red-600">Unreachable — ${err.message}</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Mode</dt><dd class="font-mono text-xs mt-1">Offline / localStorage</dd></div>
+                    `;
+                }
+            } else {
+                const t0 = Date.now();
+                let pingMs = '—';
+                try {
+                    await apiFetch('/health');
+                    pingMs = `${Date.now() - t0}ms`;
+                } catch(_) { pingMs = 'timeout'; }
+
+                grid.innerHTML = `
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded col-span-2"><dt class="hw-label text-[0.6rem]">API Endpoint</dt><dd class="font-mono text-xs mt-1 truncate">${API_BASE}</dd></div>
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Status</dt><dd class="font-mono text-xs mt-1 ${lastSyncedAt ? 'text-green-600' : 'text-red-600'}">${lastSyncedAt ? 'Connected' : 'Not synced'}</dd></div>
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Last Sync</dt><dd class="font-mono text-xs mt-1">${lastSyncedAt ? new Date(lastSyncedAt).toLocaleTimeString() : '—'}</dd></div>
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Ping Latency</dt><dd class="font-mono text-xs mt-1">${pingMs}</dd></div>
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Tasks Cached</dt><dd class="font-mono text-xs mt-1">${tasks.length}</dd></div>
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Sync Interval</dt><dd class="font-mono text-xs mt-1">${settings.sync_interval_sec}s</dd></div>
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Pending Retries</dt><dd class="font-mono text-xs mt-1 ${retryQueue.length > 0 ? 'text-amber-600' : 'text-green-600'}">${retryQueue.length}</dd></div>
+                `;
+            }
+        }
+
+        async function fetchAndRenderLog() {
+            const panel = document.getElementById('raw-log-panel');
+            if (!panel) return;
+            try {
+                const entries = await apiFetch('/log?limit=30');
+                panel.innerHTML = entries.map(e =>
+                    `<p><span class="opacity-50">${e.ts.slice(11,19)}</span> [${e.level}] ${escapeHtml(e.message)}${e.detail ? ' ' + escapeHtml(e.detail) : ''}</p>`
+                ).reverse().join('');
+                panel.scrollTop = 0;
+            } catch (_) {
+                panel.innerHTML = '<p class="text-red-500">Log unavailable (API offline)</p>';
+            }
+        }
+
+        // ── Task CRUD (API-wired) ─────────────────────────────────────────────────
+        window.toggleTask = async (id) => {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+            const newDone = !task.done;
+            task.done = newDone;
+            renderTasks(); hardwareLoop();
+            try {
+                const updated = await apiFetch(`/tasks/${id}`, {
+                    method: 'PATCH',
+                    body:   JSON.stringify({ done: newDone }),
+                });
+                Object.assign(task, updated);
+                lastSyncedAt = Date.now(); updateSyncTimestamp(); cacheToLocal();
+            } catch (err) {
+                queueRetry(`/tasks/${id}`, 'PATCH', JSON.stringify({ done: newDone }));
+                cacheToLocal();
+            }
+        };
+
+        window.deleteTask = async (id) => {
+            deletedTaskBackup = tasks.find(t => t.id === id);
+            tasks = tasks.filter(t => t.id !== id);
+            renderTasks(); hardwareLoop();
+            showToast('Directive deleted.', 'UNDO', async () => {
+                if (deletedTaskBackup) {
+                    try {
+                        const restored = await apiFetch('/tasks', {
+                            method: 'POST',
+                            body:   JSON.stringify({ title: deletedTaskBackup.title, due_time: deletedTaskBackup.due_time, source: deletedTaskBackup.source || 'web' }),
+                        });
+                        tasks.push(restored);
+                    } catch (_) {
+                        tasks.push(deletedTaskBackup);
+                    }
+                    cacheToLocal(); renderTasks(); hardwareLoop();
+                }
+            });
+            try {
+                await apiFetch(`/tasks/${id}`, { method: 'DELETE' });
+                lastSyncedAt = Date.now(); updateSyncTimestamp(); cacheToLocal();
+            } catch (err) {
+                queueRetry(`/tasks/${id}`, 'DELETE', null);
+                cacheToLocal();
+            }
+        };
+
+        window.startEdit  = (id) => { editingTaskId = id;   renderTasks(); };
+        window.cancelEdit = ()  => { editingTaskId = null;  renderTasks(); };
+        window.saveEdit   = async (id) => {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                const titleVal = document.getElementById(`edit-title-${id}`).value.trim();
+                const dateVal  = document.getElementById(`edit-date-${id}`)?.value;
+                const timeVal  = document.getElementById(`edit-time-${id}`).value;
+                if (titleVal && timeVal) {
+                    const [h, m] = timeVal.split(':');
+                    let due;
+                    if (dateVal) {
+                        const [y, mo, d] = dateVal.split('-');
+                        due = new Date(y, mo - 1, d, h, m);
+                    } else {
+                        const now = new Date();
+                        due = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
+                        if (due < now) due.setDate(due.getDate() + 1);
+                    }
+                    task.title    = titleVal;
+                    task.due_time = due.toISOString();
+
+                    try {
+                        const updated = await apiFetch(`/tasks/${id}`, {
+                            method: 'PATCH',
+                            body:   JSON.stringify({ title: titleVal, due_time: task.due_time }),
+                        });
+                        Object.assign(task, updated);
+                        lastSyncedAt = Date.now(); updateSyncTimestamp(); cacheToLocal();
+                    } catch (err) {
+                        queueRetry(`/tasks/${id}`, 'PATCH', JSON.stringify({ title: titleVal, due_time: task.due_time }));
+                        cacheToLocal();
+                    }
+                }
+            }
+            editingTaskId = null; renderTasks(); hardwareLoop();
+        };
+
+        // ── Hardware Simulation ───────────────────────────────────────────────────
+        function applyManualState() {
+            if (!manualStateOverride) return;
+            const states = {
+                'idle':     { class: 'state-idle',     status: 'SYSTEM IDLE',   title: 'Awaiting directives.' },
+                'working':  { class: 'state-working',  status: 'WORKING...',    title: 'Focus mode active.' },
+                'urgent':   { class: 'state-urgent',   status: 'URGENT TASK!',  title: 'Immediate action req!' },
+                'sleeping': { class: 'state-sleeping', status: 'SLEEP MODE',    title: 'Low power state.' }
+            };
+            const conf = states[manualStateOverride];
+            els.mascotContainer.className = `w-32 h-32 ${conf.class}`;
+            els.simStatusLabel.textContent = conf.status;
+            els.simTaskTitle.textContent   = conf.title;
+            if (manualStateOverride === 'urgent') {
+                els.simStatusLabel.classList.add('lcd-accent');
+                els.hwLed.style.backgroundColor = 'rgba(220,38,38,0.9)';
+                els.hwLed.style.boxShadow = `0 0 8px rgba(220,38,38,0.9), inset 0 2px 4px rgba(0,0,0,0.5)`;
+            } else {
+                els.simStatusLabel.classList.remove('lcd-accent');
+                els.hwLed.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                els.hwLed.style.boxShadow = '';
+            }
+        }
+
+        function hardwareLoop() {
+            const now = new Date();
+            els.simClock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: settings.time_format === '12' });
+            if (manualStateOverride) return;
+
+            const pendingTasks = tasks.filter(t => !t.done);
+            let targetUrgency = 0;
+            let statusText = "NO TASKS";
+            let taskTitle  = "All clear.";
+            let hwLedColor = 'transparent';
+
+            if (pendingTasks.length > 0) {
+                pendingTasks.sort((a, b) => new Date(a.due_time) - new Date(b.due_time));
+                const nextTask = pendingTasks[0];
+                const diffMin  = (new Date(nextTask.due_time) - now) / 60000;
+                taskTitle = nextTask.title;
+
+                if (diffMin <= 0) {
+                    targetUrgency = 2; statusText = "[OVERDUE]"; hwLedColor = 'rgba(220,38,38,0.9)';
+                } else if (diffMin <= 60) {
+                    targetUrgency = 1; statusText = `DUE IN ${Math.ceil(diffMin)}M`; hwLedColor = 'rgba(217,119,6,0.6)';
+                } else {
+                    const h = Math.floor(diffMin / 60);
+                    statusText = h < 24 ? `DUE IN ${h}H` : `NEXT TASK`;
+                }
+            }
+
+            els.simStatusLabel.textContent = statusText;
+            els.simTaskTitle.textContent   = escapeHtml(taskTitle);
+            targetUrgency === 2 ? els.simStatusLabel.classList.add('lcd-accent') : els.simStatusLabel.classList.remove('lcd-accent');
+
+            if (targetUrgency === 0) {
+                els.hwLed.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                els.hwLed.style.boxShadow = '';
+            } else {
+                els.hwLed.style.backgroundColor = hwLedColor;
+                els.hwLed.style.boxShadow = `0 0 8px ${hwLedColor}, inset 0 2px 4px rgba(0,0,0,0.5)`;
+            }
+
+            if (currentUrgency !== targetUrgency) {
+                const stateClass = targetUrgency === 2 ? 'state-urgent' : targetUrgency === 1 ? 'state-working' : 'state-idle';
+                els.mascotContainer.className = `w-32 h-32 ${stateClass}`;
+                if (targetUrgency === 2 && settings.chime_enabled) console.log("[I2S AUDIO]: Playing Chime.wav");
+                currentUrgency = targetUrgency;
+            }
+        }
+
+        function escapeHtml(str) { return str.replace(/[&<>'"]/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[tag])); }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

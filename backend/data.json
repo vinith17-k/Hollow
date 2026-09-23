@@ -1,0 +1,20 @@
+{
+  "tasks": [
+    {
+      "id": "d9e3364f-f407-4fca-a061-e857566b3862",
+      "title": "work",
+      "due_time": "2026-09-23T17:48:00.000Z",
+      "done": true,
+      "snoozed_until": null,
+      "updated_at": "2026-09-23T17:44:17.723Z",
+      "source": "web"
+    }
+  ],
+  "settings": {
+    "chime_enabled": true,
+    "led_brightness": 70,
+    "snooze_minutes": 15,
+    "sync_interval_sec": 30,
+    "time_format": "24"
+  }
+}
