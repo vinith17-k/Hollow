@@ -19,6 +19,7 @@ const DB_PATH = process.env.VERCEL
 
 const DEFAULT_DATA = {
   tasks: [],
+  logs: [],
   settings: {
     chime_enabled:     true,
     led_brightness:    80,
@@ -43,9 +44,10 @@ function load() {
   }
 
   if (!cache || typeof cache !== 'object') {
-    cache = { tasks: [], settings: { ...DEFAULT_DATA.settings } };
+    cache = { tasks: [], logs: [], settings: { ...DEFAULT_DATA.settings } };
   }
   if (!Array.isArray(cache.tasks)) cache.tasks = [];
+  if (!Array.isArray(cache.logs))  cache.logs  = [];
   if (!cache.settings) cache.settings = { ...DEFAULT_DATA.settings };
 
   return cache;

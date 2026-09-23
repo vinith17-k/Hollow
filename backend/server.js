@@ -45,9 +45,8 @@ const PORT = parseInt(process.env.PORT || '4000', 10);
 const BOOT_TIME       = Date.now();
 const FIRMWARE_VERSION = process.env.FIRMWARE_VERSION || 'v1.0.0-sim';
 
-// ── In-memory circular event log (last 100 entries) ──────────────────────────
-const LOG_MAX  = 100;
-const eventLog = [];
+// ── Persistent Event Log (last 50 entries) ───────────────────────────────────
+const LOG_MAX = 50;
 
 function logEvent(level, message, detail = '') {
   const entry = {
@@ -56,12 +55,15 @@ function logEvent(level, message, detail = '') {
     message,
     detail,
   };
-  eventLog.push(entry);
-  if (eventLog.length > LOG_MAX) eventLog.shift();
+  try {
+    if (!Array.isArray(db.data.logs)) db.data.logs = [];
+    db.data.logs.push(entry);
+    if (db.data.logs.length > LOG_MAX) db.data.logs.shift();
+    db.write();
+  } catch (_) {}
 }
 
-logEvent('SYS', 'Boot sequence complete', `port=${PORT}`);
-logEvent('SYS', 'Database ready',         'lowdb / data.json');
+logEvent('SYS', 'Hollow API initialized', `port=${PORT}`);
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 
@@ -126,15 +128,17 @@ app.get('/api/health', (req, res) => {
 // ── /api/log ──────────────────────────────────────────────────────────────────
 
 app.get('/api/log', (req, res) => {
+  db.read();
+  const logs = db.data.logs || [];
   const limit = Math.min(parseInt(req.query.limit || '50', 10), LOG_MAX);
-  res.json(eventLog.slice(-limit));
+  res.json(logs.slice(-limit));
 });
 
 // ── /api/export ───────────────────────────────────────────────────────────────
 
 app.get('/api/export', (req, res) => {
   db.read();
-  const filename = `desk-companion-backup-${new Date().toISOString().slice(0,10)}.json`;
+  const filename = `hollow-backup-${new Date().toISOString().slice(0,10)}.json`;
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
   res.setHeader('Content-Type', 'application/json');
   logEvent('SYS', 'Data exported', filename);

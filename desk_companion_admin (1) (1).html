@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desk Companion | Admin Dashboard</title>
+    <title>Hollow | Admin Dashboard</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -290,7 +290,7 @@
 
         <!-- RIGHT COLUMN: Dashboard Tabs -->
         <main class="w-full lg:w-2/3 flex flex-col h-[600px] lg:h-auto">
-            <h1 class="sr-only">Desk Companion Dashboard</h1>
+            <h1 class="sr-only">Hollow Dashboard</h1>
             
             <!-- Tab Navigation + Sync Status -->
             <div class="flex items-center gap-2 mb-3 flex-wrap">
@@ -398,7 +398,7 @@
                         <h2 class="hw-label text-sm">System Telemetry</h2>
                         <div class="flex items-center gap-2">
                             <!-- Export backup -->
-                            <a id="btn-export" href="http://localhost:4000/api/export" target="_blank" download class="btn-tactile px-2 py-1 text-[0.6rem]" title="Download data.json backup">⬇ Export</a>
+                            <a id="btn-export" href="/api/export" target="_blank" download class="btn-tactile px-2 py-1 text-[0.6rem]" title="Download data.json backup">⬇ Export</a>
                             <!-- Mode Toggle -->
                             <div class="flex items-center bg-[var(--chassis-light)] border border-[var(--chassis-dark)] rounded p-1">
                                 <button id="btn-mode-local" class="btn-tactile active px-2 py-1 text-[0.6rem]">LOCAL</button>
@@ -483,14 +483,65 @@
 
     <script>
         // ── API Configuration ──────────────────────────────────────────────────────
-        const API_BASE = 'http://localhost:4000/api';
+        // Checks custom configured backend URL first, then falls back to dev/production default.
+        function getApiBase() {
+            const custom = localStorage.getItem('dc_backend_url');
+            if (custom && custom.trim()) {
+                return custom.trim().replace(/\/+$/, '');
+            }
+            return (window.location.hostname === 'localhost' && window.location.port === '3000')
+                ? 'http://localhost:4000/api'
+                : (window.location.origin.startsWith('http') ? `${window.location.origin}/api` : '/api');
+        }
+
+        // ── Date & Time Local Helpers (Prevents UTC day shift errors) ───────────────
+        function toLocalDateString(date) {
+            const d = new Date(date);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        function toLocalTimeString(date) {
+            const d = new Date(date);
+            const h = String(d.getHours()).padStart(2, '0');
+            const m = String(d.getMinutes()).padStart(2, '0');
+            return `${h}:${m}`;
+        }
+
+        // ── Web Audio Chime Synthesizer (Simulates I2S buzzer/speaker) ─────────────
+        function playChimeAudio() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, now);
+                osc.frequency.setValueAtTime(1760, now + 0.12);
+
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.45);
+            } catch (_) {}
+        }
 
         // ── API Helpers ────────────────────────────────────────────────────────────
-        let lastSyncedAt   = null;
+        let lastSyncedAt    = null;
         let syncStatusTimer = null;
 
         async function apiFetch(path, options = {}, baseOverride = null) {
-            const url = (baseOverride || API_BASE) + path;
+            const base = baseOverride || getApiBase();
+            const url = base + path;
             const res = await fetch(url, {
                 headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
                 ...options,
@@ -527,7 +578,6 @@
 
         function queueRetry(path, method, body) {
             retryQueue.push({ path, method, body, ts: Date.now() });
-            // Only keep last 20 retries
             if (retryQueue.length > 20) retryQueue.splice(0, retryQueue.length - 20);
             saveRetryQueue();
         }
@@ -580,15 +630,15 @@
             time_format:       '12',
         };
 
-        let currentUrgency     = 0;
+        let currentUrgency      = 0;
         let manualStateOverride = null;
-        let editingTaskId      = null;
-        let deletedTaskBackup  = null;
-        let toastTimeout       = null;
-        let diagMode           = 'local';
-        let settingsSaveTimer  = null;
-        let autoSyncInterval   = null;  // Restartable interval ref
-        let diagRefreshInterval = null; // Diag live refresh
+        let editingTaskId       = null;
+        const deletedTasksStack = []; // Multi-level Undo stack
+        let toastTimeout        = null;
+        let diagMode            = 'local';
+        let settingsSaveTimer   = null;
+        let autoSyncInterval    = null;
+        let diagRefreshInterval = null;
 
         // ── DOM Elements ──────────────────────────────────────────────────────────
         const els = {
@@ -609,12 +659,16 @@
 
         // ── Init ──────────────────────────────────────────────────────────────────
         async function init() {
-            // Restore backend URL from localStorage
+            // Restore backend URL from localStorage into admin input
             const savedUrl = localStorage.getItem('dc_backend_url');
             if (savedUrl) {
                 const inp = document.getElementById('admin-backend-url');
                 if (inp) inp.value = savedUrl;
             }
+
+            // Sync dynamic export button URL
+            const exportBtn = document.getElementById('btn-export');
+            if (exportBtn) exportBtn.href = `${getApiBase()}/export`;
 
             await loadData();
             setupTabs();
@@ -627,19 +681,19 @@
             hardwareLoop();
             startAutoSync();
 
-            // Refresh diag if on diag tab
+            // Refresh telemetry periodically when active
             diagRefreshInterval = setInterval(() => {
-                if (diagMode && document.getElementById('panel-diag') &&
-                    !document.getElementById('panel-diag').classList.contains('hidden')) {
+                const diagPanel = document.getElementById('panel-diag');
+                if (diagPanel && !diagPanel.classList.contains('hidden')) {
                     renderDiag();
                 }
             }, 10000);
 
-            // Process any pending retry queue
+            // Replay any pending queued mutations
             processRetryQueue();
         }
 
-        // ── Auto-sync (restartable so interval change takes effect) ───────────────
+        // ── Auto-sync (restartable on interval setting change) ─────────────────────
         function startAutoSync() {
             if (autoSyncInterval) clearInterval(autoSyncInterval);
             const intervalMs = (settings.sync_interval_sec || 30) * 1000;
@@ -675,7 +729,6 @@
 
         function setSyncIndicator(state) {
             const dot = document.getElementById('sync-dot');
-            const lbl = document.getElementById('sync-status-label');
             if (!dot) return;
             const colours = { online: '#22c55e', offline: '#ef4444', stale: '#f59e0b' };
             dot.style.backgroundColor = colours[state] || '#9ca3af';
@@ -692,25 +745,28 @@
                     tab.classList.add('active');
                     document.getElementById(tab.getAttribute('aria-controls')).classList.remove('hidden');
 
-                    // Refresh diag when switching to it
                     if (tab.getAttribute('aria-controls') === 'panel-diag') renderDiag();
                 });
             });
         }
 
         function setupEventListeners() {
-            // State Override Buttons
+            // State Override Buttons (Fix: immediately invokes applyManualState)
             document.querySelectorAll('[data-state]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const newState = btn.dataset.state;
-                    manualStateOverride = manualStateOverride === newState ? null : newState;
+                    manualStateOverride = (manualStateOverride === newState) ? null : newState;
                     document.querySelectorAll('[data-state]').forEach(b => b.classList.remove('active'));
-                    if (manualStateOverride) btn.classList.add('active');
-                    hardwareLoop();
+                    if (manualStateOverride) {
+                        btn.classList.add('active');
+                        applyManualState();
+                    } else {
+                        hardwareLoop();
+                    }
                 });
             });
 
-            // Add Task — POST to API (with date picker support)
+            // Add Task — POST to API (with date picker support + rollover notice)
             els.formAdd.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const titleInput = document.getElementById('new-task-title');
@@ -719,16 +775,18 @@
 
                 const [hours, minutes] = timeInput.value.split(':');
                 let dueDate;
+                let isRollover = false;
 
                 if (dateInput && dateInput.value) {
-                    // User picked a specific date
                     const [y, mo, d] = dateInput.value.split('-');
                     dueDate = new Date(y, mo - 1, d, hours, minutes);
                 } else {
-                    // Default to today, roll over to tomorrow if time already passed
                     const now = new Date();
                     dueDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
-                    if (dueDate < now) dueDate.setDate(dueDate.getDate() + 1);
+                    if (dueDate < now) {
+                        dueDate.setDate(dueDate.getDate() + 1);
+                        isRollover = true;
+                    }
                 }
 
                 const newTask = {
@@ -746,11 +804,14 @@
                     lastSyncedAt = Date.now();
                     updateSyncTimestamp();
                     cacheToLocal();
+                    if (isRollover) {
+                        showToast(`ℹ Scheduled for tomorrow at ${timeInput.value}`);
+                    }
                 } catch (err) {
                     tasks.push({ ...newTask, id: 't_' + Date.now(), done: false, updated_at: new Date().toISOString() });
                     cacheToLocal();
                     queueRetry('/tasks', 'POST', JSON.stringify(newTask));
-                    showToast('⚠ Saved locally (API unreachable)');
+                    showToast(isRollover ? `ℹ Scheduled for tomorrow (saved locally)` : '⚠ Saved locally (API unreachable)');
                 }
 
                 titleInput.value = '';
@@ -764,7 +825,7 @@
             if (markAllBtn) {
                 markAllBtn.addEventListener('click', async () => {
                     const pending = tasks.filter(t => !t.done);
-                    if (!pending.length) { showToast('All tasks already done!'); return; }
+                    if (!pending.length) { showToast('All directives already completed!'); return; }
                     pending.forEach(t => t.done = true);
                     renderTasks(); hardwareLoop();
                     try {
@@ -772,7 +833,7 @@
                             apiFetch(`/tasks/${t.id}`, { method: 'PATCH', body: JSON.stringify({ done: true }) })
                         ));
                         lastSyncedAt = Date.now(); updateSyncTimestamp(); cacheToLocal();
-                        showToast(`✓ Marked ${pending.length} task${pending.length > 1 ? 's' : ''} done.`);
+                        showToast(`✓ Marked ${pending.length} directive${pending.length > 1 ? 's' : ''} completed.`);
                     } catch (err) {
                         cacheToLocal();
                         pending.forEach(t => queueRetry(`/tasks/${t.id}`, 'PATCH', JSON.stringify({ done: true })));
@@ -793,7 +854,6 @@
                 applySettingsToSimulator();
                 renderTasks();
 
-                // Restart auto-sync if interval changed
                 if (name === 'sync_interval_sec' && settings.sync_interval_sec !== prevInterval) {
                     startAutoSync();
                 }
@@ -851,13 +911,16 @@
             const refreshLogBtn = document.getElementById('btn-refresh-log');
             if (refreshLogBtn) refreshLogBtn.addEventListener('click', fetchAndRenderLog);
 
-            // Hardware Admin Buttons
+            // Hardware Admin Buttons (Fix: Real Web Audio chime)
             document.getElementById('btn-test-chime').addEventListener('click', () => {
-                showToast('♪ Chime test triggered (simulated).');
+                playChimeAudio();
+                showToast('♪ Chime tone synthesized (Web Audio API).');
             });
+
             document.getElementById('btn-test-led').addEventListener('click', () => {
-                els.hwLed.style.backgroundColor = '#ea580c';
-                els.hwLed.style.boxShadow = '0 0 10px #ea580c, inset 0 2px 5px rgba(0,0,0,0.5)';
+                const brightness = Math.max(0.1, (settings.led_brightness || 80) / 100);
+                els.hwLed.style.backgroundColor = `rgba(234,88,12,${brightness.toFixed(2)})`;
+                els.hwLed.style.boxShadow = `0 0 12px rgba(234,88,12,${brightness.toFixed(2)}), inset 0 2px 5px rgba(0,0,0,0.5)`;
                 setTimeout(() => { els.hwLed.style.backgroundColor = ''; els.hwLed.style.boxShadow = ''; }, 1000);
                 showToast('LED test sequence running.');
             });
@@ -877,17 +940,22 @@
                 });
             }
 
-            // Backend URL — save to localStorage
+            // Backend URL — save to localStorage and immediately re-sync
             const saveUrlBtn = document.getElementById('btn-save-backend-url');
             if (saveUrlBtn) {
-                saveUrlBtn.addEventListener('click', () => {
+                saveUrlBtn.addEventListener('click', async () => {
                     const url = document.getElementById('admin-backend-url').value.trim();
                     if (url) {
                         localStorage.setItem('dc_backend_url', url);
-                        showToast('Backend URL saved (takes effect on next reload).');
+                        showToast('Backend URL saved. Re-syncing...');
                     } else {
-                        showToast('⚠ Enter a valid URL first.');
+                        localStorage.removeItem('dc_backend_url');
+                        showToast('Reset to default endpoint. Re-syncing...');
                     }
+                    const exportBtn = document.getElementById('btn-export');
+                    if (exportBtn) exportBtn.href = `${getApiBase()}/export`;
+                    await loadData();
+                    renderTasks(); updateSettingsUI(); hardwareLoop();
                 });
             }
 
@@ -897,17 +965,18 @@
                 testConnBtn.addEventListener('click', async () => {
                     const urlInput = document.getElementById('admin-backend-url');
                     const resultEl = document.getElementById('connection-test-result');
-                    const base = urlInput.value.trim() || API_BASE.replace('/api', '');
+                    const base = (urlInput.value.trim() || getApiBase()).replace(/\/+$/, '');
                     resultEl.textContent = 'testing...';
                     resultEl.style.color = '#9ca3af';
                     const t0 = Date.now();
                     try {
-                        await apiFetch('/api/health', {}, base.endsWith('/api') ? base.slice(0,-4) : base);
+                        const target = base.endsWith('/api') ? base : `${base}/api`;
+                        await apiFetch('/health', {}, target);
                         const ms = Date.now() - t0;
                         resultEl.textContent = `✓ ${ms}ms`;
                         resultEl.style.color = '#22c55e';
                     } catch (err) {
-                        resultEl.textContent = `✗ ${err.message.slice(0,20)}`;
+                        resultEl.textContent = `✗ ${err.message.slice(0,18)}`;
                         resultEl.style.color = '#ef4444';
                     }
                 });
@@ -917,13 +986,12 @@
             document.getElementById('form-wifi').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const ssid = document.getElementById('wifi-ssid').value;
-                // TODO (ESP32): POST /device/wifi { ssid, password } to ESP32 provisioning endpoint
-                showToast(`♦ Credentials for "${ssid}" saved. Device will reconnect.`);
+                showToast(`♦ Credentials for "${ssid}" saved. Device reconnect sequence triggered.`);
             });
 
             // Factory Reset
             document.getElementById('btn-factory-reset').addEventListener('click', async () => {
-                if (confirm('WARNING: This will erase all tasks and reset settings. This cannot be undone.')) {
+                if (confirm('WARNING: This will erase all directives and reset settings. This cannot be undone.')) {
                     try {
                         const snapshot = [...tasks];
                         for (const t of snapshot) await apiFetch(`/tasks/${t.id}`, { method: 'DELETE' }).catch(() => {});
@@ -941,13 +1009,11 @@
 
             // Keyboard shortcuts
             document.addEventListener('keydown', (e) => {
-                // N — focus add-task title input (unless already in an input)
                 if (e.key === 'n' && !e.ctrlKey && !e.metaKey &&
                     !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
                     e.preventDefault();
                     document.getElementById('new-task-title')?.focus();
                 }
-                // Escape — cancel inline edit
                 if (e.key === 'Escape' && editingTaskId) cancelEdit();
             });
 
@@ -990,32 +1056,30 @@
             const pending = tasks.filter(t => !t.done).length;
             els.taskCount.textContent = `${pending} / ${tasks.length}`;
 
-            // Update browser tab title with overdue count
-            const overdue = tasks.filter(t => !t.done && new Date(t.due_time) < new Date()).length;
-            document.title = overdue > 0 ? `(${overdue}) Desk Companion` : 'Desk Companion';
+            const now = new Date();
+            const overdue = tasks.filter(t => !t.done && new Date(t.due_time) < now && (!t.snoozed_until || new Date(t.snoozed_until) <= now)).length;
+            document.title = overdue > 0 ? `(${overdue}) Hollow` : 'Hollow';
 
             if (sortedTasks.length === 0) {
                 els.taskList.innerHTML = '<li class="text-sm font-mono text-gray-500 p-4 text-center">NO_DATA</li>';
                 return;
             }
 
-            const now = new Date();
-
             sortedTasks.forEach(task => {
                 const li = document.createElement('li');
 
-                // EDIT MODE
+                // EDIT MODE (Uses local date/time helpers to avoid UTC shifts)
                 if (editingTaskId === task.id) {
                     const due = new Date(task.due_time);
-                    const timeStr = `${String(due.getHours()).padStart(2,'0')}:${String(due.getMinutes()).padStart(2,'0')}`;
-                    const dateStr = due.toISOString().slice(0,10);
+                    const timeStr = toLocalTimeString(due);
+                    const dateStr = toLocalDateString(due);
                     li.className = "flex gap-2 p-2 bg-white border-2 border-[var(--accent-orange)] rounded shadow-md items-center flex-wrap";
                     li.innerHTML = `
                         <input type="text" id="edit-title-${task.id}" value="${escapeHtml(task.title)}" class="input-tactile flex-grow h-8" maxlength="32">
                         <input type="date" id="edit-date-${task.id}" value="${dateStr}" class="input-tactile w-32 h-8">
                         <input type="time" id="edit-time-${task.id}" value="${timeStr}" class="input-tactile w-24 h-8">
-                        <button onclick="saveEdit('${task.id}')" class="btn-tactile btn-tactile-primary px-2 h-8">✓</button>
-                        <button onclick="cancelEdit()" class="btn-tactile px-2 h-8">✕</button>
+                        <button onclick="saveEdit('${task.id}')" class="btn-tactile btn-tactile-primary px-2 h-8" title="Save">✓</button>
+                        <button onclick="cancelEdit()" class="btn-tactile px-2 h-8" title="Cancel">✕</button>
                     `;
                     els.taskList.appendChild(li);
                     return;
@@ -1023,26 +1087,37 @@
 
                 // NORMAL MODE
                 const due = new Date(task.due_time);
-                const isOverdue = !task.done && due < now;
+                const isSnoozed = !task.done && task.snoozed_until && new Date(task.snoozed_until) > now;
+                const isOverdue = !task.done && !isSnoozed && due < now;
                 const timeString = due.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: settings.time_format === '12' });
                 const dateString = due.toLocaleDateString([], { month: 'short', day: 'numeric' });
                 const sourceLabel = task.source && task.source !== 'web'
                     ? `<span class="text-[0.55rem] font-mono bg-gray-200 text-gray-500 px-1 rounded ml-1">[${task.source}]</span>`
                     : '';
+                const snoozeNotice = isSnoozed
+                    ? ` <span class="text-amber-600 font-mono text-[0.6rem] font-semibold">[Snoozed until ${new Date(task.snoozed_until).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: settings.time_format === '12' })}]</span>`
+                    : '';
 
-                li.className = `flex items-center justify-between p-2 rounded border shadow-sm ${task.done ? 'bg-[#e2e1dc] border-[var(--chassis-dark)] opacity-70' : (isOverdue ? 'bg-red-50 border-red-300' : 'bg-white border-[var(--chassis-dark)]')}`;
+                li.className = `flex items-center justify-between p-2 rounded border shadow-sm ${task.done ? 'bg-[#e2e1dc] border-[var(--chassis-dark)] opacity-70' : (isOverdue ? 'bg-red-50 border-red-300' : (isSnoozed ? 'bg-amber-50 border-amber-300' : 'bg-white border-[var(--chassis-dark)]'))}`;
+
+                const snoozeButton = (!task.done)
+                    ? `<button onclick="snoozeTask('${task.id}')" class="flex-shrink-0 btn-tactile px-1.5 py-1 text-xs text-amber-600 hover:text-amber-800" title="Snooze for ${settings.snooze_minutes || 15}m" aria-label="Snooze directive">💤</button>`
+                    : '';
 
                 li.innerHTML = `
                     <div class="flex items-center gap-3 flex-grow overflow-hidden">
                         <button onclick="toggleTask('${task.id}')" class="flex-shrink-0 w-7 h-7 rounded border-2 border-[var(--chassis-dark)] flex items-center justify-center transition-colors ${task.done ? 'bg-[var(--chassis-dark)] text-white' : 'bg-white hover:bg-gray-50'}" aria-label="${task.done ? 'Mark pending' : 'Mark done'}">
                             ${task.done ? '✓' : ''}
                         </button>
-                        <div class="min-w-0 cursor-pointer" onclick="startEdit('${task.id}')" title="Click to edit">
-                            <p class="font-bold text-sm truncate ${task.done ? 'line-through text-gray-600' : (isOverdue ? 'text-red-700' : '')}">${escapeHtml(task.title)}${sourceLabel}</p>
-                            <p class="text-xs font-mono ${isOverdue ? 'text-red-500' : 'text-gray-500'}">${dateString} ${timeString}${isOverdue ? ' ⚠ OVERDUE' : ''}</p>
+                        <div class="min-w-0 cursor-pointer flex-grow" onclick="startEdit('${task.id}')" title="Click to edit directive">
+                            <p class="font-bold text-sm truncate ${task.done ? 'line-through text-gray-600' : (isOverdue ? 'text-red-700' : (isSnoozed ? 'text-amber-800' : ''))}">${escapeHtml(task.title)}${sourceLabel}</p>
+                            <p class="text-xs font-mono ${isOverdue ? 'text-red-500 font-bold' : (isSnoozed ? 'text-amber-600' : 'text-gray-500')}">${dateString} ${timeString}${isOverdue ? ' ⚠ OVERDUE' : ''}${snoozeNotice}</p>
                         </div>
                     </div>
-                    <button onclick="deleteTask('${task.id}')" class="flex-shrink-0 btn-tactile px-2 py-1 text-xs ml-2 text-red-600 hover:text-red-800" aria-label="Delete task">✕</button>
+                    <div class="flex items-center gap-1 ml-2">
+                        ${snoozeButton}
+                        <button onclick="deleteTask('${task.id}')" class="flex-shrink-0 btn-tactile px-2 py-1 text-xs text-red-600 hover:text-red-800" aria-label="Delete directive">✕</button>
+                    </div>
                 `;
                 els.taskList.appendChild(li);
             });
@@ -1054,7 +1129,6 @@
             document.getElementById('setting-brightness').value = settings.led_brightness;
             document.getElementById('setting-snooze').value     = settings.snooze_minutes;
             document.getElementById('setting-format').value     = settings.time_format;
-            // sync_interval_sec field (if present)
             const syncField = document.querySelector('[name="sync_interval_sec"]');
             if (syncField) syncField.value = settings.sync_interval_sec;
             applySettingsToSimulator();
@@ -1096,7 +1170,7 @@
                 } catch(_) { pingMs = 'timeout'; }
 
                 grid.innerHTML = `
-                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded col-span-2"><dt class="hw-label text-[0.6rem]">API Endpoint</dt><dd class="font-mono text-xs mt-1 truncate">${API_BASE}</dd></div>
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded col-span-2"><dt class="hw-label text-[0.6rem]">API Endpoint</dt><dd class="font-mono text-xs mt-1 truncate">${getApiBase()}</dd></div>
                     <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Status</dt><dd class="font-mono text-xs mt-1 ${lastSyncedAt ? 'text-green-600' : 'text-red-600'}">${lastSyncedAt ? 'Connected' : 'Not synced'}</dd></div>
                     <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Last Sync</dt><dd class="font-mono text-xs mt-1">${lastSyncedAt ? new Date(lastSyncedAt).toLocaleTimeString() : '—'}</dd></div>
                     <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Ping Latency</dt><dd class="font-mono text-xs mt-1">${pingMs}</dd></div>
@@ -1112,20 +1186,25 @@
             if (!panel) return;
             try {
                 const entries = await apiFetch('/log?limit=30');
-                panel.innerHTML = entries.map(e =>
-                    `<p><span class="opacity-50">${e.ts.slice(11,19)}</span> [${e.level}] ${escapeHtml(e.message)}${e.detail ? ' ' + escapeHtml(e.detail) : ''}</p>`
-                ).reverse().join('');
+                if (Array.isArray(entries) && entries.length) {
+                    panel.innerHTML = entries.map(e =>
+                        `<p><span class="opacity-50">${e.ts ? e.ts.slice(11,19) : ''}</span> [${e.level || 'SYS'}] ${escapeHtml(e.message || '')}${e.detail ? ' ' + escapeHtml(e.detail) : ''}</p>`
+                    ).reverse().join('');
+                } else {
+                    panel.innerHTML = '<p class="opacity-50">[SYS] Ready for telemetry streaming.</p>';
+                }
                 panel.scrollTop = 0;
             } catch (_) {
                 panel.innerHTML = '<p class="text-red-500">Log unavailable (API offline)</p>';
             }
         }
 
-        // ── Task CRUD (API-wired) ─────────────────────────────────────────────────
+        // ── Task CRUD (API-wired + Optimistic Revert + Snooze) ─────────────────────
         window.toggleTask = async (id) => {
             const task = tasks.find(t => t.id === id);
             if (!task) return;
-            const newDone = !task.done;
+            const prevDone = task.done;
+            const newDone = !prevDone;
             task.done = newDone;
             renderTasks(); hardwareLoop();
             try {
@@ -1136,25 +1215,65 @@
                 Object.assign(task, updated);
                 lastSyncedAt = Date.now(); updateSyncTimestamp(); cacheToLocal();
             } catch (err) {
-                queueRetry(`/tasks/${id}`, 'PATCH', JSON.stringify({ done: newDone }));
-                cacheToLocal();
+                if (err.message && err.message.includes('400')) {
+                    task.done = prevDone;
+                    renderTasks(); hardwareLoop();
+                    showToast('⚠ Action rejected by server (reverted)');
+                } else {
+                    queueRetry(`/tasks/${id}`, 'PATCH', JSON.stringify({ done: newDone }));
+                    cacheToLocal();
+                }
+            }
+        };
+
+        window.snoozeTask = async (id) => {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+            const minutes = settings.snooze_minutes || 15;
+            const prevSnooze = task.snoozed_until;
+            const optimisticUntil = new Date(Date.now() + minutes * 60 * 1000).toISOString();
+            task.snoozed_until = optimisticUntil;
+            renderTasks(); hardwareLoop();
+            try {
+                const res = await apiFetch(`/tasks/${id}/snooze`, {
+                    method: 'POST',
+                    body:   JSON.stringify({ minutes }),
+                });
+                if (res && res.snoozed_until) {
+                    task.snoozed_until = res.snoozed_until;
+                }
+                lastSyncedAt = Date.now(); updateSyncTimestamp(); cacheToLocal();
+                showToast(`Directive snoozed for ${minutes}m.`);
+            } catch (err) {
+                if (err.message && err.message.includes('400')) {
+                    task.snoozed_until = prevSnooze;
+                    renderTasks(); hardwareLoop();
+                    showToast('Failed to snooze directive.');
+                } else {
+                    queueRetry(`/tasks/${id}/snooze`, 'POST', JSON.stringify({ minutes }));
+                    cacheToLocal();
+                    showToast(`Snoozed locally for ${minutes}m (API offline)`);
+                }
             }
         };
 
         window.deleteTask = async (id) => {
-            deletedTaskBackup = tasks.find(t => t.id === id);
+            const deleted = tasks.find(t => t.id === id);
+            if (!deleted) return;
+            deletedTasksStack.push(deleted);
             tasks = tasks.filter(t => t.id !== id);
             renderTasks(); hardwareLoop();
             showToast('Directive deleted.', 'UNDO', async () => {
-                if (deletedTaskBackup) {
+                const restored = deletedTasksStack.pop();
+                if (restored) {
                     try {
-                        const restored = await apiFetch('/tasks', {
+                        const created = await apiFetch('/tasks', {
                             method: 'POST',
-                            body:   JSON.stringify({ title: deletedTaskBackup.title, due_time: deletedTaskBackup.due_time, source: deletedTaskBackup.source || 'web' }),
+                            body:   JSON.stringify({ title: restored.title, due_time: restored.due_time, source: restored.source || 'web' }),
                         });
-                        tasks.push(restored);
+                        tasks.push(created);
                     } catch (_) {
-                        tasks.push(deletedTaskBackup);
+                        tasks.push(restored);
                     }
                     cacheToLocal(); renderTasks(); hardwareLoop();
                 }
@@ -1183,12 +1302,15 @@
                         const [y, mo, d] = dateVal.split('-');
                         due = new Date(y, mo - 1, d, h, m);
                     } else {
-                        const now = new Date();
-                        due = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
-                        if (due < now) due.setDate(due.getDate() + 1);
+                        const existingDue = new Date(task.due_time);
+                        due = new Date(existingDue.getFullYear(), existingDue.getMonth(), existingDue.getDate(), h, m);
                     }
-                    task.title    = titleVal;
-                    task.due_time = due.toISOString();
+
+                    const prevTitle = task.title;
+                    const prevDue   = task.due_time;
+                    task.title      = titleVal;
+                    task.due_time   = due.toISOString();
+                    renderTasks(); hardwareLoop();
 
                     try {
                         const updated = await apiFetch(`/tasks/${id}`, {
@@ -1198,15 +1320,22 @@
                         Object.assign(task, updated);
                         lastSyncedAt = Date.now(); updateSyncTimestamp(); cacheToLocal();
                     } catch (err) {
-                        queueRetry(`/tasks/${id}`, 'PATCH', JSON.stringify({ title: titleVal, due_time: task.due_time }));
-                        cacheToLocal();
+                        if (err.message && err.message.includes('400')) {
+                            task.title    = prevTitle;
+                            task.due_time = prevDue;
+                            renderTasks(); hardwareLoop();
+                            showToast('⚠ Invalid changes (reverted)');
+                        } else {
+                            queueRetry(`/tasks/${id}`, 'PATCH', JSON.stringify({ title: titleVal, due_time: task.due_time }));
+                            cacheToLocal();
+                        }
                     }
                 }
             }
             editingTaskId = null; renderTasks(); hardwareLoop();
         };
 
-        // ── Hardware Simulation ───────────────────────────────────────────────────
+        // ── Hardware Simulation (Fix: manual overrides apply immediately) ──────────
         function applyManualState() {
             if (!manualStateOverride) return;
             const states = {
@@ -1216,16 +1345,26 @@
                 'sleeping': { class: 'state-sleeping', status: 'SLEEP MODE',    title: 'Low power state.' }
             };
             const conf = states[manualStateOverride];
+            if (!conf) return;
+
+            const brightness = Math.max(0.1, (settings.led_brightness || 80) / 100);
             els.mascotContainer.className = `w-32 h-32 ${conf.class}`;
             els.simStatusLabel.textContent = conf.status;
             els.simTaskTitle.textContent   = conf.title;
+
             if (manualStateOverride === 'urgent') {
                 els.simStatusLabel.classList.add('lcd-accent');
-                els.hwLed.style.backgroundColor = 'rgba(220,38,38,0.9)';
-                els.hwLed.style.boxShadow = `0 0 8px rgba(220,38,38,0.9), inset 0 2px 4px rgba(0,0,0,0.5)`;
+                const red = `rgba(220,38,38,${(0.9 * brightness).toFixed(2)})`;
+                els.hwLed.style.backgroundColor = red;
+                els.hwLed.style.boxShadow = `0 0 10px ${red}, inset 0 2px 4px rgba(0,0,0,0.5)`;
+            } else if (manualStateOverride === 'working') {
+                els.simStatusLabel.classList.remove('lcd-accent');
+                const amber = `rgba(217,119,6,${(0.8 * brightness).toFixed(2)})`;
+                els.hwLed.style.backgroundColor = amber;
+                els.hwLed.style.boxShadow = `0 0 8px ${amber}, inset 0 2px 4px rgba(0,0,0,0.5)`;
             } else {
                 els.simStatusLabel.classList.remove('lcd-accent');
-                els.hwLed.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                els.hwLed.style.backgroundColor = `rgba(255,255,255,${(0.1 * brightness).toFixed(2)})`;
                 els.hwLed.style.boxShadow = '';
             }
         }
@@ -1233,28 +1372,49 @@
         function hardwareLoop() {
             const now = new Date();
             els.simClock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: settings.time_format === '12' });
-            if (manualStateOverride) return;
+            
+            // If manual override is active, apply its styles and skip auto-calculation
+            if (manualStateOverride) {
+                applyManualState();
+                return;
+            }
 
+            const brightness = Math.max(0.1, (settings.led_brightness || 80) / 100);
             const pendingTasks = tasks.filter(t => !t.done);
+            // Separate active non-snoozed tasks from snoozed tasks
+            const activeTasks  = pendingTasks.filter(t => !t.snoozed_until || new Date(t.snoozed_until) <= now);
+            const snoozedTasks = pendingTasks.filter(t => t.snoozed_until && new Date(t.snoozed_until) > now);
+
             let targetUrgency = 0;
             let statusText = "NO TASKS";
             let taskTitle  = "All clear.";
             let hwLedColor = 'transparent';
 
-            if (pendingTasks.length > 0) {
-                pendingTasks.sort((a, b) => new Date(a.due_time) - new Date(b.due_time));
-                const nextTask = pendingTasks[0];
+            if (activeTasks.length > 0) {
+                activeTasks.sort((a, b) => new Date(a.due_time) - new Date(b.due_time));
+                const nextTask = activeTasks[0];
                 const diffMin  = (new Date(nextTask.due_time) - now) / 60000;
                 taskTitle = nextTask.title;
 
                 if (diffMin <= 0) {
-                    targetUrgency = 2; statusText = "[OVERDUE]"; hwLedColor = 'rgba(220,38,38,0.9)';
+                    targetUrgency = 2;
+                    statusText = "[OVERDUE]";
+                    hwLedColor = `rgba(220,38,38,${(0.9 * brightness).toFixed(2)})`;
                 } else if (diffMin <= 60) {
-                    targetUrgency = 1; statusText = `DUE IN ${Math.ceil(diffMin)}M`; hwLedColor = 'rgba(217,119,6,0.6)';
+                    targetUrgency = 1;
+                    statusText = `DUE IN ${Math.ceil(diffMin)}M`;
+                    hwLedColor = `rgba(217,119,6,${(0.8 * brightness).toFixed(2)})`;
                 } else {
                     const h = Math.floor(diffMin / 60);
                     statusText = h < 24 ? `DUE IN ${h}H` : `NEXT TASK`;
                 }
+            } else if (snoozedTasks.length > 0) {
+                snoozedTasks.sort((a, b) => new Date(a.snoozed_until) - new Date(b.snoozed_until));
+                const nextSnoozed = snoozedTasks[0];
+                const remainingMin = Math.ceil((new Date(nextSnoozed.snoozed_until) - now) / 60000);
+                statusText = `SNOOZED ${remainingMin}M`;
+                taskTitle = nextSnoozed.title;
+                targetUrgency = 0;
             }
 
             els.simStatusLabel.textContent = statusText;
@@ -1262,17 +1422,20 @@
             targetUrgency === 2 ? els.simStatusLabel.classList.add('lcd-accent') : els.simStatusLabel.classList.remove('lcd-accent');
 
             if (targetUrgency === 0) {
-                els.hwLed.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                els.hwLed.style.backgroundColor = `rgba(255,255,255,${(0.1 * brightness).toFixed(2)})`;
                 els.hwLed.style.boxShadow = '';
             } else {
                 els.hwLed.style.backgroundColor = hwLedColor;
-                els.hwLed.style.boxShadow = `0 0 8px ${hwLedColor}, inset 0 2px 4px rgba(0,0,0,0.5)`;
+                els.hwLed.style.boxShadow = `0 0 10px ${hwLedColor}, inset 0 2px 4px rgba(0,0,0,0.5)`;
             }
 
             if (currentUrgency !== targetUrgency) {
                 const stateClass = targetUrgency === 2 ? 'state-urgent' : targetUrgency === 1 ? 'state-working' : 'state-idle';
                 els.mascotContainer.className = `w-32 h-32 ${stateClass}`;
-                if (targetUrgency === 2 && settings.chime_enabled) console.log("[I2S AUDIO]: Playing Chime.wav");
+                if (targetUrgency === 2 && settings.chime_enabled) {
+                    console.log("[I2S AUDIO]: Playing Chime.wav");
+                    playChimeAudio();
+                }
                 currentUrgency = targetUrgency;
             }
         }

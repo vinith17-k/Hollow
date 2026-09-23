@@ -25,5 +25,43 @@
     "snooze_minutes": 15,
     "sync_interval_sec": 30,
     "time_format": "24"
-  }
+  },
+  "logs": [
+    {
+      "ts": "2026-09-23T18:26:49.619Z",
+      "level": "SYS",
+      "message": "Hollow API initialized",
+      "detail": "port=4000"
+    },
+    {
+      "ts": "2026-09-23T18:26:57.071Z",
+      "level": "API",
+      "message": "GET /",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:26:57.247Z",
+      "level": "API",
+      "message": "GET /api/health",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:26:57.347Z",
+      "level": "API",
+      "message": "GET /api/log",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:26:57.406Z",
+      "level": "API",
+      "message": "GET /api/export",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:26:57.411Z",
+      "level": "SYS",
+      "message": "Data exported",
+      "detail": "hollow-backup-2026-09-23.json"
+    }
+  ]
 }
