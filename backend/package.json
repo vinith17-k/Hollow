@@ -1,7 +1,7 @@
 {
-  "name": "desk-companion-backend",
+  "name": "hollow-backend",
   "version": "1.0.0",
-  "description": "Local API backend for Desk Companion dashboard (Express + JSON file DB)",
+  "description": "Local API backend for Hollow dashboard (Express + JSON file DB)",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {

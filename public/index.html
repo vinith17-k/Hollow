@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desk Companion | Admin Dashboard</title>
+    <title>Hollow | Admin Dashboard</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -290,7 +290,7 @@
 
         <!-- RIGHT COLUMN: Dashboard Tabs -->
         <main class="w-full lg:w-2/3 flex flex-col h-[600px] lg:h-auto">
-            <h1 class="sr-only">Desk Companion Dashboard</h1>
+            <h1 class="sr-only">Hollow Dashboard</h1>
             
             <!-- Tab Navigation + Sync Status -->
             <div class="flex items-center gap-2 mb-3 flex-wrap">
@@ -996,7 +996,7 @@
 
             // Update browser tab title with overdue count
             const overdue = tasks.filter(t => !t.done && new Date(t.due_time) < new Date()).length;
-            document.title = overdue > 0 ? `(${overdue}) Desk Companion` : 'Desk Companion';
+            document.title = overdue > 0 ? `(${overdue}) Hollow` : 'Hollow';
 
             if (sortedTasks.length === 0) {
                 els.taskList.innerHTML = '<li class="text-sm font-mono text-gray-500 p-4 text-center">NO_DATA</li>';

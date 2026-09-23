@@ -1,5 +1,5 @@
 /**
- * server.js — Desk Companion API Server
+ * server.js — Hollow API Server
  *
  * Stack: Express + lowdb (JSON file persistence, no native compilation needed)
  *
@@ -204,7 +204,7 @@ app.use((err, req, res, _next) => {
 if (!process.env.VERCEL && require.main === module) {
   app.listen(PORT, () => {
     console.log('');
-    console.log('  ░▒▓ DESK COMPANION API ▓▒░');
+    console.log('  ░▒▓ HOLLOW API ▓▒░');
     console.log(`  Listening  http://localhost:${PORT}`);
     console.log(`  Health:    GET  http://localhost:${PORT}/api/health`);
     console.log(`  Tasks:     GET  http://localhost:${PORT}/api/tasks`);

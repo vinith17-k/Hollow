@@ -1,6 +1,6 @@
-# 🤖 Desk Companion
+# 🤖 Hollow
 
-> Hardware simulator, task directive management dashboard, and REST API for the Desk Companion ESP32 hardware device.
+> Hardware simulator, task directive management dashboard, and REST API for the Hollow ESP32 companion device.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Vercel%20%7C%20Node.js-black.svg)
@@ -10,7 +10,7 @@
 
 ## 🌟 Overview
 
-Desk Companion is a retro-futuristic administrative control dashboard and simulator for an ESP32-powered desk assistant. It provides a tactile, Cyberpunk/Industrial-styled interface to manage directives, test hardware states, configure system parameters, inspect live telemetry, and sync with physical devices.
+Hollow is a retro-futuristic administrative control dashboard and simulator for an ESP32-powered desk assistant. It provides a tactile, Cyberpunk/Industrial-styled interface to manage directives, test hardware states, configure system parameters, inspect live telemetry, and sync with physical devices.
 
 - **Frontend:** Single-page dashboard located in `public/index.html` with LCD simulator, CRT scanlines, LED indicators, and tactile audio-visual interactions.
 - **Backend API:** Express-based REST API with lowdb persistence, rate limiting, system diagnostics, and real-time event logs.

@@ -1,7 +1,7 @@
 {
-  "name": "desk-companion",
+  "name": "hollow",
   "version": "1.0.0",
-  "description": "Desk Companion — Hardware simulator and task directive management dashboard",
+  "description": "Hollow — Hardware simulator and task directive management dashboard",
   "main": "api/index.js",
   "scripts": {
     "start": "node backend/server.js",
