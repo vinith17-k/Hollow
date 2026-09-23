@@ -65,6 +65,9 @@ logEvent('SYS', 'Database ready',         'lowdb / data.json');
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 
+// Trust proxy for Vercel / reverse-proxy deployments
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin:         (origin, cb) => cb(null, true),
   methods:        ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -80,6 +83,7 @@ app.use(rateLimit({
   max:      200,
   standardHeaders: true,
   legacyHeaders:   false,
+  validate: { xForwardedForHeader: false },
   message: { error: 'Too many requests — slow down' },
 }));
 

@@ -1,17 +1,8 @@
 /**
- * db.js — JSON file database for Desk Companion backend
+ * db.js — JSON file database for Hollow backend
  *
- * Uses lowdb v7 with JSONFileSyncPreset (pure JavaScript, no native binaries).
- * All data is persisted to data.json automatically on every write.
- *
- * Serverless / Vercel compatibility:
- *   When deployed on Vercel (process.env.VERCEL is set), the filesystem is read-only
- *   except for /tmp. We store data.json in os.tmpdir() so writes succeed.
- *
- * Schema (db.data)
- * ────────────────
- *   tasks[]    — task collection (matches spec §3.3 data model exactly)
- *   settings{} — singleton device config (fixes spec §3.8 open gap)
+ * Uses lowdb v7 with JSONFileSyncPreset.
+ * Guaranteed safe execution on both local dev and serverless platforms (Vercel).
  */
 
 'use strict';
@@ -22,9 +13,9 @@ const path = require('path');
 const { JSONFileSyncPreset } = require('lowdb/node');
 
 // In Vercel serverless environment, local repo directory is read-only.
-// We use os.tmpdir() on Vercel so file writes succeed without EROFS errors.
+// We use os.tmpdir() on Vercel so file writes succeed.
 const DB_PATH = process.env.VERCEL
-  ? path.join(os.tmpdir(), 'data.json')
+  ? path.join(os.tmpdir(), 'hollow-data.json')
   : path.join(__dirname, 'data.json');
 
 const DEFAULT_DATA = {
@@ -38,7 +29,7 @@ const DEFAULT_DATA = {
   },
 };
 
-// Seed /tmp/data.json on Vercel if it doesn't exist yet
+// Seed /tmp data file on Vercel if it doesn't exist yet
 if (process.env.VERCEL && !fs.existsSync(DB_PATH)) {
   const seedPath = path.join(__dirname, 'data.json');
   if (fs.existsSync(seedPath)) {
@@ -48,10 +39,53 @@ if (process.env.VERCEL && !fs.existsSync(DB_PATH)) {
   }
 }
 
-const db = JSONFileSyncPreset(DB_PATH, DEFAULT_DATA);
+let internalDb;
+try {
+  internalDb = JSONFileSyncPreset(DB_PATH, DEFAULT_DATA);
+} catch (err) {
+  console.warn('[DB] Using in-memory fallback store:', err.message);
+  internalDb = {
+    data: { tasks: [], settings: { ...DEFAULT_DATA.settings } },
+    read() {},
+    write() {},
+  };
+}
 
-// Ensure both keys exist (in case of partial/corrupted data.json)
-if (!db.data.tasks)    { db.data.tasks = []; db.write(); }
-if (!db.data.settings) { db.data.settings = DEFAULT_DATA.settings; db.write(); }
+function safeRead() {
+  try {
+    if (typeof internalDb.read === 'function') internalDb.read();
+  } catch (_) {}
+  if (!internalDb.data) {
+    internalDb.data = { tasks: [], settings: { ...DEFAULT_DATA.settings } };
+  }
+  if (!Array.isArray(internalDb.data.tasks)) {
+    internalDb.data.tasks = [];
+  }
+  if (!internalDb.data.settings) {
+    internalDb.data.settings = { ...DEFAULT_DATA.settings };
+  }
+}
 
-module.exports = db;
+function safeWrite() {
+  try {
+    if (typeof internalDb.write === 'function') internalDb.write();
+  } catch (err) {
+    console.warn('[DB] Write skipped (ephemeral environment):', err.message);
+  }
+}
+
+// Initial safety check
+safeRead();
+safeWrite();
+
+module.exports = {
+  get data() {
+    safeRead();
+    return internalDb.data;
+  },
+  set data(val) {
+    internalDb.data = val;
+  },
+  read: safeRead,
+  write: safeWrite,
+};
