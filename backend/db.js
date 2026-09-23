@@ -1,8 +1,8 @@
 /**
- * db.js — JSON file database for Hollow backend
+ * db.js — Native zero-dependency JSON database for Hollow
  *
- * Uses lowdb v7 with JSONFileSyncPreset.
- * Guaranteed safe execution on both local dev and serverless platforms (Vercel).
+ * Replaces external ESM lowdb with standard Node.js fs.
+ * 100% compatible with CommonJS on Vercel Serverless (Node 18/20/22/24).
  */
 
 'use strict';
@@ -10,9 +10,8 @@
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
-const { JSONFileSyncPreset } = require('lowdb/node');
 
-// In Vercel serverless environment, local repo directory is read-only.
+// When deployed on Vercel, the repository directory is read-only.
 // We use os.tmpdir() on Vercel so file writes succeed.
 const DB_PATH = process.env.VERCEL
   ? path.join(os.tmpdir(), 'hollow-data.json')
@@ -29,63 +28,57 @@ const DEFAULT_DATA = {
   },
 };
 
-// Seed /tmp data file on Vercel if it doesn't exist yet
-if (process.env.VERCEL && !fs.existsSync(DB_PATH)) {
-  const seedPath = path.join(__dirname, 'data.json');
-  if (fs.existsSync(seedPath)) {
-    try {
-      fs.copyFileSync(seedPath, DB_PATH);
-    } catch (_) {}
-  }
-}
+let cache = null;
 
-let internalDb;
-try {
-  internalDb = JSONFileSyncPreset(DB_PATH, DEFAULT_DATA);
-} catch (err) {
-  console.warn('[DB] Using in-memory fallback store:', err.message);
-  internalDb = {
-    data: { tasks: [], settings: { ...DEFAULT_DATA.settings } },
-    read() {},
-    write() {},
-  };
-}
+function load() {
+  if (cache) return cache;
 
-function safeRead() {
   try {
-    if (typeof internalDb.read === 'function') internalDb.read();
-  } catch (_) {}
-  if (!internalDb.data) {
-    internalDb.data = { tasks: [], settings: { ...DEFAULT_DATA.settings } };
-  }
-  if (!Array.isArray(internalDb.data.tasks)) {
-    internalDb.data.tasks = [];
-  }
-  if (!internalDb.data.settings) {
-    internalDb.data.settings = { ...DEFAULT_DATA.settings };
-  }
-}
-
-function safeWrite() {
-  try {
-    if (typeof internalDb.write === 'function') internalDb.write();
+    if (fs.existsSync(DB_PATH)) {
+      const raw = fs.readFileSync(DB_PATH, 'utf8');
+      cache = JSON.parse(raw);
+    }
   } catch (err) {
-    console.warn('[DB] Write skipped (ephemeral environment):', err.message);
+    console.warn('[DB] Read error, resetting cache:', err.message);
+  }
+
+  if (!cache || typeof cache !== 'object') {
+    cache = { tasks: [], settings: { ...DEFAULT_DATA.settings } };
+  }
+  if (!Array.isArray(cache.tasks)) cache.tasks = [];
+  if (!cache.settings) cache.settings = { ...DEFAULT_DATA.settings };
+
+  return cache;
+}
+
+function persist() {
+  if (!cache) return;
+  try {
+    const dir = path.dirname(DB_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(DB_PATH, JSON.stringify(cache, null, 2), 'utf8');
+  } catch (err) {
+    console.warn('[DB] Write error (ephemeral serverless environment):', err.message);
   }
 }
 
-// Initial safety check
-safeRead();
-safeWrite();
+// Initial load & ensure file exists
+load();
+persist();
 
 module.exports = {
   get data() {
-    safeRead();
-    return internalDb.data;
+    return load();
   },
   set data(val) {
-    internalDb.data = val;
+    cache = val;
+    persist();
   },
-  read: safeRead,
-  write: safeWrite,
+  read() {
+    cache = null; // force fresh reload from disk
+    return load();
+  },
+  write() {
+    persist();
+  },
 };
