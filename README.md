@@ -1,20 +1,31 @@
-# 🤖 Hollow
+# 🤖 Hollow (Desk Companion)
 
-> Hardware simulator, task directive management dashboard, and REST API for the Hollow ESP32 companion device.
+> **Tactile desktop companion simulator, task directives management dashboard, and REST API for the Hollow ESP32 smart desk device.**
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Vercel%20%7C%20Node.js-black.svg)
-![Hardware](https://img.shields.io/badge/hardware-ESP32%20Compatible-green.svg)
+![Hardware](https://img.shields.io/badge/hardware-ESP32--S3%20Compatible-green.svg)
+![Deployment](https://img.shields.io/badge/deployment-live-success.svg)
+
+🌐 **Live Production App**: [https://backend-green-two-67.vercel.app](https://backend-green-two-67.vercel.app)  
+📖 **Comprehensive Master Documentation**: [`PROJECT_DOCUMENTATION.md`](./PROJECT_DOCUMENTATION.md)
 
 ---
 
 ## 🌟 Overview
 
-Hollow is a retro-futuristic administrative control dashboard and simulator for an ESP32-powered desk assistant. It provides a tactile, Cyberpunk/Industrial-styled interface to manage directives, test hardware states, configure system parameters, inspect live telemetry, and sync with physical devices.
+**Hollow** is an intelligent companion system featuring a bat mascot ("Hollow") paired with a physical ESP32-S3 desk device and an administrative control dashboard inspired by Teenage Engineering / industrial aesthetics.
 
-- **Frontend:** Single-page dashboard located in `public/index.html` with LCD simulator, CRT scanlines, LED indicators, and tactile audio-visual interactions.
-- **Backend API:** Express-based REST API with lowdb persistence, rate limiting, system diagnostics, and real-time event logs.
-- **Deployment:** Zero-config deploy to **Vercel** with static hosting and serverless API execution.
+It provides a digital twin hardware simulator, directive scheduling, dynamic mascot animations, alert suppression with quiet hours, rotary knob shortcuts, and weekly completion velocity charts.
+
+### Key Capabilities
+- **🔐 Master Security Gate**: PIN/password authentication gate powered by constant-time HMAC tokens (`crypto.timingSafeEqual`).
+- **🌙 Schedule-Aware Quiet Hours**: Time-window alert suppression (chime & LED) with full midnight-crossing / overnight support.
+- **🎛️ Rotary Encoder Shortcuts & HUD**: Virtual EC11 knob supporting long-press mute (>600ms), double-click jump (<400ms), single-click task completion, and mouse wheel rotation.
+- **🦇 Mascot Moods & Micro-Animations**: Non-destructive emotional states (`neutral`, `content`, `satisfied`, `restless`) and natural idle twitches (blink, ear-twitch, wing-flutter).
+- **🔥 Consecutive Streak Tracking**: Day-by-day task completion streak counter displayed on the dashboard and on the simulator screen (`🔥 XD`).
+- **📊 7-Day Velocity Analytics**: Retro Teenage Engineering styled dual-bar chart visualizing completed vs missed tasks per day.
+- **⚡ Offline-First Architecture**: Resilient localStorage caching with background mutation retry queue.
 
 ---
 
@@ -34,44 +45,42 @@ npm install
 npm start
 ```
 The application will launch on **http://localhost:4000**:
-- **Dashboard:** `http://localhost:4000/`
-- **Health Check:** `http://localhost:4000/api/health`
-- **Tasks API:** `http://localhost:4000/api/tasks`
+- **Dashboard UI**: `http://localhost:4000/` (Default PIN: `1024`)
+- **System Health**: `http://localhost:4000/api/health`
+- **Directives API**: `http://localhost:4000/api/tasks`
 
 ---
 
 ## ☁️ Deploying to Vercel
 
-This repository is pre-configured for instant deployment on Vercel.
+This repository is pre-configured with `vercel.json` for instant deployment on Vercel:
 
-1. **Push this repository to GitHub** (instructions below).
-2. Go to [Vercel Dashboard](https://vercel.com/) and click **"Add New..."** → **"Project"**.
-3. Import your GitHub repository (`desk-companion`).
-4. Keep the default settings (Framework Preset: **Other**, Root Directory: `./`).
-5. Click **"Deploy"**.
-
-Vercel will automatically:
-- Serve the static frontend from `/public` at your root domain (`/`).
-- Mount `/api/*` to the serverless function handler in `/api/index.js`.
+1. Push your repository to GitHub.
+2. In the [Vercel Dashboard](https://vercel.com/), import your repository.
+3. Keep default settings (Framework Preset: **Other**, Root Directory: `./`).
+4. (Optional) Set `HOLLOW_PIN` under Environment Variables.
+5. Click **Deploy**.
 
 ---
 
-## 📡 API Reference
+## 📡 API Reference Overview
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/health` | System status, uptime, firmware version, and task counts |
+| `POST` | `/api/auth/login` | Authenticate master PIN/password; returns HMAC token |
+| `GET` | `/api/auth/verify` | Verify current session bearer token |
+| `GET` | `/api/health` | Telemetry: uptime, firmware version, task counts, and database status |
 | `GET` | `/api/tasks` | Get all directives sorted by status and due time |
 | `GET` | `/api/tasks?pending=true` | Filter for incomplete tasks only (ESP32 polling) |
 | `GET` | `/api/tasks?since=<ISO>` | Delta-sync: tasks updated after timestamp |
 | `POST` | `/api/tasks` | Create directive (`title`, `due_time`, `source`) |
 | `PATCH` | `/api/tasks/:id` | Update directive fields (`title`, `done`, `due_time`) |
 | `DELETE` | `/api/tasks/:id` | Delete directive (204 No Content) |
-| `POST` | `/api/tasks/:id/snooze` | Snooze directive by `minutes` |
-| `GET` | `/api/settings` | Retrieve device configuration singleton |
-| `PATCH` | `/api/settings` | Update configuration (`chime_enabled`, `led_brightness`, etc.) |
-| `GET` | `/api/log` | Circular event log (last 50-100 operations) |
-| `GET` | `/api/export` | Download complete JSON database backup |
+| `POST` | `/api/tasks/:id/snooze` | Snooze directive by specified `minutes` |
+| `GET` | `/api/settings` | Retrieve configuration singleton (quiet hours, streak, etc.) |
+| `PATCH` | `/api/settings` | Update configuration with schema validation |
+| `GET` | `/api/log` | Circular event telemetry log |
+| `GET` | `/api/export` | Download full JSON database backup |
 | `POST` | `/api/import` | Restore database from JSON backup |
 
 ---
@@ -83,32 +92,38 @@ DESK-COMPANION/
 ├── api/
 │   └── index.js              # Serverless API entrypoint for Vercel
 ├── backend/
-│   ├── .env.example          # Environment configuration template
 │   ├── data.json             # Seed database file (JSON storage)
 │   ├── db.js                 # lowdb database manager (with /tmp fallback for Vercel)
 │   ├── routes/
-│   │   ├── settings.js       # Device settings routes
+│   │   ├── auth.js           # PIN authentication routes
+│   │   ├── diag.js           # Health, logging, import/export routes
+│   │   ├── settings.js       # Settings & quiet hours validation routes
 │   │   └── tasks.js          # Directives CRUD & snooze routes
 │   └── server.js             # Express application & middleware
 ├── public/
-│   └── index.html            # Frontend dashboard interface
-├── .gitignore                # Git exclusions
+│   └── index.html            # Single-Page Web Dashboard & Simulator
 ├── package.json              # Project dependencies & scripts
-├── README.md                 # Project documentation
-└── vercel.json               # Vercel routing & rewrites configuration
+├── vercel.json               # Vercel routing & rewrites configuration
+├── README.md                 # Project summary
+└── PROJECT_DOCUMENTATION.md  # Exhaustive master technical documentation
 ```
 
 ---
 
 ## ⌨️ Dashboard Shortcuts
 
-- **`N`**: Quick focus on the new directive input field.
+- **`N`**: Focus on the new directive input field.
 - **`Esc`**: Cancel inline directive editing.
-- **`✓ ALL`**: Mark all pending directives complete.
-- **`⬇ Export`**: Instant one-click database export from Telemetry.
+- **Encoder Knob Long-Press (>600ms)**: Toggle audio mute with on-screen HUD badge.
+- **Encoder Knob Double-Click (<400ms)**: Jump to today's next pending directive.
+- **Encoder Knob Single-Click**: Mark current task completed.
+- **Encoder Knob Mouse Wheel**: Rotate virtual knob and scroll directive list.
 
 ---
 
-## 📄 License
+## 📄 Documentation
 
+For full details on the hardware BOM, firmware architecture, LVGL layouts, and deep component documentation, read [`PROJECT_DOCUMENTATION.md`](./PROJECT_DOCUMENTATION.md).
+
+## License
 MIT
