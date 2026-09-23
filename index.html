@@ -177,6 +177,39 @@
         @keyframes puff { 0% { transform: translateY(0) scale(1); opacity: 0.9; } 100% { transform: translateY(-16px) scale(2); opacity: 0; } }
         @keyframes puff-slow { 0% { transform: translateY(0) scale(1); opacity: 0.6; } 100% { transform: translateY(-12px) scale(1.5); opacity: 0; } }
         
+        /* Secondary Mascot Mood Overlays */
+        .mood-content { --mood-bounce: -1px; }
+        .mood-content #mascot-body-group { filter: drop-shadow(0 0 3px rgba(251, 191, 36, 0.45)); }
+        .mood-content .mascot-eye { fill: #fef08a !important; }
+
+        .mood-satisfied { --mood-bounce: -2px; }
+        .mood-satisfied #mascot-body-group { filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.45)); }
+        .mood-satisfied .mascot-eye { fill: #86efac !important; }
+        .mood-satisfied #left-wing { transform: rotate(12deg); }
+        .mood-satisfied #right-wing { transform: rotate(-12deg); }
+
+        .mood-restless #mascot-body-group { animation: jitter-restless 0.18s infinite alternate !important; filter: drop-shadow(0 0 3px rgba(249, 115, 22, 0.5)); }
+        .mood-restless .mascot-eye { fill: #fdba74 !important; }
+        .mood-restless .mascot-tail { animation: thrash-fast 0.12s infinite alternate !important; }
+
+        @keyframes jitter-restless { from { transform: translateY(0); } to { transform: translateY(-1.5px) skewX(2deg); } }
+
+        /* Idle Micro-Animations (Triggered intermittently in state-idle) */
+        .micro-blink #mascot-eyes { transform: scaleY(0.08); transition: transform 0.12s ease-in-out; }
+        .micro-ear-twitch #mascot-body-group { transform: rotate(-4deg) translateY(-1px); transition: transform 0.18s ease-in-out; }
+        .micro-wing-flutter #left-wing { transform: rotate(22deg) scaleX(1.1); transition: transform 0.15s ease; }
+        .micro-wing-flutter #right-wing { transform: rotate(-22deg) scaleX(1.1); transition: transform 0.15s ease; }
+
+        /* Simulator Screen Badges & HUD popup */
+        .sim-indicator { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 0.55rem; font-weight: bold; border-radius: 2px; padding: 1px 3px; display: inline-flex; align-items: center; gap: 2px; }
+        #sim-hud-popup { transition: opacity 0.25s ease, transform 0.25s ease; }
+
+        /* Analytics Chart Styles */
+        .chart-day-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; flex: 1; min-width: 22px; gap: 2px; }
+        .chart-bar-group { display: flex; align-items: flex-end; justify-content: center; gap: 2px; width: 100%; height: 100%; }
+        .chart-bar-done { background: #22c55e; border-radius: 2px 2px 0 0; min-height: 2px; transition: height 0.4s ease; }
+        .chart-bar-missed { background: #f87171; border-radius: 2px 2px 0 0; min-height: 2px; transition: height 0.4s ease; }
+
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: var(--chassis-main); border-radius: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: var(--chassis-dark); border-radius: 4px; }
@@ -213,16 +246,22 @@
                     
                     <!-- Top Bar -->
                     <div class="flex justify-between items-start lcd-text text-xs z-0 relative">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-1.5 flex-wrap">
                             <div id="sim-wifi" class="flex gap-[2px] items-end h-3" aria-label="Wi-Fi">
                                 <span class="block w-1 h-1 bg-current opacity-30" id="wifi-1"></span>
                                 <span class="block w-1 h-2 bg-current opacity-30" id="wifi-2"></span>
                                 <span class="block w-1 h-3 bg-current" id="wifi-3"></span>
                             </div>
                             <span id="sim-sync-icon" class="hidden">⟳</span>
+                            <span id="sim-quiet-badge" class="hidden sim-indicator bg-[#1e293b] text-amber-300 border border-amber-500/40">🌙 QUIET</span>
+                            <span id="sim-streak-badge" class="hidden sim-indicator bg-[#1e293b] text-orange-400 border border-orange-500/40">🔥 0D</span>
+                            <span id="sim-mute-badge" class="hidden sim-indicator bg-[#1e293b] text-red-400 border border-red-500/40">🔇 MUTED</span>
                         </div>
                         <div id="sim-clock" class="text-base font-bold tracking-widest" aria-live="polite">--:--</div>
                     </div>
+
+                    <!-- HUD Popup Notification -->
+                    <div id="sim-hud-popup" class="hidden absolute top-8 left-1/2 -translate-x-1/2 bg-black/90 text-white font-mono text-[0.65rem] px-2.5 py-1 rounded shadow-lg border border-gray-600 z-30 uppercase tracking-widest pointer-events-none"></div>
 
                     <!-- Center: Mascot -->
                     <div class="flex-grow flex items-center justify-center z-0 relative" aria-hidden="true">
@@ -277,11 +316,11 @@
                         <span class="hw-label text-[0.55rem]">SYS_LED</span>
                     </div>
                     <div class="flex flex-col items-center gap-2">
-                        <div class="w-10 h-10 rounded-full bg-[var(--chassis-dark)] shadow-md border-b-4 border-[#888] flex items-center justify-center cursor-pointer active:border-b-0 active:translate-y-1">
-                            <div class="w-8 h-8 rounded-full bg-[var(--chassis-light)] border border-white shadow-inner flex items-center justify-center">
-                                <div class="w-1 h-4 bg-[#888] rounded"></div>
+                        <button id="hw-encoder" type="button" class="w-10 h-10 rounded-full bg-[var(--chassis-dark)] shadow-md border-b-4 border-[#888] flex items-center justify-center cursor-pointer select-none active:border-b-0 active:translate-y-1 transition-all focus:outline-none focus:ring-2 focus:ring-amber-500" title="Encoder: Click to toggle directive, Double-click to jump to next task, Hold (>600ms) to Mute, Scroll to rotate" aria-label="Rotary Encoder Control">
+                            <div class="w-8 h-8 rounded-full bg-[var(--chassis-light)] border border-white shadow-inner flex items-center justify-center pointer-events-none">
+                                <div id="hw-encoder-notch" class="w-1 h-4 bg-[#888] rounded transition-transform"></div>
                             </div>
-                        </div>
+                        </button>
                         <span class="hw-label text-[0.55rem]">ENCODER</span>
                     </div>
                 </div>
@@ -316,6 +355,7 @@
                 <nav class="flex gap-2 overflow-x-auto pb-1 flex-grow" role="tablist" aria-label="Dashboard Sections">
                     <button role="tab" aria-selected="true" aria-controls="panel-tasks" id="tab-tasks" class="btn-tactile active px-4 py-2 min-w-[80px]" tabindex="0">Tasks</button>
                     <button role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" class="btn-tactile px-4 py-2 min-w-[80px]" tabindex="-1">Config</button>
+                    <button role="tab" aria-selected="false" aria-controls="panel-analytics" id="tab-analytics" class="btn-tactile px-4 py-2 min-w-[80px]" tabindex="-1">Analytics</button>
                     <button role="tab" aria-selected="false" aria-controls="panel-diag" id="tab-diag" class="btn-tactile px-4 py-2 min-w-[80px]" tabindex="-1">Diag</button>
                     <button role="tab" aria-selected="false" aria-controls="panel-admin" id="tab-admin" class="btn-tactile px-4 py-2 min-w-[80px]" tabindex="-1">Admin</button>
                 </nav>
@@ -327,7 +367,10 @@
                 
                 <div id="panel-tasks" role="tabpanel" aria-labelledby="tab-tasks" class="h-full flex flex-col p-3">
                     <div class="flex justify-between items-center mb-3">
-                        <h2 class="hw-label text-sm">Directives DB</h2>
+                        <div class="flex items-center gap-2">
+                            <h2 class="hw-label text-sm">Directives DB</h2>
+                            <span id="streak-badge" class="hidden font-mono text-[0.65rem] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300" title="Daily Completion Streak">🔥 0 day streak</span>
+                        </div>
                         <div class="flex items-center gap-2">
                             <button id="btn-mark-all-done" class="btn-tactile px-2 py-1 text-[0.6rem]" title="Mark all tasks done">✓ ALL</button>
                             <span id="task-count" class="hw-label bg-[var(--chassis-light)] px-2 py-1 rounded border border-[var(--chassis-dark)]" title="pending / total">0 / 0</span>
@@ -423,6 +466,67 @@
                             <span class="text-[0.6rem] font-mono text-gray-500 mt-1 block">Sent to hardware for RTC reminder-time calculations</span>
                         </div>
 
+                        <!-- Schedule-Aware Quiet Hours -->
+                        <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm border-l-4 border-l-indigo-600">
+                            <div class="flex justify-between items-center mb-1">
+                                <h3 class="font-bold text-sm flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                                    Quiet Hours Schedule
+                                </h3>
+                                <div class="flex items-center gap-2">
+                                    <span id="quiet-hours-status-badge" class="font-mono text-[0.6rem] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 font-bold">OFF</span>
+                                    <label class="relative inline-flex items-center cursor-pointer" title="Quiet Hours Master Switch">
+                                        <input type="checkbox" id="setting-quiet-hours-enabled" name="quiet_hours_enabled" class="sr-only peer">
+                                        <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-2">Suppress chime audio and flashing LED alerts during specified windows. Directives still register silently.</p>
+                            
+                            <!-- Defined Windows List -->
+                            <div id="quiet-windows-list" class="space-y-1.5 mb-3">
+                                <!-- Populated dynamically by JS -->
+                            </div>
+
+                            <!-- Add Window Form -->
+                            <div class="bg-[var(--chassis-light)] p-2.5 rounded border border-[var(--chassis-dark)]">
+                                <span class="hw-label text-[0.6rem] block mb-1.5">Add Quiet Window</span>
+                                <div class="flex gap-2 items-center flex-wrap mb-2">
+                                    <div class="flex items-center gap-1">
+                                        <label for="quiet-start-time" class="text-[0.65rem] font-bold text-gray-600">From:</label>
+                                        <input type="time" id="quiet-start-time" value="22:00" class="input-tactile text-xs h-7 w-24">
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <label for="quiet-end-time" class="text-[0.65rem] font-bold text-gray-600">To:</label>
+                                        <input type="time" id="quiet-end-time" value="07:30" class="input-tactile text-xs h-7 w-24">
+                                    </div>
+                                    <span class="text-[0.6rem] text-gray-500 italic">(supports overnight)</span>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-[0.65rem] font-bold text-gray-600">Active Days:</span>
+                                        <div class="flex gap-1 text-[0.55rem] font-mono text-gray-500">
+                                            <button type="button" id="btn-quiet-days-all" class="hover:underline">All</button> |
+                                            <button type="button" id="btn-quiet-days-weekdays" class="hover:underline">Weekdays</button> |
+                                            <button type="button" id="btn-quiet-days-weekends" class="hover:underline">Weekends</button>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-7 gap-1" id="quiet-days-selector">
+                                        <label class="cursor-pointer text-center text-[0.65rem] font-mono p-1 rounded border border-gray-300 has-[:checked]:bg-indigo-600 has-[:checked]:text-white has-[:checked]:border-indigo-600"><input type="checkbox" value="0" class="sr-only quiet-day-check" checked>Su</label>
+                                        <label class="cursor-pointer text-center text-[0.65rem] font-mono p-1 rounded border border-gray-300 has-[:checked]:bg-indigo-600 has-[:checked]:text-white has-[:checked]:border-indigo-600"><input type="checkbox" value="1" class="sr-only quiet-day-check" checked>Mo</label>
+                                        <label class="cursor-pointer text-center text-[0.65rem] font-mono p-1 rounded border border-gray-300 has-[:checked]:bg-indigo-600 has-[:checked]:text-white has-[:checked]:border-indigo-600"><input type="checkbox" value="2" class="sr-only quiet-day-check" checked>Tu</label>
+                                        <label class="cursor-pointer text-center text-[0.65rem] font-mono p-1 rounded border border-gray-300 has-[:checked]:bg-indigo-600 has-[:checked]:text-white has-[:checked]:border-indigo-600"><input type="checkbox" value="3" class="sr-only quiet-day-check" checked>We</label>
+                                        <label class="cursor-pointer text-center text-[0.65rem] font-mono p-1 rounded border border-gray-300 has-[:checked]:bg-indigo-600 has-[:checked]:text-white has-[:checked]:border-indigo-600"><input type="checkbox" value="4" class="sr-only quiet-day-check" checked>Th</label>
+                                        <label class="cursor-pointer text-center text-[0.65rem] font-mono p-1 rounded border border-gray-300 has-[:checked]:bg-indigo-600 has-[:checked]:text-white has-[:checked]:border-indigo-600"><input type="checkbox" value="5" class="sr-only quiet-day-check" checked>Fr</label>
+                                        <label class="cursor-pointer text-center text-[0.65rem] font-mono p-1 rounded border border-gray-300 has-[:checked]:bg-indigo-600 has-[:checked]:text-white has-[:checked]:border-indigo-600"><input type="checkbox" value="6" class="sr-only quiet-day-check" checked>Sa</label>
+                                    </div>
+                                </div>
+
+                                <button type="button" id="btn-add-quiet-window" class="btn-tactile w-full py-1 text-xs font-bold">+ Add Window</button>
+                            </div>
+                        </div>
+
                         <!-- Cloud Endpoint Configuration (Moved here from Danger Zone proximity) -->
                         <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm border-l-4 border-l-[var(--accent-orange)]">
                             <h3 class="font-bold text-sm mb-1 flex items-center gap-1.5">
@@ -445,6 +549,58 @@
                             <button type="button" id="btn-settings-reset" class="btn-tactile w-full py-2 text-xs text-gray-500">↺ Reset to Defaults</button>
                         </div>
                     </form>
+                </div>
+
+                <!-- Panel: Weekly Completion Analytics -->
+                <div id="panel-analytics" role="tabpanel" aria-labelledby="tab-analytics" class="h-full hidden flex-col p-3 overflow-y-auto custom-scroll">
+                    <div class="flex justify-between items-center mb-3">
+                        <div>
+                            <h2 class="hw-label text-sm">Weekly Analytics</h2>
+                            <p class="text-[0.65rem] text-gray-500 font-mono">7-Day Completion vs Missed Performance</p>
+                        </div>
+                        <span id="analytics-date-range" class="hw-label bg-[var(--chassis-light)] px-2 py-0.5 rounded border border-[var(--chassis-dark)] text-[0.6rem]">—</span>
+                    </div>
+
+                    <!-- KPI Metric Cards -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                        <div class="bg-white p-2.5 border border-[var(--chassis-dark)] rounded shadow-sm text-center">
+                            <span class="hw-label text-[0.55rem] block text-gray-500">Completion Rate</span>
+                            <span id="metric-completion-rate" class="text-lg font-bold font-mono text-green-600">0%</span>
+                        </div>
+                        <div class="bg-white p-2.5 border border-[var(--chassis-dark)] rounded shadow-sm text-center">
+                            <span class="hw-label text-[0.55rem] block text-gray-500">Completed (7d)</span>
+                            <span id="metric-completed-count" class="text-lg font-bold font-mono text-gray-800">0</span>
+                        </div>
+                        <div class="bg-white p-2.5 border border-[var(--chassis-dark)] rounded shadow-sm text-center">
+                            <span class="hw-label text-[0.55rem] block text-gray-500">Missed / Overdue</span>
+                            <span id="metric-missed-count" class="text-lg font-bold font-mono text-red-600">0</span>
+                        </div>
+                        <div class="bg-white p-2.5 border border-[var(--chassis-dark)] rounded shadow-sm text-center">
+                            <span class="hw-label text-[0.55rem] block text-gray-500">Current Streak</span>
+                            <span id="metric-streak-count" class="text-lg font-bold font-mono text-amber-600">0d</span>
+                        </div>
+                    </div>
+
+                    <!-- 7-Day Chart Container -->
+                    <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm flex-grow flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="hw-label text-[0.6rem]">Directive Velocity</span>
+                            <div class="flex items-center gap-3 text-[0.6rem] font-mono">
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-green-500 rounded-sm inline-block"></span> Done</span>
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-red-400 rounded-sm inline-block"></span> Missed</span>
+                            </div>
+                        </div>
+
+                        <!-- Chart Graphic Canvas / Container -->
+                        <div id="analytics-chart" class="w-full h-44 flex items-end justify-between gap-2 pt-4 pb-1 border-b border-gray-200">
+                            <!-- Populated dynamically by renderAnalytics() -->
+                        </div>
+
+                        <div class="flex justify-between items-center text-[0.55rem] text-gray-400 font-mono pt-2">
+                            <span>Evaluated from historical directive timestamps</span>
+                            <span id="analytics-best-day">Best performance: —</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="panel-diag" role="tabpanel" aria-labelledby="tab-diag" class="h-full hidden flex-col p-3">
@@ -743,15 +899,22 @@
             } catch(e) {}
         }
 
+        // ── Encoder Input Configurable Constants ──────────────────────────────────
+        const LONG_PRESS_MS   = 600;
+        const DOUBLE_CLICK_MS = 400;
+
         // ── State ─────────────────────────────────────────────────────────────────
         let tasks = [];
         let settings = {
-            chime_enabled:     true,
-            led_brightness:    80,
-            snooze_minutes:    15,
-            sync_interval_sec: 30,
-            time_format:       '12',
-            timezone:          'UTC',
+            chime_enabled:       true,
+            led_brightness:      80,
+            snooze_minutes:      15,
+            sync_interval_sec:   30,
+            time_format:         '12',
+            timezone:            'UTC',
+            quiet_hours_enabled: false,
+            quiet_hours_windows: [],
+            current_streak:      0,
         };
 
         let currentUrgency      = 0;
@@ -763,23 +926,424 @@
         let settingsSaveTimer   = null;
         let autoSyncInterval    = null;
         let diagRefreshInterval = null;
+        let isMuted             = false;
+        let hudPopupTimeout     = null;
+        let activeMicroAnim     = null;
+        let microAnimTimer      = null;
+        let currentStreak       = 0;
 
         // ── DOM Elements ──────────────────────────────────────────────────────────
         const els = {
-            tabs:            document.querySelectorAll('[role="tab"]'),
-            panels:          document.querySelectorAll('[role="tabpanel"]'),
-            taskList:        document.getElementById('task-list'),
-            taskCount:       document.getElementById('task-count'),
-            formAdd:         document.getElementById('form-add-task'),
-            simClock:        document.getElementById('sim-clock'),
-            simStatusLabel:  document.getElementById('sim-status-label'),
-            simTaskTitle:    document.getElementById('sim-task-title'),
-            mascotContainer: document.getElementById('mascot-container'),
-            hwLed:           document.getElementById('hw-led'),
-            toastContainer:  document.getElementById('toast-container'),
-            toastMsg:        document.getElementById('toast-msg'),
-            toastAction:     document.getElementById('toast-action'),
+            tabs:             document.querySelectorAll('[role="tab"]'),
+            panels:           document.querySelectorAll('[role="tabpanel"]'),
+            taskList:         document.getElementById('task-list'),
+            taskCount:        document.getElementById('task-count'),
+            formAdd:          document.getElementById('form-add-task'),
+            simClock:         document.getElementById('sim-clock'),
+            simStatusLabel:   document.getElementById('sim-status-label'),
+            simTaskTitle:     document.getElementById('sim-task-title'),
+            mascotContainer:  document.getElementById('mascot-container'),
+            hwLed:            document.getElementById('hw-led'),
+            toastContainer:   document.getElementById('toast-container'),
+            toastMsg:         document.getElementById('toast-msg'),
+            toastAction:      document.getElementById('toast-action'),
+            quietBadge:       document.getElementById('sim-quiet-badge'),
+            streakBadge:      document.getElementById('sim-streak-badge'),
+            muteBadge:        document.getElementById('sim-mute-badge'),
+            hudPopup:         document.getElementById('sim-hud-popup'),
+            encoder:          document.getElementById('hw-encoder'),
+            encoderNotch:     document.getElementById('hw-encoder-notch'),
+            streakHeader:     document.getElementById('streak-badge'),
+            quietList:        document.getElementById('quiet-windows-list'),
+            quietSwitch:      document.getElementById('setting-quiet-hours-enabled'),
+            quietStatusBadge: document.getElementById('quiet-hours-status-badge'),
+            analyticsChart:   document.getElementById('analytics-chart'),
         };
+
+        // ── Feature 1: Quiet Hours Evaluation ──────────────────────────────────────
+        function isQuietHoursActive(date = new Date(), currentSettings = settings) {
+            if (!currentSettings || !currentSettings.quiet_hours_enabled) return false;
+            const windows = currentSettings.quiet_hours_windows || [];
+            if (!windows.length) return false;
+
+            let targetDate = date;
+            if (currentSettings.timezone) {
+                try {
+                    const tzStr = date.toLocaleString('en-US', { timeZone: currentSettings.timezone });
+                    targetDate = new Date(tzStr);
+                } catch (_) {
+                    targetDate = date;
+                }
+            }
+
+            const day = targetDate.getDay(); // 0 = Sun .. 6 = Sat
+            const prevDay = (day + 6) % 7;
+            const currentMinutes = targetDate.getHours() * 60 + targetDate.getMinutes();
+
+            for (const win of windows) {
+                const [startH, startM] = (win.start || '00:00').split(':').map(Number);
+                const [endH, endM]     = (win.end   || '00:00').split(':').map(Number);
+                const startMin = startH * 60 + startM;
+                const endMin   = endH * 60 + endM;
+                const days = Array.isArray(win.days) ? win.days : [0,1,2,3,4,5,6];
+
+                if (startMin <= endMin) {
+                    if (days.includes(day) && currentMinutes >= startMin && currentMinutes < endMin) {
+                        return true;
+                    }
+                } else {
+                    // Overnight window (e.g. 22:00 to 07:30)
+                    if (days.includes(day) && currentMinutes >= startMin) {
+                        return true;
+                    }
+                    if (days.includes(prevDay) && currentMinutes < endMin) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        function renderQuietWindows() {
+            const list = els.quietList;
+            if (!list) return;
+            list.innerHTML = '';
+            const windows = settings.quiet_hours_windows || [];
+
+            if (!windows.length) {
+                list.innerHTML = '<li class="text-[0.65rem] text-gray-400 font-mono italic p-2 text-center">No quiet hour windows scheduled.</li>';
+                return;
+            }
+
+            windows.forEach(w => {
+                const li = document.createElement('li');
+                li.className = 'bg-white p-2 border border-[var(--chassis-dark)] rounded flex justify-between items-center text-xs shadow-sm';
+
+                const days = Array.isArray(w.days) ? w.days : [0,1,2,3,4,5,6];
+                const dayTags = days.length === 7 ? 'Every day' : (
+                    days.length === 5 && !days.includes(0) && !days.includes(6) ? 'Mon-Fri' : (
+                        days.length === 2 && days.includes(0) && days.includes(6) ? 'Weekends' :
+                        days.map(d => DAY_NAMES[d]).join(', ')
+                    )
+                );
+
+                li.innerHTML = `
+                    <div>
+                        <span class="font-mono font-bold text-gray-800">${escapeHtml(w.start)} — ${escapeHtml(w.end)}</span>
+                        <span class="text-[0.6rem] text-gray-500 font-mono block">${escapeHtml(dayTags)}</span>
+                    </div>
+                    <button onclick="deleteQuietWindow('${w.id}')" class="btn-tactile px-2 py-1 text-xs text-red-600 hover:text-red-800" title="Delete window">✕</button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        window.deleteQuietWindow = async (id) => {
+            settings.quiet_hours_windows = (settings.quiet_hours_windows || []).filter(w => w.id !== id);
+            renderQuietWindows();
+            hardwareLoop();
+            try {
+                const updated = await apiFetch('/settings', {
+                    method: 'PATCH',
+                    body: JSON.stringify({ quiet_hours_windows: settings.quiet_hours_windows }),
+                });
+                settings = { ...settings, ...updated };
+                cacheToLocal();
+                showToast('Quiet window removed.');
+            } catch (_) {
+                cacheToLocal();
+                showToast('⚠ Removed locally');
+            }
+        };
+
+        // ── Feature 2: Encoder Shortcuts & Simulator HUD ──────────────────────────
+        function showHudPopup(text, duration = 1500) {
+            if (!els.hudPopup) return;
+            clearTimeout(hudPopupTimeout);
+            els.hudPopup.textContent = text;
+            els.hudPopup.classList.remove('hidden');
+            hudPopupTimeout = setTimeout(() => {
+                els.hudPopup.classList.add('hidden');
+            }, duration);
+        }
+
+        function jumpToNextTask() {
+            const pendingTasks = tasks.filter(t => !t.done).sort((a, b) => new Date(a.due_time) - new Date(b.due_time));
+            if (!pendingTasks.length) {
+                showHudPopup('ALL DONE');
+                return;
+            }
+            const target = pendingTasks[0];
+            showHudPopup(`JUMP: ${target.title.slice(0, 10).toUpperCase()}`);
+
+            const taskTab = document.getElementById('tab-tasks');
+            if (taskTab) taskTab.click();
+
+            setTimeout(() => {
+                const items = els.taskList ? els.taskList.querySelectorAll('li') : [];
+                const sorted = [...tasks].sort((a, b) => {
+                    if (a.done !== b.done) return a.done ? 1 : -1;
+                    return new Date(a.due_time) - new Date(b.due_time);
+                });
+                const targetIndex = sorted.findIndex(t => t.id === target.id);
+
+                if (items[targetIndex]) {
+                    items[targetIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    items[targetIndex].classList.add('ring-2', 'ring-amber-500', 'transition-all');
+                    setTimeout(() => {
+                        items[targetIndex].classList.remove('ring-2', 'ring-amber-500');
+                    }, 1500);
+                }
+            }, 100);
+        }
+
+        function setupEncoder() {
+            if (!els.encoder) return;
+            let pressTimer = null;
+            let isLongPress = false;
+            let clickCount = 0;
+            let clickTimer = null;
+            let rotation = 0;
+
+            els.encoder.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                isLongPress = false;
+                pressTimer = setTimeout(() => {
+                    isLongPress = true;
+                    isMuted = !isMuted;
+                    showHudPopup(isMuted ? 'AUDIO MUTED' : 'AUDIO UNMUTED');
+                    if (els.muteBadge) els.muteBadge.classList.toggle('hidden', !isMuted);
+                    showToast(isMuted ? 'Device alerts muted.' : 'Device alerts unmuted.');
+                    hardwareLoop();
+                }, LONG_PRESS_MS);
+            });
+
+            els.encoder.addEventListener('pointerup', (e) => {
+                e.preventDefault();
+                clearTimeout(pressTimer);
+                if (isLongPress) return;
+
+                clickCount++;
+                if (clickCount === 1) {
+                    clickTimer = setTimeout(() => {
+                        const pending = tasks.filter(t => !t.done).sort((a, b) => new Date(a.due_time) - new Date(b.due_time));
+                        if (pending.length) {
+                            toggleTask(pending[0].id);
+                            showHudPopup(`DONE: ${pending[0].title.slice(0, 10).toUpperCase()}`);
+                        } else {
+                            showHudPopup('ALL DONE');
+                        }
+                        clickCount = 0;
+                    }, DOUBLE_CLICK_MS);
+                } else if (clickCount === 2) {
+                    clearTimeout(clickTimer);
+                    clickCount = 0;
+                    jumpToNextTask();
+                }
+            });
+
+            els.encoder.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = Math.sign(e.deltaY);
+                rotation += delta * 30;
+                if (els.encoderNotch) {
+                    els.encoderNotch.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
+                }
+                if (els.taskList) {
+                    els.taskList.scrollBy({ top: delta * 50, behavior: 'smooth' });
+                }
+            }, { passive: false });
+        }
+
+        // ── Feature 3: Mascot Mood System & Idle Micro-Animations ─────────────────
+        function computeMascotMood(taskList = tasks) {
+            const now = new Date();
+            const todayStr = toLocalDateString(now);
+
+            const todaysTasks = taskList.filter(t => {
+                const dueDate = new Date(t.due_time);
+                const isDueToday = toLocalDateString(dueDate) === todayStr;
+                const isUpdatedToday = t.updated_at && toLocalDateString(new Date(t.updated_at)) === todayStr;
+                return isDueToday || (t.done && isUpdatedToday);
+            });
+
+            if (!todaysTasks.length) return 'mood-neutral';
+
+            const doneCount = todaysTasks.filter(t => t.done).length;
+            const totalCount = todaysTasks.length;
+            const hasOverdueToday = todaysTasks.some(t => !t.done && new Date(t.due_time) < now && (!t.snoozed_until || new Date(t.snoozed_until) <= now));
+
+            if (hasOverdueToday && doneCount === 0) {
+                return 'mood-restless';
+            }
+            if (doneCount === totalCount && totalCount > 0) {
+                return 'mood-satisfied';
+            }
+            if (totalCount > 0 && (doneCount / totalCount) >= 0.5) {
+                return 'mood-content';
+            }
+            return 'mood-neutral';
+        }
+
+        function updateMascotClass() {
+            if (manualStateOverride) return;
+            const stateClass = currentUrgency === 2 ? 'state-urgent' : currentUrgency === 1 ? 'state-working' : 'state-idle';
+            const moodClass = computeMascotMood(tasks);
+            const animClass = (currentUrgency === 0 && activeMicroAnim) ? activeMicroAnim : '';
+            if (els.mascotContainer) {
+                els.mascotContainer.className = `w-32 h-32 ${stateClass} ${moodClass}${animClass ? ' ' + animClass : ''}`;
+            }
+        }
+
+        function startMicroAnimations() {
+            if (microAnimTimer) clearTimeout(microAnimTimer);
+            const scheduleNext = () => {
+                const delay = Math.floor(Math.random() * 20000) + 20000; // 20s - 40s
+                microAnimTimer = setTimeout(() => {
+                    if (!manualStateOverride && currentUrgency === 0 && els.mascotContainer) {
+                        const anims = ['micro-blink', 'micro-ear-twitch', 'micro-wing-flutter'];
+                        const picked = anims[Math.floor(Math.random() * anims.length)];
+                        activeMicroAnim = picked;
+                        updateMascotClass();
+                        setTimeout(() => {
+                            activeMicroAnim = null;
+                            updateMascotClass();
+                        }, 1200);
+                    }
+                    scheduleNext();
+                }, delay);
+            };
+            scheduleNext();
+        }
+
+        // ── Feature 4: Streak Tracking ────────────────────────────────────────────
+        function calculateStreak(taskList = tasks) {
+            if (!taskList.length) return 0;
+            const dayMap = {};
+
+            taskList.forEach(t => {
+                const dStr = toLocalDateString(new Date(t.due_time));
+                if (!dayMap[dStr]) dayMap[dStr] = { total: 0, done: 0 };
+                dayMap[dStr].total++;
+                if (t.done) dayMap[dStr].done++;
+            });
+
+            const now = new Date();
+            let streak = 0;
+            let checkDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            const todayStr = toLocalDateString(checkDate);
+            const todayData = dayMap[todayStr];
+            if (todayData && todayData.total > 0 && todayData.done === todayData.total) {
+                streak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+            } else {
+                checkDate.setDate(checkDate.getDate() - 1);
+            }
+
+            for (let i = 0; i < 365; i++) {
+                const dStr = toLocalDateString(checkDate);
+                const dData = dayMap[dStr];
+                if (dData && dData.total > 0) {
+                    if (dData.done === dData.total) {
+                        streak++;
+                        checkDate.setDate(checkDate.getDate() - 1);
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            currentStreak = streak;
+            return streak;
+        }
+
+        // ── Feature 5: Weekly Completion Analytics ────────────────────────────────
+        function renderAnalytics() {
+            const now = new Date();
+            const days = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+                days.push(d);
+            }
+
+            let totalDone7d = 0;
+            let totalMissed7d = 0;
+            let bestDayName = '—';
+            let maxDoneOnDay = -1;
+
+            const dayStats = days.map(d => {
+                const dStr = toLocalDateString(d);
+                const dayName = d.toLocaleDateString([], { weekday: 'short' });
+                const dateNum = d.getDate();
+
+                const forDay = tasks.filter(t => toLocalDateString(new Date(t.due_time)) === dStr);
+                const done = forDay.filter(t => t.done).length;
+                const missed = forDay.filter(t => !t.done && (new Date(t.due_time) < now || dStr < toLocalDateString(now))).length;
+
+                totalDone7d += done;
+                totalMissed7d += missed;
+
+                if (done > maxDoneOnDay && done > 0) {
+                    maxDoneOnDay = done;
+                    bestDayName = `${dayName} (${done} completed)`;
+                }
+
+                return { dayName, dateNum, done, missed, total: done + missed };
+            });
+
+            const maxVal = Math.max(1, ...dayStats.map(s => Math.max(s.done, s.missed)));
+
+            const total7d = totalDone7d + totalMissed7d;
+            const rate = total7d > 0 ? Math.round((totalDone7d / total7d) * 100) : 100;
+            const rateEl = document.getElementById('metric-completion-rate');
+            if (rateEl) rateEl.textContent = `${rate}%`;
+
+            const doneEl = document.getElementById('metric-completed-count');
+            if (doneEl) doneEl.textContent = totalDone7d;
+
+            const missedEl = document.getElementById('metric-missed-count');
+            if (missedEl) missedEl.textContent = totalMissed7d;
+
+            const streakEl = document.getElementById('metric-streak-count');
+            const streak = calculateStreak(tasks);
+            if (streakEl) streakEl.textContent = `${streak}d`;
+
+            const bestDayEl = document.getElementById('analytics-best-day');
+            if (bestDayEl) bestDayEl.textContent = `Best performance: ${bestDayName}`;
+
+            const chartContainer = document.getElementById('analytics-chart');
+            if (!chartContainer) return;
+            chartContainer.innerHTML = '';
+
+            dayStats.forEach(stat => {
+                const col = document.createElement('div');
+                col.className = 'chart-day-col flex-1 flex flex-col items-center h-full justify-end';
+
+                const doneHeightPct = Math.round((stat.done / maxVal) * 100);
+                const missedHeightPct = Math.round((stat.missed / maxVal) * 100);
+
+                col.innerHTML = `
+                    <div class="w-full flex items-end justify-center gap-1 h-32 px-0.5">
+                        <div class="chart-bar-done w-1/2 bg-green-500 rounded-t-sm transition-all duration-500 relative group cursor-pointer hover:bg-green-600" style="height: ${Math.max(4, doneHeightPct)}%">
+                            <div class="hidden group-hover:block absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[0.55rem] px-1 py-0.5 rounded whitespace-nowrap z-10 font-mono">${stat.done} done</div>
+                        </div>
+                        <div class="chart-bar-missed w-1/2 bg-red-400 rounded-t-sm transition-all duration-500 relative group cursor-pointer hover:bg-red-500" style="height: ${Math.max(4, missedHeightPct)}%">
+                            <div class="hidden group-hover:block absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[0.55rem] px-1 py-0.5 rounded whitespace-nowrap z-10 font-mono">${stat.missed} missed</div>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-center">
+                        <span class="block text-[0.6rem] font-bold font-mono text-gray-700">${stat.dayName}</span>
+                        <span class="block text-[0.5rem] font-mono text-gray-400">${stat.dateNum}</span>
+                    </div>
+                `;
+                chartContainer.appendChild(col);
+            });
+        }
 
         // ── Auth Handling & Initialization ────────────────────────────────────────
         let appInitialized = false;
@@ -872,9 +1436,13 @@
             await loadData();
             setupTabs();
             setupEventListeners();
+            setupEncoder();
+            startMicroAnimations();
             renderTasks();
             updateSettingsUI();
             renderDiag();
+            calculateStreak(tasks);
+            renderAnalytics();
 
             setInterval(hardwareLoop, 1000);
             hardwareLoop();
@@ -966,7 +1534,9 @@
                     tab.classList.add('active');
                     document.getElementById(tab.getAttribute('aria-controls')).classList.remove('hidden');
 
-                    if (tab.getAttribute('aria-controls') === 'panel-diag') renderDiag();
+                    const targetId = tab.getAttribute('aria-controls');
+                    if (targetId === 'panel-diag') renderDiag();
+                    if (targetId === 'panel-analytics') renderAnalytics();
                 });
             });
         }
@@ -1101,6 +1671,94 @@
             const formSettings = document.getElementById('form-settings');
             formSettings.addEventListener('input', saveSettingsHandler);
             formSettings.addEventListener('change', saveSettingsHandler);
+
+            // Quiet Hours Master Switch
+            if (els.quietSwitch) {
+                els.quietSwitch.addEventListener('change', async (e) => {
+                    settings.quiet_hours_enabled = e.target.checked;
+                    if (els.quietStatusBadge) {
+                        els.quietStatusBadge.textContent = settings.quiet_hours_enabled ? 'ON' : 'OFF';
+                        els.quietStatusBadge.className = `font-mono text-[0.6rem] px-1.5 py-0.5 rounded font-bold ${settings.quiet_hours_enabled ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'}`;
+                    }
+                    hardwareLoop();
+                    try {
+                        const updated = await apiFetch('/settings', {
+                            method: 'PATCH',
+                            body: JSON.stringify({ quiet_hours_enabled: settings.quiet_hours_enabled }),
+                        });
+                        settings = { ...settings, ...updated };
+                        cacheToLocal();
+                        showToast(`Quiet hours ${settings.quiet_hours_enabled ? 'enabled' : 'disabled'}.`);
+                    } catch (_) {
+                        cacheToLocal();
+                        showToast('⚠ Quiet switch saved locally');
+                    }
+                });
+            }
+
+            // Quiet Hours Add Window
+            const addWindowBtn = document.getElementById('btn-add-quiet-window');
+            if (addWindowBtn) {
+                addWindowBtn.addEventListener('click', async () => {
+                    const startInput = document.getElementById('quiet-start-time');
+                    const endInput   = document.getElementById('quiet-end-time');
+                    const start = startInput ? startInput.value : '';
+                    const end   = endInput ? endInput.value : '';
+                    const checkedBoxes = Array.from(document.querySelectorAll('.quiet-day-check:checked'));
+                    const days = checkedBoxes.map(cb => parseInt(cb.value, 10)).sort((a,b) => a - b);
+
+                    if (!start || !end) {
+                        showToast('Please provide both start and end times.');
+                        return;
+                    }
+                    if (!days.length) {
+                        showToast('Please select at least one active day.');
+                        return;
+                    }
+
+                    const newWindow = {
+                        id: 'qw_' + Date.now(),
+                        start,
+                        end,
+                        days,
+                    };
+
+                    if (!Array.isArray(settings.quiet_hours_windows)) settings.quiet_hours_windows = [];
+                    settings.quiet_hours_windows.push(newWindow);
+                    renderQuietWindows();
+                    hardwareLoop();
+
+                    try {
+                        const updated = await apiFetch('/settings', {
+                            method: 'PATCH',
+                            body: JSON.stringify({ quiet_hours_windows: settings.quiet_hours_windows }),
+                        });
+                        settings = { ...settings, ...updated };
+                        cacheToLocal();
+                        showToast('Quiet window scheduled.');
+                    } catch (_) {
+                        cacheToLocal();
+                        showToast('⚠ Scheduled locally');
+                    }
+                });
+            }
+
+            // Quick select days
+            document.getElementById('btn-quiet-days-all')?.addEventListener('click', () => {
+                document.querySelectorAll('.quiet-day-check').forEach(cb => cb.checked = true);
+            });
+            document.getElementById('btn-quiet-days-weekdays')?.addEventListener('click', () => {
+                document.querySelectorAll('.quiet-day-check').forEach(cb => {
+                    const val = parseInt(cb.value, 10);
+                    cb.checked = (val >= 1 && val <= 5);
+                });
+            });
+            document.getElementById('btn-quiet-days-weekends')?.addEventListener('click', () => {
+                document.querySelectorAll('.quiet-day-check').forEach(cb => {
+                    const val = parseInt(cb.value, 10);
+                    cb.checked = (val === 0 || val === 6);
+                });
+            });
 
             // Settings Reset to Defaults
             const resetBtn = document.getElementById('btn-settings-reset');
@@ -1290,6 +1948,16 @@
             const pending = tasks.filter(t => !t.done).length;
             els.taskCount.textContent = `${pending} / ${tasks.length}`;
 
+            const streak = calculateStreak(tasks);
+            if (els.streakHeader) {
+                if (streak > 0) {
+                    els.streakHeader.textContent = `🔥 ${streak}d streak`;
+                    els.streakHeader.classList.remove('hidden');
+                } else {
+                    els.streakHeader.classList.add('hidden');
+                }
+            }
+
             const now = new Date();
             const overdue = tasks.filter(t => !t.done && new Date(t.due_time) < now && (!t.snoozed_until || new Date(t.snoozed_until) <= now)).length;
             document.title = overdue > 0 ? `(${overdue}) Hollow` : 'Hollow';
@@ -1368,6 +2036,12 @@
             if (tzSelect && settings.timezone) tzSelect.value   = settings.timezone;
             const syncField = document.querySelector('[name="sync_interval_sec"]');
             if (syncField) syncField.value = settings.sync_interval_sec;
+            if (els.quietSwitch) els.quietSwitch.checked = Boolean(settings.quiet_hours_enabled);
+            if (els.quietStatusBadge) {
+                els.quietStatusBadge.textContent = settings.quiet_hours_enabled ? 'ON' : 'OFF';
+                els.quietStatusBadge.className = `font-mono text-[0.6rem] px-1.5 py-0.5 rounded font-bold ${settings.quiet_hours_enabled ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'}`;
+            }
+            renderQuietWindows();
             applySettingsToSimulator();
         }
 
@@ -1615,7 +2289,19 @@
                 } catch (_) {}
             }
             els.simClock.textContent = now.toLocaleTimeString([], timeOptions);
-            
+
+            const isQuiet = isQuietHoursActive(now, settings);
+            if (els.quietBadge) els.quietBadge.classList.toggle('hidden', !isQuiet);
+            if (els.muteBadge) els.muteBadge.classList.toggle('hidden', !isMuted);
+            if (els.streakBadge) {
+                if (currentStreak >= 3) {
+                    els.streakBadge.textContent = `🔥 ${currentStreak}D`;
+                    els.streakBadge.classList.remove('hidden');
+                } else {
+                    els.streakBadge.classList.add('hidden');
+                }
+            }
+
             // If manual override is active, apply its styles and skip auto-calculation
             if (manualStateOverride) {
                 applyManualState();
@@ -1641,7 +2327,7 @@
 
                 if (diffMin <= 0) {
                     targetUrgency = 2;
-                    statusText = "[OVERDUE]";
+                    statusText = isQuiet ? "[QUIET: OVERDUE]" : "[OVERDUE]";
                     hwLedColor = `rgba(220,38,38,${(0.9 * brightness).toFixed(2)})`;
                 } else if (diffMin <= 60) {
                     targetUrgency = 1;
@@ -1664,7 +2350,9 @@
             els.simTaskTitle.textContent   = escapeHtml(taskTitle);
             targetUrgency === 2 ? els.simStatusLabel.classList.add('lcd-accent') : els.simStatusLabel.classList.remove('lcd-accent');
 
-            if (targetUrgency === 0) {
+            const suppressAlerts = isQuiet || isMuted;
+
+            if (targetUrgency === 0 || suppressAlerts) {
                 els.hwLed.style.backgroundColor = `rgba(255,255,255,${(0.1 * brightness).toFixed(2)})`;
                 els.hwLed.style.boxShadow = '';
             } else {
@@ -1673,14 +2361,14 @@
             }
 
             if (currentUrgency !== targetUrgency) {
-                const stateClass = targetUrgency === 2 ? 'state-urgent' : targetUrgency === 1 ? 'state-working' : 'state-idle';
-                els.mascotContainer.className = `w-32 h-32 ${stateClass}`;
-                if (targetUrgency === 2 && settings.chime_enabled) {
+                currentUrgency = targetUrgency;
+                if (targetUrgency === 2 && settings.chime_enabled && !suppressAlerts) {
                     console.log("[I2S AUDIO]: Playing Chime.wav");
                     playChimeAudio();
                 }
-                currentUrgency = targetUrgency;
             }
+
+            updateMascotClass();
         }
 
         function escapeHtml(str) { return str.replace(/[&<>'"]/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[tag])); }

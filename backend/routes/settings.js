@@ -42,12 +42,15 @@ router.get('/', (req, res) => {
 
 router.patch('/', (req, res) => {
   const SCHEMA = {
-    chime_enabled:     { type: 'boolean' },
-    led_brightness:    { type: 'number',  min: 1,  max: 100 },
-    snooze_minutes:    { type: 'number',  min: 1,  max: 60  },
-    sync_interval_sec: { type: 'number',  min: 10, max: 300 },
-    time_format:       { type: 'string',  values: ['12', '24'] },
-    timezone:          { type: 'string' },
+    chime_enabled:       { type: 'boolean' },
+    led_brightness:      { type: 'number',  min: 1,  max: 100 },
+    snooze_minutes:      { type: 'number',  min: 1,  max: 60  },
+    sync_interval_sec:   { type: 'number',  min: 10, max: 300 },
+    time_format:         { type: 'string',  values: ['12', '24'] },
+    timezone:            { type: 'string' },
+    quiet_hours_enabled: { type: 'boolean' },
+    quiet_hours_windows: { type: 'array' },
+    current_streak:      { type: 'number',  min: 0,  max: 9999 },
   };
 
   const patch = {};
@@ -79,6 +82,44 @@ router.patch('/', (req, res) => {
         }
       }
       patch[key] = val;
+    } else if (rule.type === 'array') {
+      if (!Array.isArray(val)) {
+        errors.push(`${key} must be an array`);
+        continue;
+      }
+      if (key === 'quiet_hours_windows') {
+        const validWindows = [];
+        let windowError = false;
+        const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+        for (const item of val) {
+          if (!item || typeof item !== 'object') {
+            errors.push('quiet_hours_windows must contain window objects');
+            windowError = true;
+            break;
+          }
+          const start = String(item.start || '').trim();
+          const end = String(item.end || '').trim();
+          if (!timeRegex.test(start) || !timeRegex.test(end)) {
+            errors.push(`Invalid quiet hours time format: start=${start}, end=${end} (expected HH:MM)`);
+            windowError = true;
+            break;
+          }
+          const days = Array.isArray(item.days)
+            ? item.days.map(d => parseInt(d, 10)).filter(d => !isNaN(d) && d >= 0 && d <= 6)
+            : [0, 1, 2, 3, 4, 5, 6];
+          validWindows.push({
+            id: String(item.id || 'qw_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6)),
+            start,
+            end,
+            days: days.length ? days : [0, 1, 2, 3, 4, 5, 6],
+          });
+        }
+        if (!windowError) {
+          patch[key] = validWindows;
+        }
+      } else {
+        patch[key] = val;
+      }
     }
   }
 

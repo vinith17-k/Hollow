@@ -26,7 +26,10 @@ const DEFAULT_DATA = {
     snooze_minutes:    15,
     sync_interval_sec: 30,
     time_format:       '12',
-    timezone:          'UTC',
+    timezone:            'UTC',
+    quiet_hours_enabled: false,
+    quiet_hours_windows: [],
+    current_streak:      0,
   },
 };
 
@@ -49,7 +52,7 @@ function load() {
   }
   if (!Array.isArray(cache.tasks)) cache.tasks = [];
   if (!Array.isArray(cache.logs))  cache.logs  = [];
-  if (!cache.settings) cache.settings = { ...DEFAULT_DATA.settings };
+  cache.settings = { ...DEFAULT_DATA.settings, ...(cache.settings || {}) };
 
   return cache;
 }
