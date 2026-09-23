@@ -26,6 +26,7 @@ const DEFAULT_DATA = {
     snooze_minutes:    15,
     sync_interval_sec: 30,
     time_format:       '12',
+    timezone:          'UTC',
   },
 };
 

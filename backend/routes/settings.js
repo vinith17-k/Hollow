@@ -47,6 +47,7 @@ router.patch('/', (req, res) => {
     snooze_minutes:    { type: 'number',  min: 1,  max: 60  },
     sync_interval_sec: { type: 'number',  min: 10, max: 300 },
     time_format:       { type: 'string',  values: ['12', '24'] },
+    timezone:          { type: 'string' },
   };
 
   const patch = {};
@@ -66,9 +67,16 @@ router.patch('/', (req, res) => {
       }
       patch[key] = val;
     } else if (rule.type === 'string') {
-      val = String(val);
+      val = String(val).trim();
       if (rule.values && !rule.values.includes(val)) {
         errors.push(`${key} must be one of: ${rule.values.join(', ')}`); continue;
+      }
+      if (key === 'timezone' && val && val !== 'UTC' && val !== 'local') {
+        try {
+          Intl.DateTimeFormat(undefined, { timeZone: val });
+        } catch (_) {
+          errors.push(`Invalid IANA timezone identifier: ${val}`); continue;
+        }
       }
       patch[key] = val;
     }

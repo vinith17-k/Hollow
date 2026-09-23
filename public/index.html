@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hollow | Admin Dashboard</title>
+    <title>Hollow Control</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -290,9 +290,28 @@
 
         <!-- RIGHT COLUMN: Dashboard Tabs -->
         <main class="w-full lg:w-2/3 flex flex-col h-[600px] lg:h-auto">
-            <h1 class="sr-only">Hollow Dashboard</h1>
+            <!-- Persistent Status & Branding Bar (Visible on all tabs) -->
+            <div class="flex items-center justify-between mb-3 border-b border-[var(--chassis-dark)] pb-2 flex-wrap gap-2">
+                <div class="flex items-center gap-2">
+                    <h1 class="font-bold text-base tracking-wide text-gray-800">HOLLOW CONTROL</h1>
+                    <span class="hw-label text-[0.6rem] bg-[var(--chassis-light)] px-1.5 py-0.5 rounded border border-[var(--chassis-dark)]">DC-01</span>
+                </div>
+                <!-- Persistent Device Connectivity Banner -->
+                <div class="flex items-center gap-2.5 bg-white px-3 py-1 rounded border border-[var(--chassis-dark)] shadow-sm">
+                    <div class="flex items-center gap-1.5" title="ESP32 Device Connection">
+                        <div id="device-status-dot" class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse transition-colors"></div>
+                        <span id="device-status-text" class="font-mono text-xs font-bold text-green-700">ONLINE</span>
+                    </div>
+                    <span class="text-gray-300">|</span>
+                    <div class="font-mono text-[0.65rem] text-gray-500 flex items-center gap-1" id="device-last-sync-container">
+                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span id="persistent-sync-time">checking sync...</span>
+                    </div>
+                    <button id="btn-lock-session" class="btn-tactile text-[0.6rem] px-2 py-0.5 ml-1 text-gray-600 hover:text-red-700" title="Lock Dashboard">🔒 Lock</button>
+                </div>
+            </div>
             
-            <!-- Tab Navigation + Sync Status -->
+            <!-- Tab Navigation -->
             <div class="flex items-center gap-2 mb-3 flex-wrap">
                 <nav class="flex gap-2 overflow-x-auto pb-1 flex-grow" role="tablist" aria-label="Dashboard Sections">
                     <button role="tab" aria-selected="true" aria-controls="panel-tasks" id="tab-tasks" class="btn-tactile active px-4 py-2 min-w-[80px]" tabindex="0">Tasks</button>
@@ -300,11 +319,6 @@
                     <button role="tab" aria-selected="false" aria-controls="panel-diag" id="tab-diag" class="btn-tactile px-4 py-2 min-w-[80px]" tabindex="-1">Diag</button>
                     <button role="tab" aria-selected="false" aria-controls="panel-admin" id="tab-admin" class="btn-tactile px-4 py-2 min-w-[80px]" tabindex="-1">Admin</button>
                 </nav>
-                <!-- Live sync status indicator -->
-                <div class="flex items-center gap-1.5 shrink-0" title="API sync status">
-                    <div id="sync-dot" class="w-2 h-2 rounded-full bg-gray-400 transition-colors duration-300"></div>
-                    <span id="sync-status-label" class="hw-label text-[0.55rem] opacity-70">connecting...</span>
-                </div>
             </div>
 
 
@@ -369,8 +383,8 @@
                             </div>
                         </div>
 
-                        <!-- Numeric Settings -->
-                        <div class="grid grid-cols-2 gap-3">
+                        <!-- Numeric & Time Settings -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
                                 <label for="setting-snooze" class="block font-bold text-sm mb-1">Snooze Duration</label>
                                 <div class="flex items-center gap-2">
@@ -380,12 +394,52 @@
                             </div>
                             <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
                                 <label for="setting-format" class="block font-bold text-sm mb-1">Clock Format</label>
-                                <select id="setting-format" name="time_format" class="input-tactile cursor-pointer">
+                                <select id="setting-format" name="time_format" class="input-tactile cursor-pointer w-full">
                                     <option value="12">12H (AM/PM)</option>
                                     <option value="24">24H (MIL)</option>
                                 </select>
                             </div>
                         </div>
+
+                        <!-- Timezone Setting -->
+                        <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
+                            <label for="setting-timezone" class="block font-bold text-sm mb-1">Device Timezone</label>
+                            <select id="setting-timezone" name="timezone" class="input-tactile cursor-pointer w-full text-xs">
+                                <option value="UTC">UTC (Universal Coordinated Time)</option>
+                                <option value="local">Browser Local Timezone</option>
+                                <option value="America/New_York">America/New_York (EST/EDT)</option>
+                                <option value="America/Chicago">America/Chicago (CST/CDT)</option>
+                                <option value="America/Denver">America/Denver (MST/MDT)</option>
+                                <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+                                <option value="Europe/London">Europe/London (GMT/BST)</option>
+                                <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
+                                <option value="Europe/Berlin">Europe/Berlin (CET/CEST)</option>
+                                <option value="Asia/Dubai">Asia/Dubai (GST)</option>
+                                <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+                                <option value="Asia/Singapore">Asia/Singapore (SGT)</option>
+                                <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                                <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+                            </select>
+                            <span class="text-[0.6rem] font-mono text-gray-500 mt-1 block">Sent to hardware for RTC reminder-time calculations</span>
+                        </div>
+
+                        <!-- Cloud Endpoint Configuration (Moved here from Danger Zone proximity) -->
+                        <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm border-l-4 border-l-[var(--accent-orange)]">
+                            <h3 class="font-bold text-sm mb-1 flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-[var(--accent-orange)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                                Cloud Endpoint URL
+                            </h3>
+                            <p class="text-xs text-gray-500 mb-2">Target API endpoint for syncing directives outside local network.</p>
+                            <div class="flex gap-2 mb-2">
+                                <input type="url" id="admin-backend-url" placeholder="https://api.supabase.co/... or /api" class="input-tactile text-sm flex-grow">
+                                <button id="btn-save-backend-url" type="button" class="btn-tactile px-3 font-bold">SET</button>
+                            </div>
+                            <div class="flex gap-2 items-center">
+                                <button id="btn-test-connection" type="button" class="btn-tactile px-3 py-1 text-xs flex-grow">Test Connection</button>
+                                <span id="connection-test-result" class="font-mono text-[0.6rem] text-gray-400">—</span>
+                            </div>
+                        </div>
+
                         <!-- Reset to defaults -->
                         <div class="pt-1">
                             <button type="button" id="btn-settings-reset" class="btn-tactile w-full py-2 text-xs text-gray-500">↺ Reset to Defaults</button>
@@ -439,41 +493,70 @@
                             </form>
                         </div>
 
-                        <!-- Backend Configuration -->
-                        <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm border-l-4 border-l-[var(--accent-orange)]">
-                            <h3 class="font-bold text-sm mb-1">Cloud Endpoint</h3>
-                            <p class="text-xs text-gray-500 mb-2">Target URL for syncing tasks outside local network.</p>
-                            <div class="flex gap-2 mb-2">
-                                <input type="url" id="admin-backend-url" placeholder="https://api.supabase.co/..." class="input-tactile text-sm flex-grow">
-                                <button id="btn-save-backend-url" class="btn-tactile px-3">SET</button>
-                            </div>
-                            <div class="flex gap-2 items-center">
-                                <button id="btn-test-connection" class="btn-tactile px-3 py-1 text-xs flex-grow">Test Connection</button>
-                                <span id="connection-test-result" class="font-mono text-[0.6rem] text-gray-400">—</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Hardware Tests & Actions -->
+                        <!-- Hardware Diagnostics Tests -->
                         <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
-                            <h3 class="font-bold text-sm mb-2">Diagnostics & Control</h3>
+                            <h3 class="font-bold text-sm mb-2">Hardware Diagnostics</h3>
                             <div class="grid grid-cols-2 gap-2">
                                 <button class="btn-tactile py-2" id="btn-test-chime">Test Chime</button>
                                 <button class="btn-tactile py-2" id="btn-test-led">Test LED</button>
-                                <button class="btn-tactile py-2 col-span-2" id="btn-force-sync">Force Cloud Sync</button>
                             </div>
                         </div>
 
-                        <!-- Danger Zone -->
-                        <div class="bg-red-50 p-3 border border-red-200 rounded mt-4">
-                            <h3 class="font-bold text-sm text-red-800 mb-1">Danger Zone</h3>
-                            <p class="text-[0.65rem] text-red-600 mb-3 uppercase tracking-wider font-mono">Erases NVRAM. Clears Wi-Fi, Tasks, and Config.</p>
-                            <button id="btn-factory-reset" class="btn-tactile btn-tactile-danger py-2 w-full">FACTORY RESET</button>
+                        <!-- Isolated Danger Zone -->
+                        <div class="p-3 border-2 border-red-500 bg-red-50/70 rounded-lg shadow-sm relative overflow-hidden mt-6">
+                            <div class="flex items-center gap-2 mb-1.5 text-red-800">
+                                <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                <h3 class="font-bold text-sm uppercase tracking-wider">Danger Zone</h3>
+                            </div>
+                            <p class="text-xs text-red-700 mb-3">Irreversible actions that overwrite local device storage or wipe directives.</p>
+                            
+                            <div class="space-y-2.5">
+                                <div class="bg-white p-2.5 rounded border border-red-200 flex justify-between items-center gap-2">
+                                    <div>
+                                        <span class="block font-bold text-xs text-gray-800">Force Cloud Sync</span>
+                                        <span class="text-[0.6rem] text-gray-500">Overwrites local directives cache with remote cloud state</span>
+                                    </div>
+                                    <button class="btn-tactile px-3 py-1.5 text-xs text-amber-700 hover:text-amber-900 shrink-0" id="btn-force-sync">Sync Now</button>
+                                </div>
+                                <div class="bg-white p-2.5 rounded border border-red-200 flex justify-between items-center gap-2">
+                                    <div>
+                                        <span class="block font-bold text-xs text-red-700">Factory Reset</span>
+                                        <span class="text-[0.6rem] text-red-500">Erases NVRAM: Wi-Fi credentials, directives, and settings</span>
+                                    </div>
+                                    <button id="btn-factory-reset" class="btn-tactile btn-tactile-danger px-3 py-1.5 text-xs font-bold shrink-0">RESET...</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
             </div>
         </main>
+    </div>
+
+    <!-- Security Authentication Gate Screen -->
+    <div id="auth-gate" class="fixed inset-0 bg-[#0d0e0d]/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-[var(--chassis-main)] border-2 border-white/50 border-b-4 border-r-4 border-[var(--chassis-dark)] p-6 rounded-2xl shadow-2xl max-w-sm w-full relative">
+            <div class="flex justify-between items-center mb-4 border-b border-[var(--chassis-dark)] pb-2">
+                <div>
+                    <h2 class="font-bold text-base text-gray-800 tracking-wider">HOLLOW CONTROL</h2>
+                    <p class="hw-label text-[0.55rem] text-gray-500">Security Gate // Passcode Required</p>
+                </div>
+                <div class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" title="Awaiting Authentication"></div>
+            </div>
+            <form id="form-auth" class="space-y-4">
+                <div>
+                    <label for="auth-pin" class="hw-label text-[0.6rem] block mb-1">Enter Master PIN / Password</label>
+                    <input type="password" id="auth-pin" required autocomplete="current-password" placeholder="••••" autofocus maxlength="32" class="input-tactile text-center text-xl tracking-widest font-mono h-12 w-full">
+                </div>
+                <div id="auth-error" class="hidden text-xs font-mono text-red-600 bg-red-100 p-2 rounded border border-red-300 text-center"></div>
+                <button type="submit" id="btn-auth-submit" class="btn-tactile btn-tactile-primary w-full py-3 text-xs font-bold tracking-wider uppercase">UNLOCK DASHBOARD</button>
+                <div class="flex justify-between items-center text-[0.55rem] font-mono text-gray-500 pt-1">
+                    <span>Default PIN: 1024</span>
+                    <span>Env: HOLLOW_PIN</span>
+                </div>
+            </form>
+        </div>
     </div>
 
     <div id="toast-container" class="fixed bottom-4 right-4 bg-[var(--screen-bezel)] text-[var(--screen-text)] p-3 rounded-lg border border-[#333] shadow-xl flex items-center gap-4 z-50">
@@ -535,6 +618,19 @@
             } catch (_) {}
         }
 
+        // ── Auth Helpers ───────────────────────────────────────────────────────────
+        function getAuthToken() {
+            return sessionStorage.getItem('hollow_token');
+        }
+
+        function setAuthToken(token) {
+            if (token) {
+                sessionStorage.setItem('hollow_token', token);
+            } else {
+                sessionStorage.removeItem('hollow_token');
+            }
+        }
+
         // ── API Helpers ────────────────────────────────────────────────────────────
         let lastSyncedAt    = null;
         let syncStatusTimer = null;
@@ -542,10 +638,22 @@
         async function apiFetch(path, options = {}, baseOverride = null) {
             const base = baseOverride || getApiBase();
             const url = base + path;
+            const token = getAuthToken();
+            const headers = {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                ...(options.headers || {}),
+            };
             const res = await fetch(url, {
-                headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
                 ...options,
+                headers,
             });
+            if (res.status === 401 && !path.startsWith('/auth/')) {
+                setAuthToken(null);
+                const gate = document.getElementById('auth-gate');
+                if (gate) gate.classList.remove('hidden');
+                throw new Error('Unauthorized');
+            }
             if (res.status === 204) return null;
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
@@ -589,12 +697,27 @@
             const updateLabel = () => {
                 const secs = Math.round((Date.now() - lastSyncedAt) / 1000);
                 let label;
-                if (secs < 5)          label = 'synced just now';
-                else if (secs < 60)    label = `synced ${secs}s ago`;
-                else if (secs < 3600)  label = `synced ${Math.floor(secs/60)}m ago`;
-                else                   label = 'sync stale';
+                let persistentLabel;
+                if (secs < 5) {
+                    label = 'synced just now';
+                    persistentLabel = 'Last synced just now';
+                } else if (secs < 60) {
+                    label = `synced ${secs}s ago`;
+                    persistentLabel = `Last synced ${secs}s ago`;
+                } else if (secs < 3600) {
+                    const mins = Math.floor(secs / 60);
+                    label = `synced ${mins}m ago`;
+                    persistentLabel = `Last synced ${mins}m ago`;
+                } else {
+                    label = 'sync stale';
+                    persistentLabel = 'Sync stale (>1h)';
+                }
+
                 const el = document.getElementById('sync-status-label');
                 if (el) el.textContent = label;
+
+                const persistentEl = document.getElementById('persistent-sync-time');
+                if (persistentEl) persistentEl.textContent = persistentLabel;
 
                 // Stale dot: amber if > 5 min without sync
                 if (secs > 300) setSyncIndicator('stale');
@@ -628,6 +751,7 @@
             snooze_minutes:    15,
             sync_interval_sec: 30,
             time_format:       '12',
+            timezone:          'UTC',
         };
 
         let currentUrgency      = 0;
@@ -657,8 +781,83 @@
             toastAction:     document.getElementById('toast-action'),
         };
 
-        // ── Init ──────────────────────────────────────────────────────────────────
-        async function init() {
+        // ── Auth Handling & Initialization ────────────────────────────────────────
+        let appInitialized = false;
+
+        async function checkAuth() {
+            const token = getAuthToken();
+            const gate = document.getElementById('auth-gate');
+            if (!token) {
+                if (gate) gate.classList.remove('hidden');
+                return false;
+            }
+            try {
+                await apiFetch('/auth/verify');
+                if (gate) gate.classList.add('hidden');
+                return true;
+            } catch (err) {
+                setAuthToken(null);
+                if (gate) gate.classList.remove('hidden');
+                return false;
+            }
+        }
+
+        function setupAuthHandlers() {
+            const formAuth = document.getElementById('form-auth');
+            if (formAuth) {
+                formAuth.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const pinInput  = document.getElementById('auth-pin');
+                    const errEl     = document.getElementById('auth-error');
+                    const submitBtn = document.getElementById('btn-auth-submit');
+                    const pin       = pinInput.value.trim();
+                    if (!pin) return;
+
+                    if (errEl) errEl.classList.add('hidden');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.textContent = 'VERIFYING...';
+                    }
+
+                    try {
+                        const res = await apiFetch('/auth/login', {
+                            method: 'POST',
+                            body:   JSON.stringify({ pin }),
+                        });
+                        if (res && res.token) {
+                            setAuthToken(res.token);
+                            pinInput.value = '';
+                            const gate = document.getElementById('auth-gate');
+                            if (gate) gate.classList.add('hidden');
+                            await startDashboard();
+                        }
+                    } catch (err) {
+                        if (errEl) {
+                            errEl.textContent = err.message || 'Incorrect PIN / Password';
+                            errEl.classList.remove('hidden');
+                        }
+                    } finally {
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'UNLOCK DASHBOARD';
+                        }
+                    }
+                });
+            }
+
+            const lockBtn = document.getElementById('btn-lock-session');
+            if (lockBtn) {
+                lockBtn.addEventListener('click', () => {
+                    setAuthToken(null);
+                    location.reload();
+                });
+            }
+        }
+
+        async function startDashboard() {
+            if (appInitialized) return;
+            appInitialized = true;
+
             // Restore backend URL from localStorage into admin input
             const savedUrl = localStorage.getItem('dc_backend_url');
             if (savedUrl) {
@@ -691,6 +890,14 @@
 
             // Replay any pending queued mutations
             processRetryQueue();
+        }
+
+        async function init() {
+            setupAuthHandlers();
+            const authed = await checkAuth();
+            if (authed) {
+                await startDashboard();
+            }
         }
 
         // ── Auto-sync (restartable on interval setting change) ─────────────────────
@@ -728,11 +935,25 @@
         }
 
         function setSyncIndicator(state) {
-            const dot = document.getElementById('sync-dot');
-            if (!dot) return;
             const colours = { online: '#22c55e', offline: '#ef4444', stale: '#f59e0b' };
-            dot.style.backgroundColor = colours[state] || '#9ca3af';
-            dot.title = { online: 'API connected', offline: 'API offline', stale: 'Sync stale (>5 min)' }[state] || state;
+            const statusColor = colours[state] || '#9ca3af';
+
+            const dot = document.getElementById('sync-dot');
+            if (dot) {
+                dot.style.backgroundColor = statusColor;
+                dot.title = { online: 'API connected', offline: 'API offline', stale: 'Sync stale (>5 min)' }[state] || state;
+            }
+
+            const headerDot = document.getElementById('device-status-dot');
+            if (headerDot) {
+                headerDot.style.backgroundColor = statusColor;
+            }
+
+            const headerText = document.getElementById('device-status-text');
+            if (headerText) {
+                headerText.textContent = state === 'online' ? 'ONLINE' : (state === 'offline' ? 'OFFLINE' : 'STALE');
+                headerText.className = `font-bold ${state === 'online' ? 'text-green-600' : (state === 'offline' ? 'text-red-600' : 'text-amber-600')}`;
+            }
         }
 
         // ── UI Setup ──────────────────────────────────────────────────────────────
@@ -843,8 +1064,9 @@
             }
 
             // Settings Autosave — debounced 500ms + restarts auto-sync if interval changes
-            document.getElementById('form-settings').addEventListener('input', (e) => {
+            const saveSettingsHandler = (e) => {
                 const { name, value, type, checked } = e.target;
+                if (!name) return;
                 const prevInterval = settings.sync_interval_sec;
 
                 if (type === 'checkbox') settings[name] = checked;
@@ -853,6 +1075,7 @@
 
                 applySettingsToSimulator();
                 renderTasks();
+                hardwareLoop();
 
                 if (name === 'sync_interval_sec' && settings.sync_interval_sec !== prevInterval) {
                     startAutoSync();
@@ -873,14 +1096,18 @@
                         showToast('⚠ Settings saved locally');
                     }
                 }, 500);
-            });
+            };
+
+            const formSettings = document.getElementById('form-settings');
+            formSettings.addEventListener('input', saveSettingsHandler);
+            formSettings.addEventListener('change', saveSettingsHandler);
 
             // Settings Reset to Defaults
             const resetBtn = document.getElementById('btn-settings-reset');
             if (resetBtn) {
                 resetBtn.addEventListener('click', async () => {
                     if (!confirm('Reset all settings to factory defaults?')) return;
-                    const defaults = { chime_enabled: true, led_brightness: 80, snooze_minutes: 15, sync_interval_sec: 30, time_format: '12' };
+                    const defaults = { chime_enabled: true, led_brightness: 80, snooze_minutes: 15, sync_interval_sec: 30, time_format: '12', timezone: 'UTC' };
                     try {
                         const updated = await apiFetch('/settings', { method: 'PATCH', body: JSON.stringify(defaults) });
                         settings = { ...settings, ...updated };
@@ -929,13 +1156,14 @@
             const forceSyncBtn = document.getElementById('btn-force-sync');
             if (forceSyncBtn) {
                 forceSyncBtn.addEventListener('click', async () => {
+                    if (!confirm('Force Cloud Sync? This will overwrite local directives and telemetry with the remote cloud state.')) return;
                     forceSyncBtn.disabled = true;
                     forceSyncBtn.textContent = 'Syncing...';
                     await loadData();
                     await processRetryQueue();
                     renderTasks(); updateSettingsUI(); hardwareLoop();
                     forceSyncBtn.disabled = false;
-                    forceSyncBtn.textContent = 'Force Cloud Sync';
+                    forceSyncBtn.textContent = 'Sync Now';
                     showToast('Sync complete.');
                 });
             }
@@ -989,23 +1217,29 @@
                 showToast(`♦ Credentials for "${ssid}" saved. Device reconnect sequence triggered.`);
             });
 
-            // Factory Reset
-            document.getElementById('btn-factory-reset').addEventListener('click', async () => {
-                if (confirm('WARNING: This will erase all directives and reset settings. This cannot be undone.')) {
+            // Factory Reset with typed "RESET" confirmation
+            const factoryResetBtn = document.getElementById('btn-factory-reset');
+            if (factoryResetBtn) {
+                factoryResetBtn.addEventListener('click', async () => {
+                    const confirmation = prompt('DANGER: This action will erase all directives, settings, and local credentials.\n\nTo confirm factory wipe, please type "RESET" below:');
+                    if (confirmation !== 'RESET') {
+                        if (confirmation !== null) showToast('Reset cancelled.');
+                        return;
+                    }
                     try {
                         const snapshot = [...tasks];
                         for (const t of snapshot) await apiFetch(`/tasks/${t.id}`, { method: 'DELETE' }).catch(() => {});
                         await apiFetch('/settings', {
                             method: 'PATCH',
-                            body:   JSON.stringify({ chime_enabled: true, led_brightness: 80, snooze_minutes: 15, sync_interval_sec: 30, time_format: '12' }),
+                            body:   JSON.stringify({ chime_enabled: true, led_brightness: 80, snooze_minutes: 15, sync_interval_sec: 30, time_format: '12', timezone: 'UTC' }),
                         }).catch(() => {});
                     } catch (_) {}
                     localStorage.clear();
                     tasks = [];
                     showToast('Device wiped. Reloading...');
                     setTimeout(() => location.reload(), 1500);
-                }
-            });
+                });
+            }
 
             // Keyboard shortcuts
             document.addEventListener('keydown', (e) => {
@@ -1061,7 +1295,7 @@
             document.title = overdue > 0 ? `(${overdue}) Hollow` : 'Hollow';
 
             if (sortedTasks.length === 0) {
-                els.taskList.innerHTML = '<li class="text-sm font-mono text-gray-500 p-4 text-center">NO_DATA</li>';
+                els.taskList.innerHTML = '<li class="text-sm font-mono text-gray-500 p-4 text-center">NO TASKS · All clear.</li>';
                 return;
             }
 
@@ -1115,6 +1349,7 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-1 ml-2">
+                        <button onclick="startEdit('${task.id}')" class="flex-shrink-0 btn-tactile px-1.5 py-1 text-xs text-blue-600 hover:text-blue-800" title="Edit directive" aria-label="Edit directive">✏️</button>
                         ${snoozeButton}
                         <button onclick="deleteTask('${task.id}')" class="flex-shrink-0 btn-tactile px-2 py-1 text-xs text-red-600 hover:text-red-800" aria-label="Delete directive">✕</button>
                     </div>
@@ -1129,6 +1364,8 @@
             document.getElementById('setting-brightness').value = settings.led_brightness;
             document.getElementById('setting-snooze').value     = settings.snooze_minutes;
             document.getElementById('setting-format').value     = settings.time_format;
+            const tzSelect = document.getElementById('setting-timezone');
+            if (tzSelect && settings.timezone) tzSelect.value   = settings.timezone;
             const syncField = document.querySelector('[name="sync_interval_sec"]');
             if (syncField) syncField.value = settings.sync_interval_sec;
             applySettingsToSimulator();
@@ -1371,7 +1608,13 @@
 
         function hardwareLoop() {
             const now = new Date();
-            els.simClock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: settings.time_format === '12' });
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: settings.time_format === '12' };
+            if (settings.timezone) {
+                try {
+                    timeOptions.timeZone = settings.timezone;
+                } catch (_) {}
+            }
+            els.simClock.textContent = now.toLocaleTimeString([], timeOptions);
             
             // If manual override is active, apply its styles and skip auto-calculation
             if (manualStateOverride) {

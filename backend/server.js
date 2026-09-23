@@ -35,6 +35,7 @@ const cors         = require('cors');
 const rateLimit    = require('express-rate-limit');
 const path         = require('path');
 const db           = require('./db');
+const authRoutes     = require('./routes/auth');
 const taskRoutes     = require('./routes/tasks');
 const settingsRoutes = require('./routes/settings');
 
@@ -177,6 +178,7 @@ app.post('/api/import', (req, res) => {
 
 // ── API Routes ────────────────────────────────────────────────────────────────
 
+app.use('/api/auth',     authRoutes);
 app.use('/api/tasks',    taskRoutes);
 app.use('/api/settings', settingsRoutes);
 

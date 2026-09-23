@@ -24,7 +24,8 @@
     "led_brightness": 70,
     "snooze_minutes": 15,
     "sync_interval_sec": 30,
-    "time_format": "24"
+    "time_format": "24",
+    "timezone": "America/New_York"
   },
   "logs": [
     {
@@ -62,6 +63,180 @@
       "level": "SYS",
       "message": "Data exported",
       "detail": "hollow-backup-2026-09-23.json"
+    },
+    {
+      "ts": "2026-09-23T18:27:49.325Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:27:49.334Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:28:49.312Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:28:49.320Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:29:49.336Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:29:49.340Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:30:49.326Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:30:49.334Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:31:49.309Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:31:49.313Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:32:49.387Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:32:49.395Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:33:49.331Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:33:49.336Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:34:49.330Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:34:49.340Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:35:49.310Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:35:49.319Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:36:49.320Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:36:49.329Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:37:39.249Z",
+      "level": "SYS",
+      "message": "Hollow API initialized",
+      "detail": "port=4000"
+    },
+    {
+      "ts": "2026-09-23T18:37:48.745Z",
+      "level": "API",
+      "message": "GET /api/health",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:37:48.773Z",
+      "level": "API",
+      "message": "POST /api/auth/login",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:37:48.779Z",
+      "level": "API",
+      "message": "POST /api/auth/login",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:37:48.784Z",
+      "level": "API",
+      "message": "GET /api/auth/verify",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:37:48.789Z",
+      "level": "API",
+      "message": "PATCH /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:37:48.810Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:37:49.379Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-23T18:37:49.384Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
     }
   ]
 }
