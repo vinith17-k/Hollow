@@ -900,12 +900,21 @@
                 </div>
                 <div id="auth-error" class="hidden text-xs font-mono text-red-600 bg-red-100 p-2 rounded border border-red-300 text-center"></div>
                 <button type="submit" id="btn-auth-submit" class="btn-tactile btn-tactile-primary w-full py-3 text-xs font-bold tracking-wider uppercase">UNLOCK DASHBOARD</button>
+                <button type="button" id="btn-quick-unlock" class="btn-tactile w-full py-1.5 text-[0.65rem] font-bold bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100 flex items-center justify-center gap-1.5">
+                    ⚡ QUICK UNLOCK (PIN: 1024)
+                </button>
+                <div class="flex gap-2 pt-1">
+                    <button type="button" id="btn-gate-open-guide" class="btn-tactile flex-1 py-1 text-[0.6rem] bg-white text-gray-700 hover:text-black font-bold">📖 Starter Guide</button>
+                    <button type="button" id="btn-gate-start-demo" class="btn-tactile flex-1 py-1 text-[0.6rem] bg-indigo-50 text-indigo-900 border-indigo-300 hover:bg-indigo-100 font-bold">✨ Try Live Demo</button>
+                </div>
                 <div class="flex justify-between items-center text-[0.55rem] font-mono text-gray-500 pt-1">
                     <span>Default PIN: 1024</span>
                     <span>Env: HOLLOW_PIN</span>
                 </div>
             </form>
         </div>
+    </div>
+
     <!-- Mascot Care & Cosmetics Modal -->
     <div id="cosmetics-modal" class="hidden fixed inset-0 bg-[#0d0e0d]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-[var(--chassis-main)] border-2 border-white/50 border-b-4 border-r-4 border-[var(--chassis-dark)] p-5 rounded-2xl shadow-2xl max-w-md w-full relative">
@@ -945,7 +954,7 @@
     </div>
 
     <!-- Starter Guide & Tutorial Modal -->
-    <div id="guide-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+    <div id="guide-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[70] flex items-center justify-center p-3 hidden">
         <div class="bg-[var(--chassis-color)] border-2 border-[var(--chassis-dark)] rounded-xl shadow-2xl w-full max-w-xl p-5 flex flex-col max-h-[90vh] overflow-hidden">
             <!-- Modal Header -->
             <div class="flex items-center justify-between pb-3 border-b border-[var(--chassis-dark)] mb-3">
@@ -2638,6 +2647,24 @@
 
         function startDemo() {
             if (isDemoActive) return;
+
+            // Ensure UI is initialized even if accessed before PIN unlock
+            if (!appInitialized) {
+                setupTabs();
+                setupEventListeners();
+                setupEncoder();
+                setupFocusHandlers();
+                setupSerialHandlers();
+                setupCalendarHandlers();
+                startMicroAnimations();
+                renderXPBar();
+                renderPomodoroDisplay();
+                setInterval(hardwareLoop, 1000);
+            }
+
+            const gate = document.getElementById('auth-gate');
+            if (gate) gate.classList.add('hidden');
+
             isDemoActive = true;
             demoStepIndex = 0;
             demoAutoPlaying = false;
@@ -2691,6 +2718,11 @@
             resetPomodoro();
             applySettingsToSimulator();
             hardwareLoop();
+
+            if (!getAuthToken()) {
+                const gate = document.getElementById('auth-gate');
+                if (gate) gate.classList.remove('hidden');
+            }
 
             showToast('✓ Demo exited. All original directives and settings are untouched.');
         }
@@ -2899,6 +2931,23 @@
                     location.reload();
                 });
             }
+
+            document.getElementById('btn-quick-unlock')?.addEventListener('click', async () => {
+                const pinInput = document.getElementById('auth-pin');
+                if (pinInput) pinInput.value = '1024';
+                const formAuth = document.getElementById('form-auth');
+                if (formAuth) {
+                    formAuth.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }
+            });
+
+            document.getElementById('btn-gate-open-guide')?.addEventListener('click', () => {
+                openGuide(0);
+            });
+
+            document.getElementById('btn-gate-start-demo')?.addEventListener('click', () => {
+                startDemo();
+            });
         }
 
         async function startDashboard() {
@@ -2955,6 +3004,8 @@
         async function init() {
             registerServiceWorker();
             setupAuthHandlers();
+            setupGuideHandlers();
+            setupDemoHandlers();
             const authed = await checkAuth();
             if (authed) {
                 await startDashboard();

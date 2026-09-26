@@ -40,162 +40,6 @@
   },
   "logs": [
     {
-      "ts": "2026-09-26T18:13:08.252Z",
-      "level": "API",
-      "message": "GET /sw.js",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:13:08.298Z",
-      "level": "API",
-      "message": "GET /",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:13:08.333Z",
-      "level": "API",
-      "message": "GET /api/tasks",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:13:08.338Z",
-      "level": "API",
-      "message": "GET /api/settings",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:13:12.709Z",
-      "level": "API",
-      "message": "GET /api/events",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:13:21.281Z",
-      "level": "API",
-      "message": "POST /api/tasks",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:13:21.293Z",
-      "level": "API",
-      "message": "PATCH /api/tasks/9e2d3af9-0faa-4004-a0c0-ef7f94ff4b16",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:13:21.299Z",
-      "level": "API",
-      "message": "GET /api/settings",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:13:21.304Z",
-      "level": "API",
-      "message": "DELETE /api/tasks/9e2d3af9-0faa-4004-a0c0-ef7f94ff4b16",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:13:24.678Z",
-      "level": "API",
-      "message": "PATCH /api/settings",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:13:28.503Z",
-      "level": "API",
-      "message": "GET /api/calendar/sync",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:13:48.082Z",
-      "level": "API",
-      "message": "GET /api/calendar/sync",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:13:48.122Z",
-      "level": "API",
-      "message": "GET /api/tasks",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:13:48.129Z",
-      "level": "API",
-      "message": "DELETE /api/tasks/70c80f58-c70d-45ac-b168-45e2a4e40d84",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:14:08.323Z",
-      "level": "API",
-      "message": "GET /api/tasks",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:14:08.328Z",
-      "level": "API",
-      "message": "GET /api/settings",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:15:08.328Z",
-      "level": "API",
-      "message": "GET /api/tasks",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:15:08.340Z",
-      "level": "API",
-      "message": "GET /api/settings",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:16:08.309Z",
-      "level": "API",
-      "message": "GET /api/tasks",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:16:08.313Z",
-      "level": "API",
-      "message": "GET /api/settings",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:17:08.327Z",
-      "level": "API",
-      "message": "GET /api/tasks",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:17:08.338Z",
-      "level": "API",
-      "message": "GET /api/settings",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:18:08.311Z",
-      "level": "API",
-      "message": "GET /api/tasks",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:18:08.323Z",
-      "level": "API",
-      "message": "GET /api/settings",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:19:08.316Z",
-      "level": "API",
-      "message": "GET /api/tasks",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-26T18:19:08.329Z",
-      "level": "API",
-      "message": "GET /api/settings",
-      "detail": ""
-    },
-    {
       "ts": "2026-09-26T18:20:08.315Z",
       "level": "API",
       "message": "GET /api/tasks",
@@ -335,6 +179,162 @@
     },
     {
       "ts": "2026-09-26T18:31:08.332Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:32:08.334Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:32:08.340Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:33:08.320Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:33:08.331Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:33:13.826Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:33:13.832Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:33:13.854Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:33:13.860Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:33:40.309Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:33:40.316Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:34:10.310Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:34:10.316Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:35:08.310Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:35:08.317Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:36:08.310Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:36:08.317Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:37:08.315Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:37:08.324Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:37:47.309Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:37:52.956Z",
+      "level": "API",
+      "message": "GET /api/auth/verify",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:38:08.312Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:38:08.319Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:39:08.323Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:39:08.329Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:40:08.326Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-26T18:40:08.330Z",
       "level": "API",
       "message": "GET /api/settings",
       "detail": ""
