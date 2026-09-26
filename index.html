@@ -370,10 +370,28 @@
                         <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <span id="persistent-sync-time">checking sync...</span>
                     </div>
+                    <button id="btn-start-demo" type="button" class="btn-tactile text-[0.6rem] px-2 py-0.5 ml-1 bg-amber-100 text-amber-900 border-amber-400 hover:bg-amber-200 font-bold flex items-center gap-1" title="Start Interactive Feature Demo (Safe & Non-destructive)">✨ DEMO</button>
                     <button id="btn-lock-session" class="btn-tactile text-[0.6rem] px-2 py-0.5 ml-1 text-gray-600 hover:text-red-700" title="Lock Dashboard">🔒 Lock</button>
                 </div>
             </div>
             
+            <!-- Interactive Demo Showcase Control Bar (Hidden when demo inactive) -->
+            <div id="demo-banner" class="hidden bg-gradient-to-r from-gray-900 via-indigo-950 to-gray-900 text-white px-3 py-2 rounded-lg border-2 border-amber-400 shadow-xl mb-3 flex flex-wrap items-center justify-between gap-2 z-20 transition-all">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span class="hw-label text-[0.6rem] bg-amber-400 text-black px-1.5 py-0.5 rounded font-black tracking-widest shrink-0 animate-pulse">SHOWCASE</span>
+                    <div class="min-w-0">
+                        <span id="demo-step-title" class="font-bold text-xs text-amber-200 block truncate">Step 1: Mascot Awakening</span>
+                        <span id="demo-step-desc" class="text-[0.65rem] text-gray-300 font-mono block truncate">Exploring idle state, wing flaps, and natural twitches...</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <button id="btn-demo-prev" type="button" class="btn-tactile px-2 py-1 text-[0.65rem] bg-gray-800 text-white border-gray-600 hover:bg-gray-700">◀ PREV</button>
+                    <button id="btn-demo-next" type="button" class="btn-tactile btn-tactile-primary px-3 py-1 text-[0.65rem] font-bold">NEXT ▶</button>
+                    <button id="btn-demo-auto" type="button" class="btn-tactile px-2 py-1 text-[0.65rem] bg-indigo-700 text-white border-indigo-500 hover:bg-indigo-600">AUTO-PLAY ⏵</button>
+                    <button id="btn-demo-exit" type="button" class="btn-tactile btn-tactile-danger px-2.5 py-1 text-[0.65rem] font-bold" title="Exit Demo & Restore Original Data">✕ EXIT</button>
+                </div>
+            </div>
+
             <!-- Mascot Evolution & XP Gamification Bar -->
             <div class="flex items-center gap-3 bg-white px-3 py-1.5 rounded border border-[var(--chassis-dark)] shadow-sm mb-3">
                 <div class="flex-shrink-0 text-center">
@@ -2131,6 +2149,299 @@
             }
         }
 
+        // ── Feature: Interactive Non-Destructive Demo Tour Showcase ──────────────
+        let isDemoActive      = false;
+        let demoSnapshot      = null;
+        let demoStepIndex     = 0;
+        let demoAutoTimer     = null;
+        let demoAutoPlaying   = false;
+
+        const DEMO_STEPS = [
+            {
+                title: 'Step 1/8: Mascot Awakening & Micro-Animations',
+                desc: 'Bat Pup (Level 1) in calm state. Watch for automatic ear-twitches, wing-flutters, and blinks.',
+                run: () => {
+                    const tasksTab = document.getElementById('tab-tasks');
+                    if (tasksTab) tasksTab.click();
+
+                    manualStateOverride = 'idle';
+                    settings.xp = 0;
+                    settings.level = 1;
+                    settings.level_name = 'Bat Pup';
+                    settings.cosmetic_unlocks = ['classic_cloak'];
+                    tasks = [
+                        { id: 'demo_1', title: 'Prepare daily desk focus sprint', due_time: new Date(Date.now() + 3600000).toISOString(), done: false, source: 'demo' }
+                    ];
+
+                    renderTasks();
+                    renderXPBar();
+                    hardwareLoop();
+                    showHudPopup('BAT PUP AWAKENED');
+                    playChimeAudio();
+
+                    setTimeout(() => {
+                        els.mascotContainer.classList.add('micro-ear-twitch');
+                        setTimeout(() => els.mascotContainer.classList.remove('micro-ear-twitch'), 400);
+                    }, 500);
+                }
+            },
+            {
+                title: 'Step 2/8: Deadline Urgency & LED Alert',
+                desc: 'Simulating an imminent overdue deadline. Mascot enters frantic urgent state with flashing red alerts.',
+                run: () => {
+                    manualStateOverride = 'urgent';
+                    tasks = [
+                        { id: 'demo_urgent', title: 'CRITICAL: Quantum Firmware Patch', due_time: new Date(Date.now() - 60000).toISOString(), done: false, source: 'demo' }
+                    ];
+
+                    renderTasks();
+                    hardwareLoop();
+
+                    if (els.hwLed) {
+                        els.hwLed.style.backgroundColor = 'rgba(239,68,68,1)';
+                        els.hwLed.style.boxShadow = '0 0 16px rgba(239,68,68,1), inset 0 2px 5px rgba(0,0,0,0.5)';
+                        setTimeout(() => {
+                            if (els.hwLed) { els.hwLed.style.backgroundColor = ''; els.hwLed.style.boxShadow = ''; }
+                        }, 1800);
+                    }
+
+                    showHudPopup('⚠ URGENT DIRECTIVE!');
+                    playChimeAudio();
+                }
+            },
+            {
+                title: 'Step 3/8: Rotary Knob Interaction & Resolution',
+                desc: 'Simulating hardware knob rotation and physical click to mark the critical directive complete.',
+                run: () => {
+                    if (els.encoderNotch) {
+                        els.encoderNotch.style.transform = 'translateX(-50%) rotate(120deg)';
+                    }
+                    if (tasks.length) {
+                        tasks[0].done = true;
+                    }
+                    manualStateOverride = null;
+                    renderTasks();
+                    hardwareLoop();
+                    showHudPopup('DONE: QUANTUM PATCH');
+                    playChimeAudio();
+                }
+            },
+            {
+                title: 'Step 4/8: Mascot Evolution — Level Up!',
+                desc: 'XP explodes (+150 XP)! Bat evolves into Night Scout (Lv 2) and unlocks "Silver Fangs" attire.',
+                run: () => {
+                    settings.xp = 175;
+                    settings.level = 2;
+                    settings.level_name = 'Night Scout';
+                    settings.total_tasks_completed = 5;
+                    settings.cosmetic_unlocks = ['classic_cloak', 'silver_fangs'];
+
+                    const xpBar = document.getElementById('xp-bar-fill');
+                    if (xpBar) xpBar.classList.add('level-up-flash');
+                    setTimeout(() => xpBar?.classList.remove('level-up-flash'), 1000);
+
+                    renderXPBar();
+                    hardwareLoop();
+                    showHudPopup('LEVEL UP! NIGHT SCOUT');
+                    playChimeAudio();
+                    showToast('🦇 EVO COMPLETE: Night Scout (Level 2) Unlocked!');
+                }
+            },
+            {
+                title: 'Step 5/8: Tactile Pomodoro Focus Sprint',
+                desc: 'Switching to Focus bay. Starting deep-work sprint countdown with purple indigo focus aura.',
+                run: () => {
+                    const focusTab = document.getElementById('tab-focus');
+                    if (focusTab) focusTab.click();
+
+                    pomodoroSecondsLeft = 24 * 60 + 58;
+                    pomodoroDuration = 25 * 60;
+                    pomodoroSessionsTodayCount = 1;
+                    renderPomodoroDisplay();
+
+                    manualStateOverride = 'working';
+                    hardwareLoop();
+                    showHudPopup('FOCUS SPRINT ACTIVE');
+                    playChimeAudio();
+                }
+            },
+            {
+                title: 'Step 6/8: Schedule-Aware Quiet Hours',
+                desc: 'Overnight quiet window activates (11:00 PM – 7:30 AM). Alerts & chimes are suppressed silently.',
+                run: () => {
+                    const settingsTab = document.getElementById('tab-settings');
+                    if (settingsTab) settingsTab.click();
+
+                    const quietBadge = document.getElementById('sim-quiet-badge');
+                    if (quietBadge) quietBadge.classList.remove('hidden');
+
+                    showHudPopup('🌙 QUIET HOURS ACTIVE');
+                    showToast('🌙 Quiet Hours active: Sound suppressed, LED dimmed.');
+                }
+            },
+            {
+                title: 'Step 7/8: Calendar Sync & 7-Day Velocity Analytics',
+                desc: 'Simulating Google Calendar import and 7-day velocity analytics chart with 100% velocity.',
+                run: () => {
+                    const analyticsTab = document.getElementById('tab-analytics');
+                    if (analyticsTab) analyticsTab.click();
+
+                    tasks = [
+                        { id: 'cal_1', title: 'Team Sync (Google Cal)', due_time: new Date().toISOString(), done: true, source: 'ical' },
+                        { id: 'cal_2', title: 'Review Hardware BOM', due_time: new Date().toISOString(), done: true, source: 'ical' },
+                        { id: 'cal_3', title: 'Design SMT Stencil', due_time: new Date().toISOString(), done: true, source: 'web' },
+                    ];
+
+                    renderAnalytics();
+                    showHudPopup('METRICS & CALENDAR SYNC');
+                    showToast('📅 3 Calendar directives imported from .ics feed');
+                }
+            },
+            {
+                title: 'Step 8/8: USB-C Web Serial & Sovereign Evolution (Apex)',
+                desc: 'Switching to Web Serial terminal with telemetry packets. Bat reaches Vampire Sovereign (Lv 8)!',
+                run: () => {
+                    const serialTab = document.getElementById('tab-serial');
+                    if (serialTab) serialTab.click();
+
+                    logSerial('CONNECT: ESP32-S3 @ COM4 (115200 baud)', 'sys');
+                    logSerial('<TELEMETRY> FreeHeap: 242KB | Uptime: 4d 12h | CPU: 240MHz', 'info');
+                    logSerial('CMD_IN > MASCOT_SET: SOVEREIGN_ASCEND', 'send');
+                    logSerial('ACK: ASCENSION_CONFIRMED', 'info');
+
+                    settings.xp = 8888;
+                    settings.level = 8;
+                    settings.level_name = 'Vampire Sovereign';
+                    settings.cosmetic_unlocks = ['classic_cloak', 'silver_fangs', 'obsidian_wings', 'void_crown', 'golden_aura'];
+
+                    renderXPBar();
+                    showHudPopup('APEX SOVEREIGN REACHED!');
+                    playChimeAudio();
+                    showToast('👑 Vampire Sovereign (Level 8) Reached! Golden Aura Unlocked.');
+                }
+            }
+        ];
+
+        function renderDemoStep() {
+            const step = DEMO_STEPS[demoStepIndex];
+            if (!step) return;
+
+            const titleEl = document.getElementById('demo-step-title');
+            const descEl  = document.getElementById('demo-step-desc');
+            const prevBtn = document.getElementById('btn-demo-prev');
+            const nextBtn = document.getElementById('btn-demo-next');
+
+            if (titleEl) titleEl.textContent = step.title;
+            if (descEl) descEl.textContent = step.desc;
+            if (prevBtn) prevBtn.disabled = (demoStepIndex === 0);
+            if (nextBtn) nextBtn.textContent = (demoStepIndex === DEMO_STEPS.length - 1) ? 'REPLAY ↺' : 'NEXT ▶';
+
+            step.run();
+        }
+
+        function startDemo() {
+            if (isDemoActive) return;
+            isDemoActive = true;
+            demoStepIndex = 0;
+            demoAutoPlaying = false;
+
+            // Capture non-destructive snapshot of user's active state
+            demoSnapshot = {
+                tasks: JSON.parse(JSON.stringify(tasks)),
+                settings: JSON.parse(JSON.stringify(settings)),
+                manualStateOverride,
+                isMuted,
+                activeTab: document.querySelector('[role="tab"].active')?.getAttribute('aria-controls') || 'panel-tasks'
+            };
+
+            const banner = document.getElementById('demo-banner');
+            if (banner) banner.classList.remove('hidden');
+
+            renderDemoStep();
+            showToast('✨ Interactive Demo started! Step through or click Auto-Play.');
+        }
+
+        function exitDemo() {
+            if (!isDemoActive) return;
+            if (demoAutoTimer) {
+                clearInterval(demoAutoTimer);
+                demoAutoTimer = null;
+            }
+            demoAutoPlaying = false;
+
+            // Restore original untouched state
+            if (demoSnapshot) {
+                tasks               = demoSnapshot.tasks;
+                settings            = demoSnapshot.settings;
+                manualStateOverride = demoSnapshot.manualStateOverride;
+                isMuted             = demoSnapshot.isMuted;
+                const origTab = document.querySelector(`[aria-controls="${demoSnapshot.activeTab}"]`);
+                if (origTab) origTab.click();
+            }
+
+            isDemoActive = false;
+            demoSnapshot = null;
+
+            const banner = document.getElementById('demo-banner');
+            if (banner) banner.classList.add('hidden');
+
+            const quietBadge = document.getElementById('sim-quiet-badge');
+            if (quietBadge && !settings.quiet_hours_enabled) quietBadge.classList.add('hidden');
+
+            renderTasks();
+            updateSettingsUI();
+            renderXPBar();
+            resetPomodoro();
+            applySettingsToSimulator();
+            hardwareLoop();
+
+            showToast('✓ Demo exited. All original directives and settings are untouched.');
+        }
+
+        function toggleDemoAutoPlay() {
+            const autoBtn = document.getElementById('btn-demo-auto');
+            if (demoAutoPlaying) {
+                clearInterval(demoAutoTimer);
+                demoAutoTimer = null;
+                demoAutoPlaying = false;
+                if (autoBtn) {
+                    autoBtn.textContent = 'AUTO-PLAY ⏵';
+                    autoBtn.className = 'btn-tactile px-2 py-1 text-[0.65rem] bg-indigo-700 text-white border-indigo-500 hover:bg-indigo-600';
+                }
+            } else {
+                demoAutoPlaying = true;
+                if (autoBtn) {
+                    autoBtn.textContent = 'PAUSE AUTO ⏸';
+                    autoBtn.className = 'btn-tactile px-2 py-1 text-[0.65rem] bg-amber-600 text-white border-amber-500 hover:bg-amber-500 animate-pulse';
+                }
+                demoAutoTimer = setInterval(() => {
+                    if (demoStepIndex < DEMO_STEPS.length - 1) {
+                        demoStepIndex++;
+                        renderDemoStep();
+                    } else {
+                        demoStepIndex = 0;
+                        renderDemoStep();
+                    }
+                }, 4000);
+            }
+        }
+
+        function setupDemoHandlers() {
+            document.getElementById('btn-start-demo')?.addEventListener('click', startDemo);
+            document.getElementById('btn-demo-exit')?.addEventListener('click', exitDemo);
+            document.getElementById('btn-demo-next')?.addEventListener('click', () => {
+                demoStepIndex = (demoStepIndex + 1) % DEMO_STEPS.length;
+                renderDemoStep();
+            });
+            document.getElementById('btn-demo-prev')?.addEventListener('click', () => {
+                if (demoStepIndex > 0) {
+                    demoStepIndex--;
+                    renderDemoStep();
+                }
+            });
+            document.getElementById('btn-demo-auto')?.addEventListener('click', toggleDemoAutoPlay);
+        }
+
         // ── Auth Handling & Initialization ────────────────────────────────────────
         let appInitialized = false;
 
@@ -2226,6 +2537,7 @@
             setupFocusHandlers();
             setupSerialHandlers();
             setupCalendarHandlers();
+            setupDemoHandlers();
             startMicroAnimations();
             renderTasks();
             updateSettingsUI();
