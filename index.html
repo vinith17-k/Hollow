@@ -241,6 +241,85 @@
 
         /* Serial Terminal */
         #serial-log p { font-family: 'Space Mono', monospace; line-height: 1.35; word-break: break-all; }
+
+        /* ── Field Manual / Starter Guide Styling ── */
+        .guide-glass-card {
+            background: linear-gradient(145deg, rgba(28, 30, 28, 0.95), rgba(18, 20, 18, 0.98));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 24px rgba(0,0,0,0.5);
+            transition: all 0.2s ease;
+        }
+        .guide-glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.22);
+            transform: translateY(-1px);
+        }
+        .guide-keycap {
+            background: #252826;
+            border: 1px solid #4a4d4b;
+            border-bottom: 3px solid #141615;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            color: #e5e7eb;
+        }
+        .guide-step-tick {
+            height: 5px;
+            flex: 1;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .guide-step-tick.active {
+            background: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.8);
+        }
+        .guide-step-tick.passed {
+            background: #10b981;
+            box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+        }
+        .guide-interactive-knob {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #424644, #1c1e1d);
+            border: 3px solid #5a5e5b;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.7), inset 0 2px 4px rgba(255,255,255,0.25);
+            cursor: pointer;
+            transition: transform 0.1s ease, filter 0.15s ease;
+            position: relative;
+            user-select: none;
+        }
+        .guide-interactive-knob:active {
+            transform: scale(0.95);
+            filter: brightness(1.25);
+        }
+        .guide-knob-notch {
+            position: absolute;
+            top: 7px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 16px;
+            background: #f59e0b;
+            border-radius: 2.5px;
+            box-shadow: 0 0 8px #f59e0b;
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .guide-state-chip {
+            background: #1e201f;
+            border: 1px solid #333634;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .guide-state-chip:hover, .guide-state-chip.active {
+            background: #2a2e2c;
+            border-color: #f59e0b;
+            color: #fff;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-2 sm:p-6 lg:p-8">
@@ -953,298 +1032,404 @@
         </div>
     </div>
 
-    <!-- Starter Guide & Tutorial Modal -->
-    <div id="guide-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[70] flex items-center justify-center p-3 hidden">
-        <div class="bg-[var(--chassis-color)] border-2 border-[var(--chassis-dark)] rounded-xl shadow-2xl w-full max-w-xl p-5 flex flex-col max-h-[90vh] overflow-hidden">
-            <!-- Modal Header -->
-            <div class="flex items-center justify-between pb-3 border-b border-[var(--chassis-dark)] mb-3">
-                <div class="flex items-center gap-2">
-                    <span class="hw-label text-[0.6rem] bg-indigo-600 text-white px-2 py-0.5 rounded font-black tracking-widest">FIELD MANUAL</span>
-                    <span id="guide-step-pill" class="hw-label text-[0.6rem] bg-white text-gray-800 border border-gray-300 px-2 py-0.5 rounded font-mono font-bold">STEP 1 OF 6</span>
+    <!-- Starter Guide & Tutorial Modal (Industrial Retro Field Manual) -->
+    <div id="guide-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[70] flex items-center justify-center p-3 sm:p-5 hidden">
+        <div class="bg-[#141514] border-2 border-[#2c2f2d] rounded-2xl shadow-2xl w-full max-w-2xl p-5 sm:p-6 flex flex-col max-h-[92vh] overflow-hidden relative text-gray-200" style="box-shadow: 0 30px 70px -10px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.1);">
+            
+            <!-- Corner Decorative Chassis Rivets -->
+            <div class="absolute top-2.5 left-3 text-[0.65rem] font-mono text-[#3a3d3b] select-none font-bold">+</div>
+            <div class="absolute top-2.5 right-3 text-[0.65rem] font-mono text-[#3a3d3b] select-none font-bold">+</div>
+            <div class="absolute bottom-2.5 left-3 text-[0.65rem] font-mono text-[#3a3d3b] select-none font-bold">+</div>
+            <div class="absolute bottom-2.5 right-3 text-[0.65rem] font-mono text-[#3a3d3b] select-none font-bold">+</div>
+
+            <!-- Top Header Bar -->
+            <div class="flex items-center justify-between pb-3 border-b border-[#252826] mb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#f59e0b]"></div>
+                    <span class="font-mono text-xs font-bold tracking-widest text-amber-300">FIELD MANUAL // DC-01</span>
+                    <span id="guide-step-pill" class="font-mono text-[0.65rem] px-2 py-0.5 rounded bg-black/60 text-gray-300 border border-white/10 font-bold">01 / 06</span>
                 </div>
-                <button type="button" id="btn-close-guide" class="btn-tactile px-2 py-0.5 text-xs text-gray-500 hover:text-black font-bold">✕ CLOSE</button>
+                <button type="button" id="btn-close-guide" class="btn-tactile px-2.5 py-1 text-xs text-gray-400 hover:text-white bg-[#1e201f] border-[#383b39] font-mono font-bold" title="Close Field Manual (Esc)">✕ ESC</button>
             </div>
 
-            <!-- Slide Content Area (Scrollable) -->
-            <div id="guide-slides-container" class="flex-grow overflow-y-auto custom-scroll pr-1 pb-2">
-                <!-- Slide 1: Architecture -->
-                <div class="guide-slide space-y-3" data-slide="0">
-                    <div class="flex items-center gap-2 text-indigo-900">
-                        <span class="text-2xl">🦇</span>
-                        <div>
-                            <h3 class="font-bold text-sm text-gray-900 uppercase tracking-wide">Meet Hollow — Hardware Companion &amp; Digital Twin</h3>
-                            <p class="text-[0.7rem] text-gray-600 font-mono">ESP32-S3 Physical Desk Assistant &amp; Web Controller</p>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-700 leading-relaxed">
-                        Hollow is an industrial desk companion with a physical ESP32-S3 device and an interactive web twin. 
-                        Directives and status sync automatically across the cloud and your local network in real-time.
-                    </p>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm">
-                            <div class="flex items-center gap-1.5 font-bold text-gray-800 text-[0.75rem] mb-1">
-                                <span>📟</span> 1.3" Color IPS Display
-                            </div>
-                            <p class="text-[0.68rem] text-gray-600">Shows current directive countdown, local clock, and dynamic animated bat emotions.</p>
-                        </div>
-                        <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm">
-                            <div class="flex items-center gap-1.5 font-bold text-gray-800 text-[0.75rem] mb-1">
-                                <span>💡</span> NeoPixel RGB Status LED
-                            </div>
-                            <p class="text-[0.68rem] text-gray-600">Ambient color signaling: Green (Idle), Amber (Due &lt;60m), Flashing Red (Overdue).</p>
-                        </div>
-                        <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm">
-                            <div class="flex items-center gap-1.5 font-bold text-gray-800 text-[0.75rem] mb-1">
-                                <span>🎛️</span> EC11 Mechanical Knob
-                            </div>
-                            <p class="text-[0.68rem] text-gray-600">Rotary encoder with push switch for tactile, glanceable desk task management.</p>
-                        </div>
-                        <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm">
-                            <div class="flex items-center gap-1.5 font-bold text-gray-800 text-[0.75rem] mb-1">
-                                <span>🔔</span> I2S Piezo Audio Chime
-                            </div>
-                            <p class="text-[0.68rem] text-gray-600">Pleasant 8-bit chimes for reminders and focus cues (suppressed during Quiet Hours).</p>
-                        </div>
-                    </div>
-                    <div class="bg-indigo-50 border border-indigo-200 rounded p-2 text-[0.68rem] text-indigo-900 flex items-center gap-2">
-                        <span class="text-base">⚡</span>
-                        <span><strong>Two-Way Sync:</strong> Any changes made on the physical knob or the dashboard sync instantly via REST and Server-Sent Events.</span>
-                    </div>
-                </div>
+            <!-- Segmented Progress Bar -->
+            <div class="flex gap-1.5 mb-4" id="guide-step-ticks">
+                <div class="guide-step-tick active" data-tick="0" title="Step 1: Hardware Twin"></div>
+                <div class="guide-step-tick" data-tick="1" title="Step 2: Directives &amp; Emotion"></div>
+                <div class="guide-step-tick" data-tick="2" title="Step 3: Rotary Knob Gestures"></div>
+                <div class="guide-step-tick" data-tick="3" title="Step 4: Mascot Evolution"></div>
+                <div class="guide-step-tick" data-tick="4" title="Step 5: Focus &amp; Connectivity"></div>
+                <div class="guide-step-tick" data-tick="5" title="Step 6: Cheatsheet &amp; Demo"></div>
+            </div>
 
-                <!-- Slide 2: Directives & Emotion -->
-                <div class="guide-slide space-y-3 hidden" data-slide="1">
-                    <div class="flex items-center gap-2 text-indigo-900">
-                        <span class="text-2xl">🎯</span>
-                        <div>
-                            <h3 class="font-bold text-sm text-gray-900 uppercase tracking-wide">Directives &amp; Mascot Life Cycle</h3>
-                            <p class="text-[0.7rem] text-gray-600 font-mono">Task Prioritization &amp; Behavioral Mood Engine</p>
+            <!-- Scrollable Slide Viewport -->
+            <div id="guide-slides-container" class="flex-grow overflow-y-auto custom-scroll pr-1.5 pb-2">
+                
+                <!-- SLIDE 1: Hardware Architecture & Anatomy -->
+                <div class="guide-slide space-y-4" data-slide="0">
+                    <div>
+                        <div class="flex items-center gap-2 text-amber-400 mb-0.5">
+                            <span class="text-xs font-mono font-bold tracking-wider">01 // HARDWARE ARCHITECTURE</span>
                         </div>
+                        <h3 class="text-base sm:text-lg font-bold text-white tracking-wide">ESP32-S3 Physical Companion &amp; Digital Twin</h3>
+                        <p class="text-xs text-gray-400 font-mono mt-0.5">Two-way real-time telemetry via REST API and Server-Sent Events (SSE).</p>
                     </div>
-                    <p class="text-xs text-gray-700 leading-relaxed">
-                        Tasks are called <strong>Directives</strong>. Hollow continuously analyzes your upcoming deadlines and mirrors urgency through physical posture, eye expressions, and chassis illumination.
-                    </p>
-                    <div class="space-y-2">
-                        <div class="flex items-start gap-2.5 bg-white p-2 rounded border border-[var(--chassis-dark)] shadow-sm">
-                            <span class="w-3 h-3 rounded-full bg-green-500 mt-1 shrink-0"></span>
-                            <div>
-                                <span class="font-bold text-xs text-gray-800">SYSTEM IDLE (All Clear)</span>
-                                <p class="text-[0.68rem] text-gray-600">No overdue tasks. Hollow rests peacefully, softly blinking with gentle breathing micro-animations.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-2.5 bg-white p-2 rounded border border-[var(--chassis-dark)] shadow-sm">
-                            <span class="w-3 h-3 rounded-full bg-amber-500 mt-1 shrink-0"></span>
-                            <div>
-                                <span class="font-bold text-xs text-gray-800">WORKING / DUE SOON (&lt; 60m)</span>
-                                <p class="text-[0.68rem] text-gray-600">A directive is due within an hour or a Pomodoro sprint is running. Amber glow with focused gaze.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-2.5 bg-white p-2 rounded border border-[var(--chassis-dark)] shadow-sm">
-                            <span class="w-3 h-3 rounded-full bg-red-600 animate-ping mt-1 shrink-0"></span>
-                            <div>
-                                <span class="font-bold text-xs text-red-700">URGENT / OVERDUE (&le; 0m)</span>
-                                <p class="text-[0.68rem] text-gray-600">A deadline passed! Crimson LED strobe, warning chime alert, and urgent bat flapping.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-2.5 bg-white p-2 rounded border border-[var(--chassis-dark)] shadow-sm">
-                            <span class="w-3 h-3 rounded-full bg-indigo-400 mt-1 shrink-0"></span>
-                            <div>
-                                <span class="font-bold text-xs text-gray-800">SLEEP MODE (Night / Rest)</span>
-                                <p class="text-[0.68rem] text-gray-600">Low-power hibernation. Hollow closes eyes and wraps wings for deep rest.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Slide 3: Rotary Knob Shortcuts -->
-                <div class="guide-slide space-y-3 hidden" data-slide="2">
-                    <div class="flex items-center gap-2 text-indigo-900">
-                        <span class="text-2xl">🎛️</span>
-                        <div>
-                            <h3 class="font-bold text-sm text-gray-900 uppercase tracking-wide">Rotary Knob Shortcuts</h3>
-                            <p class="text-[0.7rem] text-gray-600 font-mono">Tactile Gestures (Hardware Knob &amp; Virtual Twin)</p>
+                    <!-- Interactive Hardware Console Preview -->
+                    <div class="bg-[#0c0d0c] border border-[#2b2d2b] rounded-xl p-3.5 shadow-inner">
+                        <div class="flex items-center justify-between text-[0.6rem] font-mono text-gray-400 mb-2 border-b border-white/5 pb-1">
+                            <span>HOLLOW DC-01 HARDWARE DIAGRAM</span>
+                            <span class="text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> 115,200 BAUD LIVE</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                            <!-- Simulated Screen -->
+                            <div class="sm:col-span-2 bg-[#121814] border-2 border-[#1e2e22] rounded-lg p-2.5 relative overflow-hidden shadow-inner">
+                                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-500/5 to-transparent pointer-events-none"></div>
+                                <div class="flex justify-between items-center text-[0.6rem] font-mono text-emerald-400/80 mb-1 border-b border-emerald-900/50 pb-0.5">
+                                    <span>IPS 1.3" // 240x240</span>
+                                    <span class="text-emerald-300 font-bold">12:45 PM</span>
+                                </div>
+                                <div class="font-mono text-xs text-emerald-300 font-bold tracking-wide">STATUS: [SYSTEM IDLE]</div>
+                                <div class="font-mono text-[0.7rem] text-emerald-400/90 truncate mt-0.5">TASK: Deploy production v2.4</div>
+                                <div class="text-[0.55rem] font-mono text-emerald-500/60 mt-1">BAT MASCOT: BLINKING &amp; CALM</div>
+                            </div>
+                            <!-- Simulated LED & Knob -->
+                            <div class="flex sm:flex-col items-center justify-around gap-2 bg-[#151715] p-2 rounded-lg border border-white/5">
+                                <div class="text-center">
+                                    <div id="guide-mini-led" class="w-4 h-4 rounded-full bg-emerald-400 shadow-[0_0_10px_#10b981] mx-auto mb-1 transition-all"></div>
+                                    <span class="text-[0.55rem] font-mono text-gray-400 block uppercase">RGB LED</span>
+                                    <div class="flex gap-1 mt-1 justify-center">
+                                        <button type="button" class="px-1 py-0.2 text-[0.5rem] font-mono bg-emerald-950 text-emerald-300 border border-emerald-700 rounded guide-led-btn" data-color="green">IDLE</button>
+                                        <button type="button" class="px-1 py-0.2 text-[0.5rem] font-mono bg-amber-950 text-amber-300 border border-amber-700 rounded guide-led-btn" data-color="amber">SOON</button>
+                                        <button type="button" class="px-1 py-0.2 text-[0.5rem] font-mono bg-red-950 text-red-300 border border-red-700 rounded guide-led-btn" data-color="red">ALARM</button>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-7 h-7 rounded-full bg-[#2a2d2b] border-2 border-[#4b4e4c] flex items-center justify-center mx-auto mb-0.5">
+                                        <div class="w-1 h-3 bg-amber-400 rounded-sm"></div>
+                                    </div>
+                                    <span class="text-[0.55rem] font-mono text-gray-400 uppercase">EC11 KNOB</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-700 leading-relaxed">
-                        Control your workflow without taking your hands off your desk. The mechanical knob supports 4 essential gestures:
-                    </p>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center gap-2 font-bold text-gray-800 text-[0.75rem] mb-1">
-                                    <span class="bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded text-[0.6rem] font-mono">CLICK</span>
-                                    <span>Single Click</span>
-                                </div>
-                                <p class="text-[0.68rem] text-gray-600">Instantly marks the active overdue or next pending directive complete! Awards <strong>+25 XP</strong>.</p>
+
+                    <!-- 4 Architectural Component Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div class="guide-glass-card p-3 rounded-xl">
+                            <div class="flex items-center gap-2 font-bold text-white text-xs mb-1">
+                                <span class="text-base">📟</span>
+                                <span>1.3" Color IPS Display</span>
                             </div>
-                            <span class="text-[0.6rem] text-indigo-600 font-mono mt-2 block">Action: Mark Done</span>
+                            <p class="text-[0.7rem] text-gray-400 leading-relaxed">
+                                High-contrast panel displaying local clock, active directive countdown, and responsive bat mascot animations.
+                            </p>
                         </div>
-                        <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center gap-2 font-bold text-gray-800 text-[0.75rem] mb-1">
-                                    <span class="bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded text-[0.6rem] font-mono">2× CLICK</span>
-                                    <span>Double Click</span>
-                                </div>
-                                <p class="text-[0.68rem] text-gray-600">Quick-jumps directly to the next scheduled directive in your queue with visual highlight.</p>
+                        <div class="guide-glass-card p-3 rounded-xl">
+                            <div class="flex items-center gap-2 font-bold text-white text-xs mb-1">
+                                <span class="text-base">💡</span>
+                                <span>NeoPixel RGB Status LED</span>
                             </div>
-                            <span class="text-[0.6rem] text-indigo-600 font-mono mt-2 block">Action: Jump Queue</span>
+                            <p class="text-[0.7rem] text-gray-400 leading-relaxed">
+                                Peripheral ambient lighting: Breathing Green (idle), Amber pulse (&lt;60m), and Flashing Crimson (overdue alert).
+                            </p>
                         </div>
-                        <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center gap-2 font-bold text-gray-800 text-[0.75rem] mb-1">
-                                    <span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[0.6rem] font-mono">HOLD 800ms</span>
-                                    <span>Long Press</span>
-                                </div>
-                                <p class="text-[0.68rem] text-gray-600">Toggles Audio Mute on/off instantly. Ideal for jumping into calls or silent meetings.</p>
+                        <div class="guide-glass-card p-3 rounded-xl">
+                            <div class="flex items-center gap-2 font-bold text-white text-xs mb-1">
+                                <span class="text-base">🎛️</span>
+                                <span>EC11 Mechanical Knob</span>
                             </div>
-                            <span class="text-[0.6rem] text-amber-600 font-mono mt-2 block">Action: Toggle Mute</span>
+                            <p class="text-[0.7rem] text-gray-400 leading-relaxed">
+                                360° tactile rotary encoder with push-click switch for glanceable, one-touch desk control.
+                            </p>
                         </div>
-                        <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center gap-2 font-bold text-gray-800 text-[0.75rem] mb-1">
-                                    <span class="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-[0.6rem] font-mono">ROTATE</span>
-                                    <span>Wheel Scroll</span>
-                                </div>
-                                <p class="text-[0.68rem] text-gray-600">Scrolls up and down through your directives list with simulated mechanical detents.</p>
+                        <div class="guide-glass-card p-3 rounded-xl">
+                            <div class="flex items-center gap-2 font-bold text-white text-xs mb-1">
+                                <span class="text-base">🔔</span>
+                                <span>I2S Piezo Audio Chime</span>
                             </div>
-                            <span class="text-[0.6rem] text-gray-600 font-mono mt-2 block">Action: Navigate List</span>
+                            <p class="text-[0.7rem] text-gray-400 leading-relaxed">
+                                Custom 8-bit acoustic waves for reminders and Pomodoro cues (automatically silenced during Quiet Hours).
+                            </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Slide 4: Mascot Evolution & Care -->
-                <div class="guide-slide space-y-3 hidden" data-slide="3">
-                    <div class="flex items-center gap-2 text-indigo-900">
-                        <span class="text-2xl">⭐</span>
+                <!-- SLIDE 2: Directives & Emotion Life Cycle -->
+                <div class="guide-slide space-y-4 hidden" data-slide="1">
+                    <div>
+                        <div class="flex items-center gap-2 text-amber-400 mb-0.5">
+                            <span class="text-xs font-mono font-bold tracking-wider">02 // DIRECTIVES &amp; EMOTIONS</span>
+                        </div>
+                        <h3 class="text-base sm:text-lg font-bold text-white tracking-wide">Mascot Life Cycle &amp; Emotional Mirroring</h3>
+                        <p class="text-xs text-gray-400 font-mono mt-0.5">Directives represent tasks. Hollow monitors deadlines and physically reflects your work stress.</p>
+                    </div>
+
+                    <!-- Interactive Mascot Stage Preview -->
+                    <div class="bg-[#0c0d0c] border border-[#2b2d2b] rounded-xl p-4 text-center">
+                        <span class="text-[0.6rem] font-mono text-gray-400 block mb-2 uppercase tracking-widest">LIVE MASCOT PREVIEW // CLICK STATES TO TEST</span>
+                        
+                        <div class="flex items-center justify-center my-2">
+                            <div id="guide-mascot-avatar" class="w-20 h-20 flex items-center justify-center bg-[#151715] rounded-full border-2 border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all">
+                                <span id="guide-mascot-icon" class="text-4xl select-none animate-bounce">🦇</span>
+                            </div>
+                        </div>
+                        
+                        <div id="guide-mascot-status-desc" class="font-mono text-xs text-emerald-400 font-bold mb-3">
+                            IDLE: All directives clear. Hollow rests calmly with gentle wing flutter.
+                        </div>
+
+                        <!-- 4 Interactive State Chips -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <button type="button" class="guide-state-chip active p-2 rounded-lg text-xs font-mono text-center flex flex-col items-center gap-1" data-state="idle">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981]"></span>
+                                <span class="font-bold">🟢 IDLE</span>
+                                <span class="text-[0.6rem] opacity-70">All clear</span>
+                            </button>
+                            <button type="button" class="guide-state-chip p-2 rounded-lg text-xs font-mono text-center flex flex-col items-center gap-1" data-state="working">
+                                <span class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_6px_#f59e0b]"></span>
+                                <span class="font-bold">🟡 WORKING</span>
+                                <span class="text-[0.6rem] opacity-70">Due &lt;60m / Sprint</span>
+                            </button>
+                            <button type="button" class="guide-state-chip p-2 rounded-lg text-xs font-mono text-center flex flex-col items-center gap-1" data-state="urgent">
+                                <span class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_6px_#ef4444]"></span>
+                                <span class="font-bold">🔴 URGENT</span>
+                                <span class="text-[0.6rem] opacity-70">Overdue alarm</span>
+                            </button>
+                            <button type="button" class="guide-state-chip p-2 rounded-lg text-xs font-mono text-center flex flex-col items-center gap-1" data-state="sleep">
+                                <span class="w-2 h-2 rounded-full bg-indigo-400 shadow-[0_0_6px_#818cf8]"></span>
+                                <span class="font-bold">🌙 SLEEP</span>
+                                <span class="text-[0.6rem] opacity-70">Night / Quiet</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Directives Workflow Pill -->
+                    <div class="guide-glass-card p-3 rounded-xl flex items-center gap-3">
+                        <span class="text-xl">🎯</span>
+                        <div class="text-xs">
+                            <span class="font-bold text-white block">Prioritize, Order &amp; Snooze</span>
+                            <span class="text-gray-400 text-[0.68rem]">Directives are auto-sorted chronologically. Snooze tasks for 10m, 30m, or 1h with one click when meetings run over.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 3: Rotary Knob Shortcuts (Interactive Playground) -->
+                <div class="guide-slide space-y-4 hidden" data-slide="2">
+                    <div>
+                        <div class="flex items-center gap-2 text-amber-400 mb-0.5">
+                            <span class="text-xs font-mono font-bold tracking-wider">03 // TACTILE GESTURES</span>
+                        </div>
+                        <h3 class="text-base sm:text-lg font-bold text-white tracking-wide">Interactive Rotary Dial Simulator</h3>
+                        <p class="text-xs text-gray-400 font-mono mt-0.5">Control tasks directly from your desk without taking your hands off the keyboard.</p>
+                    </div>
+
+                    <!-- Hands-on Dial Playground -->
+                    <div class="bg-[#0c0d0c] border border-[#2b2d2b] rounded-xl p-4 text-center">
+                        <div id="guide-hud-display" class="font-mono text-xs text-amber-300 bg-[#161816] px-3 py-2 rounded-lg border border-amber-500/30 mb-3 shadow-inner">
+                            👉 TRY IT: Click, Double-Click, Hold (800ms) or Scroll the dial below!
+                        </div>
+
+                        <!-- Knob Element -->
+                        <div class="flex justify-center items-center my-3">
+                            <div id="guide-knob-playground" class="guide-interactive-knob" title="Click or Scroll Wheel to interact!">
+                                <div id="guide-knob-notch" class="guide-knob-notch"></div>
+                            </div>
+                        </div>
+
+                        <span class="text-[0.6rem] font-mono text-gray-400 block uppercase tracking-widest">EC11 PHYSICAL ROTARY ENCODER SIMULATOR</span>
+                    </div>
+
+                    <!-- 4 Gesture Reference Cards -->
+                    <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                        <div class="guide-glass-card p-2.5 rounded-lg border-l-2 border-indigo-500">
+                            <div class="flex items-center gap-1.5 text-white font-bold text-[0.72rem] mb-0.5">
+                                <span class="bg-indigo-950 text-indigo-300 px-1 py-0.2 rounded text-[0.6rem]">CLICK</span>
+                                <span>Single Click</span>
+                            </div>
+                            <p class="text-[0.65rem] text-gray-400">Completes top urgent task! Awards <strong>+25 XP</strong>.</p>
+                        </div>
+                        <div class="guide-glass-card p-2.5 rounded-lg border-l-2 border-emerald-500">
+                            <div class="flex items-center gap-1.5 text-white font-bold text-[0.72rem] mb-0.5">
+                                <span class="bg-emerald-950 text-emerald-300 px-1 py-0.2 rounded text-[0.6rem]">2× CLICK</span>
+                                <span>Double Click</span>
+                            </div>
+                            <p class="text-[0.65rem] text-gray-400">Jumps focus to next scheduled directive in queue.</p>
+                        </div>
+                        <div class="guide-glass-card p-2.5 rounded-lg border-l-2 border-amber-500">
+                            <div class="flex items-center gap-1.5 text-white font-bold text-[0.72rem] mb-0.5">
+                                <span class="bg-amber-950 text-amber-300 px-1 py-0.2 rounded text-[0.6rem]">HOLD</span>
+                                <span>Long Press (800ms)</span>
+                            </div>
+                            <p class="text-[0.65rem] text-gray-400">Toggles Audio Mute on/off for instant call silence.</p>
+                        </div>
+                        <div class="guide-glass-card p-2.5 rounded-lg border-l-2 border-gray-400">
+                            <div class="flex items-center gap-1.5 text-white font-bold text-[0.72rem] mb-0.5">
+                                <span class="bg-gray-800 text-gray-300 px-1 py-0.2 rounded text-[0.6rem]">ROTATE</span>
+                                <span>Wheel Scroll</span>
+                            </div>
+                            <p class="text-[0.65rem] text-gray-400">Scrolls directive queue with mechanical detents.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 4: Mascot Evolution & Sanctuary -->
+                <div class="guide-slide space-y-4 hidden" data-slide="3">
+                    <div>
+                        <div class="flex items-center gap-2 text-amber-400 mb-0.5">
+                            <span class="text-xs font-mono font-bold tracking-wider">04 // EVOLUTION &amp; CARE</span>
+                        </div>
+                        <h3 class="text-base sm:text-lg font-bold text-white tracking-wide">Level Up &amp; Unlock Tamagotchi Cosmetics</h3>
+                        <p class="text-xs text-gray-400 font-mono mt-0.5">Earn +25 XP per completed task and +50 XP per Pomodoro focus sprint.</p>
+                    </div>
+
+                    <!-- Interactive Evolution Rank Previewer -->
+                    <div class="bg-[#0c0d0c] border border-[#2b2d2b] rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <span id="guide-preview-rank-title" class="text-sm font-bold text-amber-300 font-mono">BAT PUP (LEVEL 1)</span>
+                                <span id="guide-preview-stage-badge" class="ml-2 text-[0.55rem] font-mono bg-amber-950 text-amber-400 border border-amber-800 px-1.5 py-0.5 rounded">STAGE I</span>
+                            </div>
+                            <span id="guide-preview-xp-val" class="font-mono text-xs text-gray-400">0 XP</span>
+                        </div>
+
+                        <!-- XP Test Slider -->
+                        <input type="range" id="guide-xp-slider" min="0" max="8500" value="0" step="50" class="w-full h-2 bg-[#222] rounded-lg appearance-none cursor-pointer accent-amber-500 mb-3">
+
+                        <!-- 8 Evolution Tiers Visual Grid -->
+                        <div class="grid grid-cols-4 sm:grid-cols-8 gap-1 text-center font-mono text-[0.6rem]">
+                            <div class="p-1 rounded bg-[#1e201f] border border-white/10" id="tier-box-1">Lv 1<br><span class="text-gray-500 text-[0.5rem]">0 XP</span></div>
+                            <div class="p-1 rounded bg-[#1e201f] border border-white/10" id="tier-box-2">Lv 2<br><span class="text-gray-500 text-[0.5rem]">100</span></div>
+                            <div class="p-1 rounded bg-[#1e201f] border border-white/10" id="tier-box-3">Lv 3<br><span class="text-gray-500 text-[0.5rem]">250</span></div>
+                            <div class="p-1 rounded bg-[#1e201f] border border-white/10" id="tier-box-4">Lv 4<br><span class="text-gray-500 text-[0.5rem]">500</span></div>
+                            <div class="p-1 rounded bg-[#1e201f] border border-white/10" id="tier-box-5">Lv 5<br><span class="text-gray-500 text-[0.5rem]">1k</span></div>
+                            <div class="p-1 rounded bg-[#1e201f] border border-white/10" id="tier-box-6">Lv 6<br><span class="text-gray-500 text-[0.5rem]">2k</span></div>
+                            <div class="p-1 rounded bg-[#1e201f] border border-white/10" id="tier-box-7">Lv 7<br><span class="text-gray-500 text-[0.5rem]">4k</span></div>
+                            <div class="p-1 rounded bg-amber-950/60 border border-amber-500 text-amber-300 font-bold" id="tier-box-8">Lv 8<br><span class="text-amber-400 text-[0.5rem]">8k+</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Sanctuary & Cosmetics Card -->
+                    <div class="guide-glass-card p-3 rounded-xl flex items-center justify-between flex-wrap gap-2">
                         <div>
-                            <h3 class="font-bold text-sm text-gray-900 uppercase tracking-wide">Mascot Evolution &amp; Care Sanctuary</h3>
-                            <p class="text-[0.7rem] text-gray-600 font-mono">Gamified Tamagotchi Progression &amp; Unlockables</p>
+                            <span class="font-bold text-white text-xs block">🦇 Hollow Care Sanctuary</span>
+                            <span class="text-[0.68rem] text-gray-400">Pet Hollow for hearts, clean the resting cave, and equip retro skins (Neon Synth, Cyber Gold, Retro Terminal, Crimson Lord).</span>
+                        </div>
+                        <span class="text-[0.65rem] font-mono bg-white/10 text-gray-300 px-2 py-1 rounded">HEADER ➔ 🦇 CARE</span>
+                    </div>
+                </div>
+
+                <!-- SLIDE 5: Focus Sprints, Quiet Hours & USB-C Link -->
+                <div class="guide-slide space-y-4 hidden" data-slide="4">
+                    <div>
+                        <div class="flex items-center gap-2 text-amber-400 mb-0.5">
+                            <span class="text-xs font-mono font-bold tracking-wider">05 // ADVANCED WORKFLOWS</span>
+                        </div>
+                        <h3 class="text-base sm:text-lg font-bold text-white tracking-wide">Deep Work Engines &amp; Hardware Connectivity</h3>
+                        <p class="text-xs text-gray-400 font-mono mt-0.5">Built for intense focus, quiet night rest, and USB-C hardware communication.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div class="guide-glass-card p-3 rounded-xl">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-white text-xs flex items-center gap-1.5">⏱️ Pomodoro Focus</span>
+                                <span class="font-mono text-[0.6rem] bg-indigo-950 text-indigo-300 px-1.5 py-0.5 rounded">+50 XP</span>
+                            </div>
+                            <p class="text-[0.68rem] text-gray-400 mb-2">25m Focus, 5m Break, and 45m Deep Work profiles. Mascot enters dedicated focus trance.</p>
+                            <span class="font-mono text-[0.6rem] text-indigo-400 block">Tab: Focus Bay</span>
+                        </div>
+
+                        <div class="guide-glass-card p-3 rounded-xl">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-white text-xs flex items-center gap-1.5">🌙 Quiet Hours</span>
+                                <span class="font-mono text-[0.6rem] bg-amber-950 text-amber-300 px-1.5 py-0.5 rounded">Silenced</span>
+                            </div>
+                            <p class="text-[0.68rem] text-gray-400 mb-2">Schedule evening windows (e.g. 22:00–08:00). Suppresses chime and flashes silently.</p>
+                            <span class="font-mono text-[0.6rem] text-amber-400 block">Tab: Config</span>
+                        </div>
+
+                        <div class="guide-glass-card p-3 rounded-xl">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-white text-xs flex items-center gap-1.5">🔌 Web Serial USB-C</span>
+                                <span class="font-mono text-[0.6rem] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded">115.2k</span>
+                            </div>
+                            <p class="text-[0.68rem] text-gray-400 mb-2">Direct physical USB link via Chrome/Edge. Stream telemetry and trigger device diagnostics.</p>
+                            <span class="font-mono text-[0.6rem] text-emerald-400 block">Tab: Serial Link</span>
+                        </div>
+
+                        <div class="guide-glass-card p-3 rounded-xl">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-white text-xs flex items-center gap-1.5">📅 Calendar Sync</span>
+                                <span class="font-mono text-[0.6rem] bg-blue-950 text-blue-300 px-1.5 py-0.5 rounded">.ics</span>
+                            </div>
+                            <p class="text-[0.68rem] text-gray-400 mb-2">Connect Google / Apple Calendar .ics feed to automatically import agenda events.</p>
+                            <span class="font-mono text-[0.6rem] text-blue-400 block">Config: External Sync</span>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-700 leading-relaxed">
-                        Your desk companion grows stronger as you crush your goals. Earn XP, level up through 8 ranks, and unlock exclusive cosmetic skins!
-                    </p>
-                    <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm">
-                        <span class="hw-label text-[0.6rem] text-gray-500 block mb-1">8 EVOLUTION RANKS</span>
-                        <div class="grid grid-cols-4 gap-1 text-[0.65rem] font-mono text-center">
-                            <div class="p-1 bg-gray-50 rounded border border-gray-200">1: Bat Pup<br><span class="text-gray-400">0 XP</span></div>
-                            <div class="p-1 bg-gray-50 rounded border border-gray-200">2: Night Scout<br><span class="text-gray-400">100 XP</span></div>
-                            <div class="p-1 bg-gray-50 rounded border border-gray-200">3: Cave Keeper<br><span class="text-gray-400">250 XP</span></div>
-                            <div class="p-1 bg-gray-50 rounded border border-gray-200">4: Shadow Wing<br><span class="text-gray-400">500 XP</span></div>
-                            <div class="p-1 bg-gray-50 rounded border border-gray-200">5: Dusk Sentinel<br><span class="text-gray-400">1k XP</span></div>
-                            <div class="p-1 bg-gray-50 rounded border border-gray-200">6: Hollow Guard<br><span class="text-gray-400">2k XP</span></div>
-                            <div class="p-1 bg-gray-50 rounded border border-gray-200">7: Void Ranger<br><span class="text-gray-400">4k XP</span></div>
-                            <div class="p-1 bg-amber-50 rounded border border-amber-300 font-bold text-amber-900">8: Sovereign<br><span class="text-amber-600">8k+ XP</span></div>
+                </div>
+
+                <!-- SLIDE 6: Cheatsheet, Hotkeys & Live Demo -->
+                <div class="guide-slide space-y-4 hidden" data-slide="5">
+                    <div>
+                        <div class="flex items-center gap-2 text-amber-400 mb-0.5">
+                            <span class="text-xs font-mono font-bold tracking-wider">06 // QUICK CHEATSHEET &amp; LAUNCH</span>
+                        </div>
+                        <h3 class="text-base sm:text-lg font-bold text-white tracking-wide">You Are Cleared for Action</h3>
+                        <p class="text-xs text-gray-400 font-mono mt-0.5">Keyboard shortcuts and the instant interactive live demo showcase.</p>
+                    </div>
+
+                    <!-- Keyboard Hotkeys Matrix -->
+                    <div class="guide-glass-card p-3 rounded-xl">
+                        <span class="text-[0.6rem] font-mono text-gray-400 block mb-2 uppercase tracking-widest">TACTICAL MECHANICAL SHORTCUTS</span>
+                        <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                            <div class="flex justify-between items-center bg-[#151715] px-2.5 py-1.5 rounded-lg border border-white/5">
+                                <span class="text-gray-400">New Directive</span>
+                                <kbd class="guide-keycap px-2 py-0.5 text-xs text-amber-300">N</kbd>
+                            </div>
+                            <div class="flex justify-between items-center bg-[#151715] px-2.5 py-1.5 rounded-lg border border-white/5">
+                                <span class="text-gray-400">Close / Cancel</span>
+                                <kbd class="guide-keycap px-2 py-0.5 text-xs text-amber-300">Esc</kbd>
+                            </div>
+                            <div class="flex justify-between items-center bg-[#151715] px-2.5 py-1.5 rounded-lg border border-white/5">
+                                <span class="text-gray-400">Cycle Focus</span>
+                                <kbd class="guide-keycap px-2 py-0.5 text-xs text-amber-300">Tab</kbd>
+                            </div>
+                            <div class="flex justify-between items-center bg-[#151715] px-2.5 py-1.5 rounded-lg border border-white/5">
+                                <span class="text-gray-400">PWA Install</span>
+                                <span class="text-emerald-400 text-[0.65rem] font-bold">Standalone</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm space-y-1.5">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="font-bold text-gray-800">🦇 Hollow Care Sanctuary</span>
-                            <span class="text-[0.65rem] text-indigo-600 font-mono">Click 🦇 in Header</span>
-                        </div>
-                        <p class="text-[0.68rem] text-gray-600">
-                            Open the Care Sanctuary to pet Hollow (+hearts animation), clean the cave, check care metrics, and equip unlocked cosmetic themes (Neon Synth, Cyber Gold, Retro Terminal, Crimson Lord).
+
+                    <!-- Glowing Hero Showcase Banner -->
+                    <div class="bg-gradient-to-r from-amber-950/40 via-amber-900/30 to-amber-950/40 border-2 border-amber-500/80 rounded-xl p-4 text-center space-y-2 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+                        <span class="text-[0.6rem] font-mono text-amber-300 uppercase tracking-widest font-bold block animate-pulse">100% NON-DESTRUCTIVE INTERACTIVE TOUR</span>
+                        <p class="text-xs text-amber-100/90 leading-relaxed max-w-md mx-auto">
+                            Experience the mascot animations, urgency alarms, rotary jump, evolution leveling, and focus sprints in a safe live sandbox.
                         </p>
-                    </div>
-                </div>
-
-                <!-- Slide 5: Advanced Features -->
-                <div class="guide-slide space-y-3 hidden" data-slide="4">
-                    <div class="flex items-center gap-2 text-indigo-900">
-                        <span class="text-2xl">⚡</span>
-                        <div>
-                            <h3 class="font-bold text-sm text-gray-900 uppercase tracking-wide">Focus Sprints, Quiet Hours &amp; USB Link</h3>
-                            <p class="text-[0.7rem] text-gray-600 font-mono">Deep Work Tools &amp; Advanced Connectivity</p>
-                        </div>
-                    </div>
-                    <div class="space-y-2 text-xs">
-                        <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm">
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="font-bold text-gray-800">⏱️ Pomodoro Focus Engine</span>
-                                <span class="text-[0.6rem] bg-indigo-100 text-indigo-800 px-1 rounded font-mono">+50 XP / Sprint</span>
-                            </div>
-                            <p class="text-[0.68rem] text-gray-600">Dedicated 25m Focus, 5m Break, and 45m Deep Work presets. Locks Hollow into working posture and sends desktop audio/notification on finish.</p>
-                        </div>
-                        <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm">
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="font-bold text-gray-800">🌙 Schedule-Aware Quiet Hours</span>
-                                <span class="text-[0.6rem] bg-amber-100 text-amber-800 px-1 rounded font-mono">Config Tab</span>
-                            </div>
-                            <p class="text-[0.68rem] text-gray-600">Define quiet windows (e.g. 22:00–08:00). Suppresses chime and flashes while quietly queuing alerts for review when window ends.</p>
-                        </div>
-                        <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm">
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="font-bold text-gray-800">🔌 Web Serial USB-C Device Link</span>
-                                <span class="text-[0.6rem] bg-emerald-100 text-emerald-800 px-1 rounded font-mono">Serial Tab</span>
-                            </div>
-                            <p class="text-[0.68rem] text-gray-600">Direct zero-network USB connection via Web Serial API. Stream real-time serial logs at 115,200 baud and trigger LED/restart test commands.</p>
-                        </div>
-                        <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm">
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="font-bold text-gray-800">📅 iCal External Calendar Sync</span>
-                                <span class="text-[0.6rem] bg-blue-100 text-blue-800 px-1 rounded font-mono">Calendar Tab</span>
-                            </div>
-                            <p class="text-[0.68rem] text-gray-600">Paste your Google or Apple Calendar iCal URL. Hollow parses your agenda and imports events straight into your directive schedule.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slide 6: Cheatsheet & Launch Demo -->
-                <div class="guide-slide space-y-3 hidden" data-slide="5">
-                    <div class="flex items-center gap-2 text-indigo-900">
-                        <span class="text-2xl">🚀</span>
-                        <div>
-                            <h3 class="font-bold text-sm text-gray-900 uppercase tracking-wide">Cheatsheet &amp; Interactive Showcase</h3>
-                            <p class="text-[0.7rem] text-gray-600 font-mono">Quick Shortcuts &amp; Full Guided Tour</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-2.5 rounded border border-[var(--chassis-dark)] shadow-sm">
-                        <span class="hw-label text-[0.6rem] text-gray-500 block mb-1.5">KEYBOARD SHORTCUTS</span>
-                        <div class="grid grid-cols-2 gap-1.5 text-xs font-mono">
-                            <div class="flex justify-between items-center bg-gray-50 px-2 py-1 rounded">
-                                <span class="text-gray-600">New Directive</span>
-                                <kbd class="bg-gray-200 border border-gray-400 px-1 rounded text-[0.65rem] font-bold">N</kbd>
-                            </div>
-                            <div class="flex justify-between items-center bg-gray-50 px-2 py-1 rounded">
-                                <span class="text-gray-600">Close / Cancel</span>
-                                <kbd class="bg-gray-200 border border-gray-400 px-1 rounded text-[0.65rem] font-bold">Esc</kbd>
-                            </div>
-                            <div class="flex justify-between items-center bg-gray-50 px-2 py-1 rounded">
-                                <span class="text-gray-600">Focus Switch</span>
-                                <kbd class="bg-gray-200 border border-gray-400 px-1 rounded text-[0.65rem] font-bold">Tab</kbd>
-                            </div>
-                            <div class="flex justify-between items-center bg-gray-50 px-2 py-1 rounded">
-                                <span class="text-gray-600">Install PWA</span>
-                                <span class="text-indigo-600 text-[0.65rem] font-bold">Desktop / Mobile</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-lg p-3 text-center space-y-2">
-                        <span class="hw-label text-[0.6rem] text-amber-800 font-bold block">EXPERIENCE EVERY FEATURE LIVE</span>
-                        <p class="text-xs text-amber-950">
-                            Want to see the mascot animations, urgency alarms, rotary jump, evolution leveling, and focus sprints in action without touching your real data?
-                        </p>
-                        <button type="button" id="btn-guide-launch-demo" class="btn-tactile px-4 py-2 bg-amber-400 text-amber-950 border-amber-600 hover:bg-amber-300 font-bold text-xs shadow-md">
-                            ✨ LAUNCH INTERACTIVE LIVE DEMO
+                        <button type="button" id="btn-guide-launch-demo" class="btn-tactile px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs tracking-wider rounded-lg shadow-lg border-b-4 border-amber-800 active:border-b-0 active:translate-y-1 transition-all uppercase">
+                            ✨ LAUNCH FULL INTERACTIVE DEMO ➔
                         </button>
                     </div>
                 </div>
+
             </div>
 
-            <!-- Footer Controls & Carousel Dots -->
-            <div class="pt-3 border-t border-[var(--chassis-dark)] mt-2 flex items-center justify-between">
-                <div class="flex items-center gap-1.5" id="guide-dots">
-                    <button class="w-2.5 h-2.5 rounded-full bg-indigo-600 transition-all guide-dot" data-dot="0"></button>
-                    <button class="w-2.5 h-2.5 rounded-full bg-gray-300 hover:bg-gray-400 transition-all guide-dot" data-dot="1"></button>
-                    <button class="w-2.5 h-2.5 rounded-full bg-gray-300 hover:bg-gray-400 transition-all guide-dot" data-dot="2"></button>
-                    <button class="w-2.5 h-2.5 rounded-full bg-gray-300 hover:bg-gray-400 transition-all guide-dot" data-dot="3"></button>
-                    <button class="w-2.5 h-2.5 rounded-full bg-gray-300 hover:bg-gray-400 transition-all guide-dot" data-dot="4"></button>
-                    <button class="w-2.5 h-2.5 rounded-full bg-gray-300 hover:bg-gray-400 transition-all guide-dot" data-dot="5"></button>
+            <!-- Footer Controls Bar -->
+            <div class="pt-3 border-t border-[#252826] mt-2 flex items-center justify-between flex-wrap gap-2">
+                <button type="button" id="btn-guide-prev" class="btn-tactile px-3.5 py-1.5 text-xs font-mono font-bold bg-[#1e201f] text-gray-300 border-[#383b39] hover:text-white" disabled>◀ PREV</button>
+                
+                <!-- 6 Segmented Step Indicators -->
+                <div class="flex items-center gap-1 font-mono text-[0.65rem]" id="guide-dots">
+                    <button class="w-6 h-6 rounded bg-amber-500 text-black font-bold guide-dot" data-dot="0">1</button>
+                    <button class="w-6 h-6 rounded bg-[#222423] text-gray-400 hover:text-white guide-dot" data-dot="1">2</button>
+                    <button class="w-6 h-6 rounded bg-[#222423] text-gray-400 hover:text-white guide-dot" data-dot="2">3</button>
+                    <button class="w-6 h-6 rounded bg-[#222423] text-gray-400 hover:text-white guide-dot" data-dot="3">4</button>
+                    <button class="w-6 h-6 rounded bg-[#222423] text-gray-400 hover:text-white guide-dot" data-dot="4">5</button>
+                    <button class="w-6 h-6 rounded bg-[#222423] text-gray-400 hover:text-white guide-dot" data-dot="5">6</button>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button type="button" id="btn-guide-prev" class="btn-tactile px-3 py-1.5 text-xs text-gray-700" disabled>◀ PREV</button>
-                    <button type="button" id="btn-guide-next" class="btn-tactile btn-tactile-primary px-4 py-1.5 text-xs font-bold">NEXT ▶</button>
-                </div>
+
+                <button type="button" id="btn-guide-next" class="btn-tactile btn-tactile-primary px-4 py-1.5 text-xs font-mono font-bold tracking-wider">NEXT ➔</button>
             </div>
         </div>
     </div>
@@ -2774,6 +2959,11 @@
         // ── Starter Guide & Tutorial Screens Controller ────────────────────────────
         let guideCurrentSlide = 0;
         const GUIDE_TOTAL_SLIDES = 6;
+        let guideKnobRotation = 0;
+        let guideKnobClickTimer = null;
+        let guideKnobClickCount = 0;
+        let guideKnobPressTimer = null;
+        let guideKnobIsLongPress = false;
 
         function renderGuideSlide(index) {
             guideCurrentSlide = Math.max(0, Math.min(index, GUIDE_TOTAL_SLIDES - 1));
@@ -2782,14 +2972,23 @@
                 el.classList.toggle('hidden', idx !== guideCurrentSlide);
             });
             const pill = document.getElementById('guide-step-pill');
-            if (pill) pill.textContent = `STEP ${guideCurrentSlide + 1} OF ${GUIDE_TOTAL_SLIDES}`;
+            if (pill) pill.textContent = `0${guideCurrentSlide + 1} / 06`;
 
+            // Update segmented top ticks
+            const ticks = document.querySelectorAll('.guide-step-tick');
+            ticks.forEach((tick, idx) => {
+                tick.className = 'guide-step-tick';
+                if (idx < guideCurrentSlide) tick.classList.add('passed');
+                else if (idx === guideCurrentSlide) tick.classList.add('active');
+            });
+
+            // Update bottom step buttons
             const dots = document.querySelectorAll('.guide-dot');
             dots.forEach((dot, idx) => {
                 if (idx === guideCurrentSlide) {
-                    dot.className = 'w-4 h-2.5 rounded-full bg-indigo-600 transition-all guide-dot';
+                    dot.className = 'w-6 h-6 rounded bg-amber-500 text-black font-bold guide-dot shadow-[0_0_8px_#f59e0b]';
                 } else {
-                    dot.className = 'w-2.5 h-2.5 rounded-full bg-gray-300 hover:bg-gray-400 transition-all guide-dot';
+                    dot.className = 'w-6 h-6 rounded bg-[#222423] text-gray-400 hover:text-white guide-dot';
                 }
             });
 
@@ -2798,9 +2997,11 @@
             if (prevBtn) prevBtn.disabled = guideCurrentSlide === 0;
             if (nextBtn) {
                 if (guideCurrentSlide === GUIDE_TOTAL_SLIDES - 1) {
-                    nextBtn.textContent = 'FINISH & EXPLORE 🚀';
+                    nextBtn.textContent = 'EXPLORE HOLLOW 🚀';
+                    nextBtn.className = 'btn-tactile px-5 py-1.5 text-xs font-mono font-bold tracking-wider bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_10px_#10b981]';
                 } else {
-                    nextBtn.textContent = 'NEXT ▶';
+                    nextBtn.textContent = 'NEXT ➔';
+                    nextBtn.className = 'btn-tactile btn-tactile-primary px-4 py-1.5 text-xs font-mono font-bold tracking-wider';
                 }
             }
         }
@@ -2838,6 +3039,15 @@
                 }
             });
 
+            // Ticks click navigation
+            document.querySelectorAll('.guide-step-tick').forEach(tick => {
+                tick.addEventListener('click', () => {
+                    const idx = parseInt(tick.dataset.tick, 10);
+                    if (!isNaN(idx)) renderGuideSlide(idx);
+                });
+            });
+
+            // Step dots click navigation
             document.querySelectorAll('.guide-dot').forEach(dot => {
                 dot.addEventListener('click', () => {
                     const idx = parseInt(dot.dataset.dot, 10);
@@ -2845,11 +3055,161 @@
                 });
             });
 
+            // Direct demo launcher from guide
             document.getElementById('btn-guide-launch-demo')?.addEventListener('click', () => {
                 closeGuide();
                 setTimeout(() => {
                     startDemo();
                 }, 200);
+            });
+
+            // Slide 1: Interactive LED test buttons
+            document.querySelectorAll('.guide-led-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const color = btn.dataset.color;
+                    const led = document.getElementById('guide-mini-led');
+                    if (!led) return;
+                    if (color === 'green') {
+                        led.className = 'w-4 h-4 rounded-full bg-emerald-400 shadow-[0_0_10px_#10b981] mx-auto mb-1 transition-all';
+                    } else if (color === 'amber') {
+                        led.className = 'w-4 h-4 rounded-full bg-amber-400 shadow-[0_0_10px_#f59e0b] mx-auto mb-1 transition-all';
+                    } else if (color === 'red') {
+                        led.className = 'w-4 h-4 rounded-full bg-red-500 shadow-[0_0_12px_#ef4444] animate-pulse mx-auto mb-1 transition-all';
+                    }
+                });
+            });
+
+            // Slide 2: Interactive Mascot Emotion State chips
+            document.querySelectorAll('.guide-state-chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    document.querySelectorAll('.guide-state-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+
+                    const state = chip.dataset.state;
+                    const avatar = document.getElementById('guide-mascot-avatar');
+                    const icon = document.getElementById('guide-mascot-icon');
+                    const desc = document.getElementById('guide-mascot-status-desc');
+
+                    if (!avatar || !icon || !desc) return;
+
+                    if (state === 'idle') {
+                        avatar.className = 'w-20 h-20 flex items-center justify-center bg-[#151715] rounded-full border-2 border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.25)] transition-all';
+                        icon.textContent = '🦇';
+                        icon.className = 'text-4xl select-none animate-bounce';
+                        desc.textContent = 'IDLE: All directives clear. Hollow rests calmly with gentle wing flutter.';
+                        desc.className = 'font-mono text-xs text-emerald-400 font-bold mb-3';
+                    } else if (state === 'working') {
+                        avatar.className = 'w-20 h-20 flex items-center justify-center bg-[#181612] rounded-full border-2 border-amber-500/60 shadow-[0_0_20px_rgba(245,158,11,0.35)] transition-all';
+                        icon.textContent = '⚡';
+                        icon.className = 'text-4xl select-none animate-pulse';
+                        desc.textContent = 'WORKING: Sprint running or task due <60m. Amber alert gaze, ready for action.';
+                        desc.className = 'font-mono text-xs text-amber-400 font-bold mb-3';
+                    } else if (state === 'urgent') {
+                        avatar.className = 'w-20 h-20 flex items-center justify-center bg-[#1a1212] rounded-full border-2 border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.5)] animate-pulse transition-all';
+                        icon.textContent = '🚨';
+                        icon.className = 'text-4xl select-none animate-bounce';
+                        desc.textContent = 'URGENT: Directive overdue! Flashing red beacon and warning audio chime.';
+                        desc.className = 'font-mono text-xs text-red-400 font-bold mb-3';
+                        playChimeAudio();
+                    } else if (state === 'sleep') {
+                        avatar.className = 'w-20 h-20 flex items-center justify-center bg-[#12141a] rounded-full border-2 border-indigo-500/40 shadow-[0_0_20px_rgba(129,140,248,0.2)] transition-all';
+                        icon.textContent = '💤';
+                        icon.className = 'text-4xl select-none';
+                        desc.textContent = 'SLEEP: Low power state. Eyes shut, wings tucked, quiet hours active.';
+                        desc.className = 'font-mono text-xs text-indigo-400 font-bold mb-3';
+                    }
+                });
+            });
+
+            // Slide 3: Interactive Rotary Dial Simulator
+            const knobPlayground = document.getElementById('guide-knob-playground');
+            const hudDisplay = document.getElementById('guide-hud-display');
+            const knobNotch = document.getElementById('guide-knob-notch');
+
+            if (knobPlayground && hudDisplay) {
+                knobPlayground.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    guideKnobIsLongPress = false;
+                    guideKnobPressTimer = setTimeout(() => {
+                        guideKnobIsLongPress = true;
+                        hudDisplay.innerHTML = '<span class="text-amber-400 font-bold">🔔 LONG PRESS: AUDIO ALERTS MUTED / UNMUTED!</span>';
+                        playChimeAudio();
+                    }, 800);
+                });
+
+                knobPlayground.addEventListener('pointerup', (e) => {
+                    e.preventDefault();
+                    clearTimeout(guideKnobPressTimer);
+                    if (guideKnobIsLongPress) return;
+
+                    guideKnobClickCount++;
+                    if (guideKnobClickCount === 1) {
+                        guideKnobClickTimer = setTimeout(() => {
+                            hudDisplay.innerHTML = '<span class="text-emerald-400 font-bold">✓ SINGLE CLICK: +25 XP DIRECTIVE COMPLETED! [DING]</span>';
+                            playChimeAudio();
+                            guideKnobClickCount = 0;
+                        }, 280);
+                    } else if (guideKnobClickCount === 2) {
+                        clearTimeout(guideKnobClickTimer);
+                        guideKnobClickCount = 0;
+                        hudDisplay.innerHTML = '<span class="text-indigo-400 font-bold">⚡ DOUBLE CLICK: JUMP TO NEXT TASK DIRECTIVE!</span>';
+                    }
+                });
+
+                knobPlayground.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const delta = Math.sign(e.deltaY);
+                    guideKnobRotation += delta * 25;
+                    if (knobNotch) knobNotch.style.transform = `translateX(-50%) rotate(${guideKnobRotation}deg)`;
+                    hudDisplay.innerHTML = `<span class="text-gray-300 font-bold">🔄 SCROLL: NAVIGATE QUEUE [ROTATION: ${guideKnobRotation % 360}°]</span>`;
+                }, { passive: false });
+            }
+
+            // Slide 4: Interactive XP Evolution Slider
+            const xpSlider = document.getElementById('guide-xp-slider');
+            if (xpSlider) {
+                xpSlider.addEventListener('input', () => {
+                    const xp = parseInt(xpSlider.value, 10);
+                    const titleEl = document.getElementById('guide-preview-rank-title');
+                    const badgeEl = document.getElementById('guide-preview-stage-badge');
+                    const valEl = document.getElementById('guide-preview-xp-val');
+
+                    if (valEl) valEl.textContent = `${xp} XP`;
+
+                    let level = 1, name = 'Bat Pup', stage = 'STAGE I';
+                    if (xp >= 8000) { level = 8; name = 'Vampire Sovereign'; stage = 'STAGE VIII (APEX)'; }
+                    else if (xp >= 4000) { level = 7; name = 'Void Ranger'; stage = 'STAGE VII'; }
+                    else if (xp >= 2000) { level = 6; name = 'Hollow Guardian'; stage = 'STAGE VI'; }
+                    else if (xp >= 1000) { level = 5; name = 'Dusk Sentinel'; stage = 'STAGE V'; }
+                    else if (xp >= 500) { level = 4; name = 'Shadow Wing'; stage = 'STAGE IV'; }
+                    else if (xp >= 250) { level = 3; name = 'Cave Keeper'; stage = 'STAGE III'; }
+                    else if (xp >= 100) { level = 2; name = 'Night Scout'; stage = 'STAGE II'; }
+
+                    if (titleEl) titleEl.textContent = `${name.toUpperCase()} (LEVEL ${level})`;
+                    if (badgeEl) badgeEl.textContent = stage;
+
+                    // Highlight active box
+                    for (let i = 1; i <= 8; i++) {
+                        const box = document.getElementById(`tier-box-${i}`);
+                        if (box) {
+                            if (i === level) {
+                                box.className = 'p-1 rounded bg-amber-950/70 border border-amber-500 text-amber-300 font-bold shadow-[0_0_8px_rgba(245,158,11,0.5)]';
+                            } else {
+                                box.className = 'p-1 rounded bg-[#1e201f] border border-white/10 text-gray-400';
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Keyboard navigation: Escape key closes guide
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('guide-modal');
+                    if (modal && !modal.classList.contains('hidden')) {
+                        closeGuide();
+                    }
+                }
             });
 
             // Auto-open on very first visit
