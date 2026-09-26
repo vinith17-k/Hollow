@@ -118,6 +118,9 @@ router.post('/', (req, res) => {
     db.read();
     db.data.tasks.push(task);
     db.write();
+    if (typeof req.app?.locals?.broadcastSSE === 'function') {
+      req.app.locals.broadcastSSE('tasks_changed', { action: 'created', task });
+    }
     res.status(201).json(task);
   } catch (err) {
     console.error('[TASKS] POST error:', err.message);
@@ -150,12 +153,53 @@ router.patch('/:id', (req, res) => {
     const idx = db.data.tasks.findIndex(t => t.id === id);
     if (idx === -1) return res.status(404).json({ error: 'Task not found' });
 
+    const wasDone = !!db.data.tasks[idx].done;
+    const isNowDone = patch.done === true;
+
+    // Gamification: Award XP when marking task done
+    if (isNowDone && !wasDone) {
+      const curXP = (db.data.settings.xp || 0) + 25;
+      const curCompleted = (db.data.settings.total_tasks_completed || 0) + 1;
+      db.data.settings.xp = curXP;
+      db.data.settings.total_tasks_completed = curCompleted;
+
+      const levels = [
+        { level: 1, name: 'Bat Pup',          minXP: 0 },
+        { level: 2, name: 'Night Scout',      minXP: 100 },
+        { level: 3, name: 'Cave Keeper',      minXP: 250 },
+        { level: 4, name: 'Shadow Wing',      minXP: 500 },
+        { level: 5, name: 'Dusk Sentinel',    minXP: 1000 },
+        { level: 6, name: 'Hollow Guardian',  minXP: 2000 },
+        { level: 7, name: 'Void Ranger',      minXP: 4000 },
+        { level: 8, name: 'Vampire Sovereign', minXP: 8000 },
+      ];
+      let curLvl = levels[0];
+      for (const l of levels) {
+        if (curXP >= l.minXP) curLvl = l;
+      }
+      db.data.settings.level = curLvl.level;
+      db.data.settings.level_name = curLvl.name;
+
+      if (typeof req.app?.locals?.broadcastSSE === 'function') {
+        req.app.locals.broadcastSSE('xp_gained', {
+          xp: curXP,
+          level: curLvl.level,
+          level_name: curLvl.name,
+          task_title: db.data.tasks[idx].title
+        });
+      }
+    }
+
     db.data.tasks[idx] = {
       ...db.data.tasks[idx],
       ...patch,
       updated_at: now(),
     };
     db.write();
+
+    if (typeof req.app?.locals?.broadcastSSE === 'function') {
+      req.app.locals.broadcastSSE('tasks_changed', { action: 'updated', task: db.data.tasks[idx] });
+    }
     res.json(db.data.tasks[idx]);
   } catch (err) {
     console.error('[TASKS] PATCH error:', err.message);
@@ -185,6 +229,9 @@ router.post('/:id/snooze', (req, res) => {
       updated_at:    now(),
     };
     db.write();
+    if (typeof req.app?.locals?.broadcastSSE === 'function') {
+      req.app.locals.broadcastSSE('tasks_changed', { action: 'snoozed', task: db.data.tasks[idx] });
+    }
     res.json({ snoozed_until: snoozeUntil, task: db.data.tasks[idx] });
   } catch (err) {
     console.error('[TASKS] SNOOZE error:', err.message);
@@ -202,6 +249,9 @@ router.delete('/:id', (req, res) => {
 
     db.data.tasks.splice(idx, 1);
     db.write();
+    if (typeof req.app?.locals?.broadcastSSE === 'function') {
+      req.app.locals.broadcastSSE('tasks_changed', { action: 'deleted', id: req.params.id });
+    }
     res.status(204).send();
   } catch (err) {
     console.error('[TASKS] DELETE error:', err.message);

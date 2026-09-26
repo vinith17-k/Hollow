@@ -236,8 +236,10 @@ Dedicated **Analytics Tab** (`#panel-analytics`) providing insight into directiv
 | Tab ID | Name | Core Responsibilities |
 |---|---|---|
 | `#panel-tasks` | **Directives** | Task creation, date/time scheduling, rollover warnings, inline editing, complete toggle, snooze, multi-level undo deletion |
-| `#panel-settings` | **Config** | Chime toggle, LED brightness, snooze duration, 12H/24H format, timezone selector, cloud endpoint URL, quiet hours schedule |
+| `#panel-focus` | **Focus** | Pomodoro focus sprint engine with 25m/5m/15m/45m profiles, retro digital timer, session stats, mascot deep work sync, +50 XP reward |
+| `#panel-settings` | **Config** | Chime toggle, LED brightness, snooze duration, 12H/24H format, timezone selector, cloud endpoint URL, quiet hours schedule, iCal feed subscription |
 | `#panel-analytics` | **Analytics** | 7-day completion chart, completion rate KPI, completed vs missed counts, streak performance |
+| `#panel-serial` | **Serial** | Web Serial API USB-C link at 115200 baud, real-time command terminal, quick hardware packets (STATUS, LED, CHIME, RESTART) |
 | `#panel-diag` | **Telemetry** | System diagnostics (uptime, RAM, firmware, ping latency, API status) and raw circular event log stream |
 | `#panel-admin` | **Admin** | Wi-Fi credential provisioning, isolated Danger Zone with Force Cloud Sync and Factory Reset ("RESET" prompt) |
 
@@ -301,7 +303,15 @@ The backend is built with Express 4.x and designed to work both as a standalone 
     - `current_streak`: Number between `0` and `9999`.
     - `led_brightness`: Number between `1` and `100`.
 
-#### 4. System Diagnostics & Backup
+#### 4. Real-Time Streaming & Calendar Integrations
+- **`GET /api/events`**:
+  - **Headers**: `text/event-stream`, `Cache-Control: no-cache`
+  - **Action**: Opens a persistent Server-Sent Events (SSE) pipe. Streams instant push events (`tasks_changed`, `settings_changed`, `xp_gained`) to all open dashboards within 50ms of any mutation.
+- **`GET /api/calendar/sync`**:
+  - **Query Params**: `?url=<encoded_ics_url>`
+  - **Action**: Fetches external .ics calendar feeds (Google Calendar, Apple, Outlook) using Node native HTTP/HTTPS with redirect resolution. Parses `BEGIN:VEVENT` blocks, parses DTSTART, and creates desk directives for upcoming calendar events with `source: 'ical'`.
+
+#### 5. System Diagnostics & Backup
 - **`GET /api/health`**:
   - **Response**: System status report (`status: "ok"`, firmware version, formatted uptime, total directives count, pending count, database engine).
 - **`GET /api/log`**:
@@ -326,15 +336,18 @@ c:\Users\vinit\Projects\DESK-COMPANION\
 │   └── index.js                      # Serverless entry point for Vercel; imports Express app
 ├── backend/
 │   ├── data.json                     # Seed / local JSON flat-file database
-│   ├── db.js                         # Database controller, lowdb manager & /tmp fallback
-│   ├── server.js                     # Main Express 4.x application & route registrations
+│   ├── db.js                         # Database controller & /tmp fallback with gamification schema
+│   ├── server.js                     # Main Express 4.x application, SSE stream & route registrations
 │   └── routes/
 │       ├── auth.js                   # PIN login & verify routes with crypto timingSafeEqual
+│       ├── calendar.js               # iCal / Google Calendar parser & sync engine
 │       ├── diag.js                   # Health check, circular logging, export & import routes
 │       ├── settings.js               # Device settings schema validation & update routes
-│       └── tasks.js                  # Directives CRUD, delta querying, and snooze handler
+│       └── tasks.js                  # Directives CRUD, XP progression & SSE broadcasting
 ├── public/
-│   └── index.html                    # Single-Page App containing UI, styles, simulator & logic
+│   ├── index.html                    # Single-Page App with all 6 major subsystems & tactile UI
+│   ├── manifest.json                 # Web App Manifest for standalone PWA installation
+│   └── sw.js                         # Service Worker for offline asset caching & network-first fallback
 ├── .gitignore                        # Git exclusion rules (node_modules, logs, cache)
 ├── package.json                      # Node.js project manifest & dependencies
 ├── vercel.json                       # Vercel deployment routes and serverless configuration

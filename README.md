@@ -22,7 +22,12 @@ It provides a digital twin hardware simulator, directive scheduling, dynamic mas
 - **🔐 Master Security Gate**: PIN/password authentication gate powered by constant-time HMAC tokens (`crypto.timingSafeEqual`).
 - **🌙 Schedule-Aware Quiet Hours**: Time-window alert suppression (chime & LED) with full midnight-crossing / overnight support.
 - **🎛️ Rotary Encoder Shortcuts & HUD**: Virtual EC11 knob supporting long-press mute (>600ms), double-click jump (<400ms), single-click task completion, and mouse wheel rotation.
-- **🦇 Mascot Moods & Micro-Animations**: Non-destructive emotional states (`neutral`, `content`, `satisfied`, `restless`) and natural idle twitches (blink, ear-twitch, wing-flutter).
+- **🦇 Mascot Evolution & Tamagotchi Care**: Progressive XP system across 8 evolutionary tiers (Bat Pup → Vampire Sovereign), unlockable cosmetic attire, vitality tracking, and Care Sanctuary modal.
+- **⏱️ Tactile Pomodoro & Deep Work Sprints**: Hardware focus sprint engine with 25m/5m/15m/45m profiles, retro pulsating digital timer, session metrics, and +50 XP bonus rewards.
+- **🔌 Web Serial API (USB-C Hardware Link)**: Direct browser-to-ESP32 serial connection at 115200 baud with interactive packet terminal and quick action commands (`STATUS`, `LED`, `CHIME`, `RESTART`).
+- **📅 External Calendar & Tool Sync (iCal / Google)**: Remote .ics subscription engine that automatically imports calendar events into directives.
+- **⚡ Sub-50ms Server-Sent Events (SSE)**: Instant bi-directional real-time sync across multiple open dashboard windows and hardware devices.
+- **📱 Progressive Web App (PWA) & Native Notifications**: Standalone OS installation, offline asset caching via Service Worker (`sw.js`), and Web Notification API integration.
 - **🔥 Consecutive Streak Tracking**: Day-by-day task completion streak counter displayed on the dashboard and on the simulator screen (`🔥 XD`).
 - **📊 7-Day Velocity Analytics**: Retro Teenage Engineering styled dual-bar chart visualizing completed vs missed tasks per day.
 - **⚡ Offline-First Architecture**: Resilient localStorage caching with background mutation retry queue.
@@ -77,8 +82,10 @@ This repository is pre-configured with `vercel.json` for instant deployment on V
 | `PATCH` | `/api/tasks/:id` | Update directive fields (`title`, `done`, `due_time`) |
 | `DELETE` | `/api/tasks/:id` | Delete directive (204 No Content) |
 | `POST` | `/api/tasks/:id/snooze` | Snooze directive by specified `minutes` |
-| `GET` | `/api/settings` | Retrieve configuration singleton (quiet hours, streak, etc.) |
+| `GET` | `/api/settings` | Retrieve configuration singleton (quiet hours, gamification, calendar feeds) |
 | `PATCH` | `/api/settings` | Update configuration with schema validation |
+| `GET` | `/api/events` | Server-Sent Events (SSE) live push stream |
+| `GET` | `/api/calendar/sync` | Sync and parse external .ics / Google Calendar feeds |
 | `GET` | `/api/log` | Circular event telemetry log |
 | `GET` | `/api/export` | Download full JSON database backup |
 | `POST` | `/api/import` | Restore database from JSON backup |

@@ -48,9 +48,17 @@ router.patch('/', (req, res) => {
     sync_interval_sec:   { type: 'number',  min: 10, max: 300 },
     time_format:         { type: 'string',  values: ['12', '24'] },
     timezone:            { type: 'string' },
-    quiet_hours_enabled: { type: 'boolean' },
-    quiet_hours_windows: { type: 'array' },
-    current_streak:      { type: 'number',  min: 0,  max: 9999 },
+    quiet_hours_enabled:         { type: 'boolean' },
+    quiet_hours_windows:         { type: 'array' },
+    current_streak:              { type: 'number',  min: 0,  max: 9999 },
+    xp:                          { type: 'number',  min: 0,  max: 999999 },
+    level:                       { type: 'number',  min: 1,  max: 20 },
+    level_name:                  { type: 'string' },
+    total_tasks_completed:       { type: 'number',  min: 0,  max: 999999 },
+    cosmetic_unlocks:            { type: 'array' },
+    pomodoro_sessions_completed: { type: 'number',  min: 0,  max: 99999 },
+    calendar_feeds:              { type: 'array' },
+    calendar_sync_enabled:       { type: 'boolean' },
   };
 
   const patch = {};
@@ -134,6 +142,9 @@ router.patch('/', (req, res) => {
     db.read();
     Object.assign(db.data.settings, patch);
     db.write();
+    if (typeof req.app?.locals?.broadcastSSE === 'function') {
+      req.app.locals.broadcastSSE('settings_changed', db.data.settings);
+    }
     res.json(db.data.settings);
   } catch (err) {
     console.error('[SETTINGS] PATCH error:', err.message);

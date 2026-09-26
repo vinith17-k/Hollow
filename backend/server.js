@@ -38,6 +38,7 @@ const db           = require('./db');
 const authRoutes     = require('./routes/auth');
 const taskRoutes     = require('./routes/tasks');
 const settingsRoutes = require('./routes/settings');
+const calendarRoutes = require('./routes/calendar');
 
 const app  = express();
 const PORT = parseInt(process.env.PORT || '4000', 10);
@@ -176,11 +177,67 @@ app.post('/api/import', (req, res) => {
   res.json({ imported: { tasks: db.data.tasks.length, settings: !!settings } });
 });
 
+// ── Real-Time Server-Sent Events (SSE) ───────────────────────────────────────
+const sseClients = new Set();
+
+function broadcastSSE(type, payload = {}) {
+  const data = JSON.stringify({ type, payload, ts: Date.now() });
+  const msg = `data: ${data}\n\n`;
+  for (const client of sseClients) {
+    try {
+      client.write(msg);
+    } catch (_) {
+      sseClients.delete(client);
+    }
+  }
+}
+
+app.locals.broadcastSSE = broadcastSSE;
+
+app.get('/api/events', (req, res) => {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : req.query.token;
+
+  // In production with PIN set, verify token
+  if (process.env.HOLLOW_PIN && !authRoutes.verifySessionToken(token)) {
+    return res.status(401).json({ error: 'Unauthorized for SSE stream' });
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+
+  if (typeof res.flushHeaders === 'function') {
+    res.flushHeaders();
+  }
+
+  // Welcome frame
+  res.write(`data: ${JSON.stringify({ type: 'connected', ts: Date.now() })}\n\n`);
+  sseClients.add(res);
+
+  // Keep-alive heartbeat ping every 25 seconds
+  const pingTimer = setInterval(() => {
+    try {
+      res.write(': keepalive\n\n');
+    } catch (_) {
+      clearInterval(pingTimer);
+      sseClients.delete(res);
+    }
+  }, 25000);
+
+  req.on('close', () => {
+    clearInterval(pingTimer);
+    sseClients.delete(res);
+  });
+});
+
 // ── API Routes ────────────────────────────────────────────────────────────────
 
 app.use('/api/auth',     authRoutes);
 app.use('/api/tasks',    taskRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/calendar', calendarRoutes);
 
 // Expose logEvent to routes
 app.locals.logEvent = logEvent;

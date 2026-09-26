@@ -1,0 +1,20 @@
+{
+  "name": "Hollow Control",
+  "short_name": "Hollow",
+  "description": "Tactile Desk Companion & Directive Control Center",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#8c8f8d",
+  "theme_color": "#111211",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23111211' rx='12'/%3E%3Cpath d='M20 20 H16 V16 H12 V12 H8 V16 H4 V24 H8 V32 H12 V28 H16 V24 H20 Z M44 20 H48 V16 H52 V12 H56 V16 H60 V24 H56 V32 H52 V28 H48 V24 H44 Z M24 16 H40 V20 H44 V44 H40 V48 H24 V44 H20 V20 H24 Z' fill='%23ea580c'/%3E%3Crect x='26' y='24' width='4' height='4' fill='%23fff'/%3E%3Crect x='34' y='24' width='4' height='4' fill='%23fff'/%3E%3C/svg%3E",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities", "hardware"]
+}

@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hollow Control</title>
     
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#111211">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Hollow">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -217,6 +223,24 @@
         /* Toast Notification */
         #toast-container { transition: transform 0.3s ease, opacity 0.3s ease; transform: translateY(100%); opacity: 0; }
         #toast-container.show { transform: translateY(0); opacity: 1; }
+
+        /* XP & Gamification Bar */
+        #xp-bar-fill { transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .level-up-flash { animation: level-up-flash 0.8s ease-out forwards; }
+        @keyframes level-up-flash { 0% { transform: scale(1); } 50% { transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(234, 88, 12, 0.8)); } 100% { transform: scale(1); } }
+
+        /* Focus / Pomodoro Mode Mascot */
+        .state-focus { --eye-glow: #818cf8; }
+        .state-focus #mascot-body-group { animation: float-work 1.8s ease-in-out infinite; }
+        .state-focus .mascot-eye { fill: #c7d2fe !important; animation: focus-pulse 2.5s ease-in-out infinite alternate; }
+        @keyframes focus-pulse { 0% { opacity: 0.7; filter: drop-shadow(0 0 2px #818cf8); } 100% { opacity: 1; filter: drop-shadow(0 0 8px #818cf8); } }
+
+        /* Focus Timer Pulse */
+        .pomodoro-pulsing { animation: clock-pulse 1s ease-in-out infinite alternate; }
+        @keyframes clock-pulse { from { opacity: 0.92; } to { opacity: 1; text-shadow: 0 0 12px var(--screen-text); } }
+
+        /* Serial Terminal */
+        #serial-log p { font-family: 'Space Mono', monospace; line-height: 1.35; word-break: break-all; }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-2 sm:p-6 lg:p-8">
@@ -350,14 +374,39 @@
                 </div>
             </div>
             
+            <!-- Mascot Evolution & XP Gamification Bar -->
+            <div class="flex items-center gap-3 bg-white px-3 py-1.5 rounded border border-[var(--chassis-dark)] shadow-sm mb-3">
+                <div class="flex-shrink-0 text-center">
+                    <span class="hw-label text-[0.55rem] block">LVL</span>
+                    <span id="xp-level-display" class="text-base font-bold font-mono text-gray-800 leading-tight">1</span>
+                </div>
+                <div class="flex-grow min-w-0">
+                    <div class="flex justify-between items-center mb-1">
+                        <div class="flex items-center gap-1.5 truncate">
+                            <span id="xp-level-name" class="font-mono text-xs font-bold text-gray-800 truncate">Bat Pup</span>
+                            <span id="xp-stage-badge" class="hw-label text-[0.5rem] bg-indigo-50 text-indigo-700 px-1 py-0.2 rounded border border-indigo-200">STAGE I</span>
+                        </div>
+                        <span id="xp-display" class="font-mono text-[0.65rem] text-gray-500 whitespace-nowrap ml-2">0 / 100 XP</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 border border-gray-300 overflow-hidden relative">
+                        <div id="xp-bar-fill" class="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-indigo-600 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="flex-shrink-0 flex items-center gap-1">
+                    <button id="btn-open-cosmetics" type="button" class="btn-tactile px-2 py-1 text-[0.65rem] text-gray-700" title="Mascot Care & Cosmetic Unlocks">🦇 CARE</button>
+                </div>
+            </div>
+
             <!-- Tab Navigation -->
             <div class="flex items-center gap-2 mb-3 flex-wrap">
                 <nav class="flex gap-2 overflow-x-auto pb-1 flex-grow" role="tablist" aria-label="Dashboard Sections">
-                    <button role="tab" aria-selected="true" aria-controls="panel-tasks" id="tab-tasks" class="btn-tactile active px-4 py-2 min-w-[80px]" tabindex="0">Tasks</button>
-                    <button role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" class="btn-tactile px-4 py-2 min-w-[80px]" tabindex="-1">Config</button>
-                    <button role="tab" aria-selected="false" aria-controls="panel-analytics" id="tab-analytics" class="btn-tactile px-4 py-2 min-w-[80px]" tabindex="-1">Analytics</button>
-                    <button role="tab" aria-selected="false" aria-controls="panel-diag" id="tab-diag" class="btn-tactile px-4 py-2 min-w-[80px]" tabindex="-1">Diag</button>
-                    <button role="tab" aria-selected="false" aria-controls="panel-admin" id="tab-admin" class="btn-tactile px-4 py-2 min-w-[80px]" tabindex="-1">Admin</button>
+                    <button role="tab" aria-selected="true" aria-controls="panel-tasks" id="tab-tasks" class="btn-tactile active px-4 py-2 min-w-[70px]" tabindex="0">Tasks</button>
+                    <button role="tab" aria-selected="false" aria-controls="panel-focus" id="tab-focus" class="btn-tactile px-4 py-2 min-w-[70px]" tabindex="-1">Focus</button>
+                    <button role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" class="btn-tactile px-4 py-2 min-w-[70px]" tabindex="-1">Config</button>
+                    <button role="tab" aria-selected="false" aria-controls="panel-analytics" id="tab-analytics" class="btn-tactile px-4 py-2 min-w-[70px]" tabindex="-1">Analytics</button>
+                    <button role="tab" aria-selected="false" aria-controls="panel-serial" id="tab-serial" class="btn-tactile px-4 py-2 min-w-[70px]" tabindex="-1">Serial</button>
+                    <button role="tab" aria-selected="false" aria-controls="panel-diag" id="tab-diag" class="btn-tactile px-4 py-2 min-w-[70px]" tabindex="-1">Diag</button>
+                    <button role="tab" aria-selected="false" aria-controls="panel-admin" id="tab-admin" class="btn-tactile px-4 py-2 min-w-[70px]" tabindex="-1">Admin</button>
                 </nav>
             </div>
 
@@ -527,6 +576,26 @@
                             </div>
                         </div>
 
+                        <!-- External Calendar Sync (iCal / Google Calendar) -->
+                        <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm border-l-4 border-l-blue-600">
+                            <div class="flex items-center justify-between mb-1">
+                                <h3 class="font-bold text-sm flex items-center gap-1.5 text-gray-800">
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    External Calendar Sync (iCal / Google)
+                                </h3>
+                                <span class="hw-label text-[0.55rem] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200">AUTO-DIRECTIVES</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-2">Subscribe to public or secret .ics calendar feeds to automatically generate desk directives.</p>
+                            <div class="flex gap-2 mb-2">
+                                <input type="url" id="calendar-feed-url" placeholder="https://calendar.google.com/calendar/ical/.../basic.ics" class="input-tactile text-xs flex-grow">
+                                <button type="button" id="btn-sync-calendar" class="btn-tactile btn-tactile-primary px-3 text-xs font-bold shrink-0">⟳ SYNC NOW</button>
+                            </div>
+                            <div class="flex justify-between items-center text-[0.6rem] font-mono text-gray-400">
+                                <span id="calendar-sync-status">No calendar sync run yet</span>
+                                <button type="button" id="btn-save-calendar-feed" class="text-blue-600 hover:underline">Save as Default Feed</button>
+                            </div>
+                        </div>
+
                         <!-- Cloud Endpoint Configuration (Moved here from Danger Zone proximity) -->
                         <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm border-l-4 border-l-[var(--accent-orange)]">
                             <h3 class="font-bold text-sm mb-1 flex items-center gap-1.5">
@@ -599,6 +668,111 @@
                         <div class="flex justify-between items-center text-[0.55rem] text-gray-400 font-mono pt-2">
                             <span>Evaluated from historical directive timestamps</span>
                             <span id="analytics-best-day">Best performance: —</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel: Tactile Pomodoro & Deep Work Focus Sprints -->
+                <div id="panel-focus" role="tabpanel" aria-labelledby="tab-focus" class="h-full hidden flex-col p-3 overflow-y-auto custom-scroll">
+                    <div class="flex justify-between items-center mb-3">
+                        <div>
+                            <h2 class="hw-label text-sm">Focus Sprint Engine</h2>
+                            <p class="text-[0.65rem] text-gray-500 font-mono">Tactile Pomodoro · Mascot Deep Focus Mode</p>
+                        </div>
+                        <span id="focus-mode-badge" class="hw-label bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-200 text-[0.6rem]">IDLE</span>
+                    </div>
+
+                    <!-- Retro Digital Focus Display -->
+                    <div class="bg-[var(--screen-bezel)] rounded-xl p-5 text-center shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] border border-[#333] mb-4 relative overflow-hidden">
+                        <div class="absolute inset-0 pointer-events-none opacity-20 bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.4)_50%)] bg-[length:100%_4px]"></div>
+                        <div id="pomodoro-clock" class="text-6xl font-mono font-bold text-[var(--screen-text)] tracking-wider pomodoro-pulsing" style="text-shadow: 0 0 10px var(--screen-text);">25:00</div>
+                        <div id="pomodoro-label" class="text-xs font-mono text-gray-400 mt-2 uppercase tracking-widest">25M DEEP WORK SPRINT</div>
+                    </div>
+
+                    <!-- Primary Controls -->
+                    <div class="grid grid-cols-3 gap-2 mb-3">
+                        <button id="btn-pomodoro-start" type="button" class="btn-tactile btn-tactile-primary py-2.5 text-xs font-bold tracking-wider">▶ START</button>
+                        <button id="btn-pomodoro-pause" type="button" class="btn-tactile py-2.5 text-xs font-bold tracking-wider" disabled>⏸ PAUSE</button>
+                        <button id="btn-pomodoro-reset" type="button" class="btn-tactile py-2.5 text-xs font-bold tracking-wider">↺ RESET</button>
+                    </div>
+
+                    <!-- Focus Presets -->
+                    <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm mb-3">
+                        <span class="hw-label text-[0.6rem] block mb-2 text-gray-600">Preset Sprint Profiles</span>
+                        <div class="grid grid-cols-4 gap-1.5">
+                            <button type="button" class="btn-tactile py-1.5 text-[0.65rem] pomodoro-preset active" data-minutes="25">25m Focus</button>
+                            <button type="button" class="btn-tactile py-1.5 text-[0.65rem] pomodoro-preset" data-minutes="5">5m Break</button>
+                            <button type="button" class="btn-tactile py-1.5 text-[0.65rem] pomodoro-preset" data-minutes="15">15m Rest</button>
+                            <button type="button" class="btn-tactile py-1.5 text-[0.65rem] pomodoro-preset" data-minutes="45">45m Deep</button>
+                        </div>
+                    </div>
+
+                    <!-- Session Rewards & Stats -->
+                    <div class="grid grid-cols-2 gap-2 bg-[var(--chassis-light)] p-2.5 rounded border border-[var(--chassis-dark)]">
+                        <div class="bg-white p-2 rounded border border-gray-300 text-center">
+                            <span class="hw-label text-[0.55rem] block text-gray-500">Sprints Today</span>
+                            <span id="pomodoro-sessions-today" class="text-base font-bold font-mono text-gray-800">0</span>
+                        </div>
+                        <div class="bg-white p-2 rounded border border-gray-300 text-center">
+                            <span class="hw-label text-[0.55rem] block text-gray-500">Total Sprints</span>
+                            <span id="pomodoro-sessions-total" class="text-base font-bold font-mono text-indigo-700">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel: Web Serial API — USB Device Link & Telemetry -->
+                <div id="panel-serial" role="tabpanel" aria-labelledby="tab-serial" class="h-full hidden flex-col p-3 overflow-y-auto custom-scroll">
+                    <div class="flex justify-between items-center mb-3">
+                        <div>
+                            <h2 class="hw-label text-sm">Web Serial Device Link</h2>
+                            <p class="text-[0.65rem] text-gray-500 font-mono">Direct USB-C Link · 115200 Baud · Live Telemetry</p>
+                        </div>
+                        <span id="serial-baud-badge" class="hw-label bg-[var(--chassis-light)] px-2 py-0.5 rounded border border-[var(--chassis-dark)] text-[0.6rem]">115200 BAUD</span>
+                    </div>
+
+                    <!-- Connection Banner -->
+                    <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm flex justify-between items-center mb-3">
+                        <div>
+                            <span class="font-bold text-sm block">ESP32 USB-C Port</span>
+                            <span id="serial-status-text" class="text-xs font-mono text-gray-500">Disconnected (Click Connect to select COM port)</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="btn-serial-connect" type="button" class="btn-tactile btn-tactile-primary px-3 py-1.5 text-xs font-bold">⚡ CONNECT</button>
+                            <button id="btn-serial-disconnect" type="button" class="btn-tactile px-3 py-1.5 text-xs font-bold" disabled>DISCONNECT</button>
+                        </div>
+                    </div>
+
+                    <div id="serial-unavailable-notice" class="hidden bg-amber-50 border border-amber-300 rounded p-2.5 text-xs text-amber-800 mb-3 font-mono">
+                        ⚠️ Web Serial API is unavailable in this browser context. Please use Chrome, Edge, or Opera on desktop to link hardware over USB-C.
+                    </div>
+
+                    <!-- Live Serial Console -->
+                    <div class="bg-[var(--screen-bg)] rounded-lg p-3 border-2 border-[var(--screen-bezel)] shadow-inner mb-3 flex-grow flex flex-col min-h-[160px]">
+                        <div class="flex justify-between items-center mb-2 border-b border-[#222] pb-1">
+                            <span class="hw-label text-[var(--screen-text)] opacity-70">LIVE SERIAL STREAM</span>
+                            <button id="btn-serial-clear" type="button" class="hw-label text-[var(--screen-text)] opacity-50 text-[0.5rem] hover:opacity-100">✕ CLEAR</button>
+                        </div>
+                        <div id="serial-log" class="font-mono text-[0.65rem] text-green-400 h-36 overflow-y-auto custom-scroll space-y-0.5 pr-1">
+                            <p class="text-gray-500">[SERIAL] Ready. Connect USB device to begin communication.</p>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Command Input -->
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" id="serial-cmd-input" placeholder="Type custom command (e.g. STATUS)..." class="input-tactile text-xs flex-grow" disabled>
+                        <button id="btn-serial-send" type="button" class="btn-tactile px-4 text-xs font-bold" disabled>SEND</button>
+                    </div>
+
+                    <!-- Quick Hardware Directives -->
+                    <div class="bg-[var(--chassis-light)] p-2.5 border border-[var(--chassis-dark)] rounded">
+                        <span class="hw-label text-[0.6rem] block mb-1.5 text-gray-700">Quick Hardware Packets</span>
+                        <div class="flex flex-wrap gap-1.5">
+                            <button type="button" class="btn-tactile px-2 py-1 text-[0.6rem] serial-quick-cmd" data-cmd="STATUS">STATUS</button>
+                            <button type="button" class="btn-tactile px-2 py-1 text-[0.6rem] serial-quick-cmd" data-cmd="LED:RED">LED:RED</button>
+                            <button type="button" class="btn-tactile px-2 py-1 text-[0.6rem] serial-quick-cmd" data-cmd="LED:GREEN">LED:GREEN</button>
+                            <button type="button" class="btn-tactile px-2 py-1 text-[0.6rem] serial-quick-cmd" data-cmd="LED:OFF">LED:OFF</button>
+                            <button type="button" class="btn-tactile px-2 py-1 text-[0.6rem] serial-quick-cmd" data-cmd="CHIME">CHIME</button>
+                            <button type="button" class="btn-tactile px-2 py-1 text-[0.6rem] serial-quick-cmd" data-cmd="RESTART">RESTART</button>
                         </div>
                     </div>
                 </div>
@@ -712,6 +886,42 @@
                     <span>Env: HOLLOW_PIN</span>
                 </div>
             </form>
+        </div>
+    <!-- Mascot Care & Cosmetics Modal -->
+    <div id="cosmetics-modal" class="hidden fixed inset-0 bg-[#0d0e0d]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[var(--chassis-main)] border-2 border-white/50 border-b-4 border-r-4 border-[var(--chassis-dark)] p-5 rounded-2xl shadow-2xl max-w-md w-full relative">
+            <div class="flex justify-between items-center mb-3 border-b border-[var(--chassis-dark)] pb-2">
+                <div>
+                    <h2 class="font-bold text-base text-gray-800 tracking-wider">HOLLOW CARE & SANCTUARY</h2>
+                    <p class="hw-label text-[0.55rem] text-gray-500">Mascot Evolution · Cosmetics · Vitality</p>
+                </div>
+                <button id="btn-close-cosmetics" type="button" class="btn-tactile px-2 py-0.5 text-xs text-gray-600 hover:text-black">✕</button>
+            </div>
+
+            <!-- Mascot Status Card -->
+            <div class="bg-[var(--screen-bg)] rounded-xl p-4 border border-[var(--screen-bezel)] mb-3 text-center">
+                <div class="text-xs font-mono text-amber-400 uppercase tracking-widest mb-1" id="care-mascot-stage">STAGE I COMPANION</div>
+                <div class="text-xl font-bold font-mono text-white" id="care-mascot-title">Bat Pup</div>
+                <div class="text-[0.65rem] font-mono text-gray-400 mt-1" id="care-xp-subtext">Total XP: 0 · Complete directives to evolve</div>
+
+                <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-800 text-left">
+                    <div class="bg-black/40 p-2 rounded">
+                        <span class="text-[0.55rem] font-mono uppercase text-gray-400 block">Vitality / Mood</span>
+                        <span class="text-xs font-mono font-bold text-green-400" id="care-mood-text">Content & Attentive</span>
+                    </div>
+                    <div class="bg-black/40 p-2 rounded">
+                        <span class="text-[0.55rem] font-mono uppercase text-gray-400 block">Sprint Focus</span>
+                        <span class="text-xs font-mono font-bold text-indigo-400" id="care-focus-text">0 Completed</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cosmetics List -->
+            <div class="space-y-2 mb-3 max-h-56 overflow-y-auto custom-scroll pr-1" id="cosmetics-list">
+                <!-- Populated dynamically by JS -->
+            </div>
+
+            <button type="button" id="btn-save-cosmetics" class="btn-tactile btn-tactile-primary w-full py-2 text-xs font-bold uppercase tracking-wider">DONE</button>
         </div>
     </div>
 
@@ -912,9 +1122,17 @@
             sync_interval_sec:   30,
             time_format:         '12',
             timezone:            'UTC',
-            quiet_hours_enabled: false,
-            quiet_hours_windows: [],
-            current_streak:      0,
+            quiet_hours_enabled:         false,
+            quiet_hours_windows:         [],
+            current_streak:              0,
+            xp:                          0,
+            level:                       1,
+            level_name:                  'Bat Pup',
+            total_tasks_completed:       0,
+            cosmetic_unlocks:            ['classic_cloak'],
+            pomodoro_sessions_completed: 0,
+            calendar_feeds:              [],
+            calendar_sync_enabled:       false,
         };
 
         let currentUrgency      = 0;
@@ -931,6 +1149,18 @@
         let activeMicroAnim     = null;
         let microAnimTimer      = null;
         let currentStreak       = 0;
+
+        // ── PWA, SSE, Focus, Serial State ─────────────────────────────────────────
+        let sseConnection              = null;
+        let sseReconnectTimer          = null;
+        let pomodoroTimer              = null;
+        let pomodoroSecondsLeft        = 25 * 60;
+        let pomodoroDuration           = 25 * 60;
+        let pomodoroRunning            = false;
+        let pomodoroSessionsTodayCount = 0;
+        let serialPort                 = null;
+        let serialReader               = null;
+        let serialWriter               = null;
 
         // ── DOM Elements ──────────────────────────────────────────────────────────
         const els = {
@@ -1345,6 +1575,562 @@
             });
         }
 
+        // ── Feature: PWA & Notifications ──────────────────────────────────────────
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js').catch(err => {
+                        console.log('[PWA] SW register skipped:', err.message);
+                    });
+                });
+            }
+        }
+
+        function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().catch(() => {});
+            }
+        }
+
+        function sendDesktopNotification(title, body) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try {
+                    new Notification(title, {
+                        body,
+                        icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23111211' rx='12'/%3E%3Cpath d='M20 20 H16 V16 H12 V12 H8 V16 H4 V24 H8 V32 H12 V28 H16 V24 H20 Z M44 20 H48 V16 H52 V12 H56 V16 H60 V24 H56 V32 H52 V28 H48 V24 H44 Z M24 16 H40 V20 H44 V44 H40 V48 H24 V44 H20 V20 H24 Z' fill='%23ea580c'/%3E%3Crect x='26' y='24' width='4' height='4' fill='%23fff'/%3E%3Crect x='34' y='24' width='4' height='4' fill='%23fff'/%3E%3C/svg%3E",
+                        silent: isMuted
+                    });
+                } catch (_) {}
+            }
+        }
+
+        // ── Feature: Real-Time SSE Stream ─────────────────────────────────────────
+        function setupSSE() {
+            if (sseConnection) {
+                try { sseConnection.close(); } catch (_) {}
+                sseConnection = null;
+            }
+            const token = getAuthToken();
+            const sseUrl = `${getApiBase()}/events?token=${encodeURIComponent(token || '')}`;
+
+            try {
+                sseConnection = new EventSource(sseUrl);
+
+                sseConnection.onmessage = (event) => {
+                    if (!event.data) return;
+                    try {
+                        const msg = JSON.parse(event.data);
+                        if (msg.type === 'connected') {
+                            setSyncIndicator('online');
+                        } else if (msg.type === 'tasks_changed') {
+                            loadData().then(() => {
+                                renderTasks();
+                                hardwareLoop();
+                            });
+                        } else if (msg.type === 'settings_changed') {
+                            loadData().then(() => {
+                                updateSettingsUI();
+                                hardwareLoop();
+                                renderXPBar();
+                            });
+                        } else if (msg.type === 'xp_gained') {
+                            if (msg.payload) {
+                                showToast(`🔥 +25 XP! ${msg.payload.level_name} (Lv ${msg.payload.level})`);
+                                playChimeAudio();
+                                settings.xp = msg.payload.xp;
+                                settings.level = msg.payload.level;
+                                settings.level_name = msg.payload.level_name;
+                                renderXPBar();
+                            }
+                        }
+                    } catch (_) {}
+                };
+
+                sseConnection.onerror = () => {
+                    if (sseConnection) {
+                        try { sseConnection.close(); } catch (_) {}
+                        sseConnection = null;
+                    }
+                    if (!sseReconnectTimer) {
+                        sseReconnectTimer = setTimeout(() => {
+                            sseReconnectTimer = null;
+                            if (appInitialized) setupSSE();
+                        }, 5000);
+                    }
+                };
+            } catch (e) {
+                console.warn('[SSE] EventSource init error:', e.message);
+            }
+        }
+
+        // ── Feature: Mascot Evolution & Tamagotchi Care ───────────────────────────
+        const LEVEL_THRESHOLDS = [
+            { level: 1, name: 'Bat Pup',          stage: 'STAGE I',   minXP: 0 },
+            { level: 2, name: 'Night Scout',      stage: 'STAGE II',  minXP: 100 },
+            { level: 3, name: 'Cave Keeper',      stage: 'STAGE III', minXP: 250 },
+            { level: 4, name: 'Shadow Wing',      stage: 'STAGE IV',  minXP: 500 },
+            { level: 5, name: 'Dusk Sentinel',    stage: 'STAGE V',   minXP: 1000 },
+            { level: 6, name: 'Hollow Guardian',  stage: 'STAGE VI',  minXP: 2000 },
+            { level: 7, name: 'Void Ranger',      stage: 'STAGE VII', minXP: 4000 },
+            { level: 8, name: 'Vampire Sovereign', stage: 'STAGE VIII', minXP: 8000 },
+        ];
+
+        const COSMETICS_CATALOG = [
+            { id: 'classic_cloak', name: 'Classic Nightcloak', unlockLevel: 1, desc: 'Original obsidian matte fur coat' },
+            { id: 'silver_fangs',  name: 'Silver Fangs',       unlockLevel: 2, desc: 'Polished silver gleam on nocturnal hunts' },
+            { id: 'obsidian_wings', name: 'Obsidian Wings',    unlockLevel: 4, desc: 'Aerodynamic razor-edge wingtips' },
+            { id: 'void_crown',    name: 'Void Crown',         unlockLevel: 6, desc: 'A subtle shadowy circlet of desk authority' },
+            { id: 'golden_aura',   name: 'Golden Aura',        unlockLevel: 8, desc: 'Radiates legendary golden sovereign luminescence' },
+        ];
+
+        function getXPProgress(xp = 0) {
+            let current = LEVEL_THRESHOLDS[0];
+            let next = LEVEL_THRESHOLDS[1];
+            for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
+                if (xp >= LEVEL_THRESHOLDS[i].minXP) {
+                    current = LEVEL_THRESHOLDS[i];
+                    next = LEVEL_THRESHOLDS[i + 1] || null;
+                }
+            }
+            if (!next) return { current, next: null, pct: 100, nextXP: null };
+            const pct = Math.round(((xp - current.minXP) / (next.minXP - current.minXP)) * 100);
+            return { current, next, pct: Math.min(100, Math.max(0, pct)), nextXP: next.minXP - xp };
+        }
+
+        function renderXPBar() {
+            const xp = settings.xp || 0;
+            const { current, next, pct, nextXP } = getXPProgress(xp);
+            
+            const lvlEl = document.getElementById('xp-level-display');
+            const nameEl = document.getElementById('xp-level-name');
+            const stageEl = document.getElementById('xp-stage-badge');
+            const fillEl = document.getElementById('xp-bar-fill');
+            const xpEl = document.getElementById('xp-display');
+
+            if (lvlEl) lvlEl.textContent = current.level;
+            if (nameEl) nameEl.textContent = current.name;
+            if (stageEl) stageEl.textContent = current.stage;
+            if (fillEl) fillEl.style.width = `${pct}%`;
+            if (xpEl) {
+                xpEl.textContent = next ? `${xp} / ${next.minXP} XP` : `${xp} XP (MAX)`;
+            }
+
+            // Sync care modal
+            const careTitle = document.getElementById('care-mascot-title');
+            const careStage = document.getElementById('care-mascot-stage');
+            const careSub = document.getElementById('care-xp-subtext');
+            const careMood = document.getElementById('care-mood-text');
+            const careFocus = document.getElementById('care-focus-text');
+
+            if (careTitle) careTitle.textContent = current.name;
+            if (careStage) careStage.textContent = `${current.stage} COMPANION · LV ${current.level}`;
+            if (careSub) careSub.textContent = nextXP ? `Total XP: ${xp} · ${nextXP} XP until ${next.name}` : `Total XP: ${xp} · Apex Sovereign Achieved`;
+
+            const mood = computeMascotMood(tasks);
+            const moodMap = {
+                'mood-neutral': 'Balanced & Vigilant',
+                'mood-content': 'Content & Attentive (≥50% done)',
+                'mood-satisfied': 'Thriving & Satisfied (100% done)',
+                'mood-restless': 'Restless & Needing Directives',
+            };
+            if (careMood) careMood.textContent = moodMap[mood] || 'Vigilant';
+            if (careFocus) careFocus.textContent = `${settings.pomodoro_sessions_completed || 0} Sprints Done`;
+        }
+
+        function renderCosmeticsList() {
+            const container = document.getElementById('cosmetics-list');
+            if (!container) return;
+            const currentLevel = settings.level || 1;
+            const unlockedItems = Array.isArray(settings.cosmetic_unlocks) ? settings.cosmetic_unlocks : ['classic_cloak'];
+
+            container.innerHTML = '';
+            COSMETICS_CATALOG.forEach(item => {
+                const isUnlocked = currentLevel >= item.unlockLevel;
+                const isEquipped = unlockedItems.includes(item.id);
+
+                const card = document.createElement('div');
+                card.className = `p-2 rounded border flex items-center justify-between gap-2 ${
+                    isEquipped ? 'bg-indigo-50/80 border-indigo-300' : 'bg-white border-gray-200'
+                }`;
+
+                card.innerHTML = `
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-bold text-xs text-gray-800">${item.name}</span>
+                            ${isEquipped ? '<span class="hw-label text-[0.5rem] bg-indigo-600 text-white px-1 rounded">EQUIPPED</span>' : ''}
+                        </div>
+                        <p class="text-[0.6rem] text-gray-500">${item.desc}</p>
+                    </div>
+                    <div>
+                        ${isUnlocked
+                            ? `<button type="button" class="btn-tactile px-2 py-0.5 text-[0.6rem] btn-toggle-cosmetic ${isEquipped ? 'active' : ''}" data-id="${item.id}">
+                                ${isEquipped ? 'UNEQUIP' : 'EQUIP'}
+                               </button>`
+                            : `<span class="hw-label text-[0.55rem] text-gray-400 border border-dashed border-gray-300 px-1 py-0.5 rounded">LV ${item.unlockLevel}</span>`
+                        }
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            container.querySelectorAll('.btn-toggle-cosmetic').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.dataset.id;
+                    let list = Array.isArray(settings.cosmetic_unlocks) ? [...settings.cosmetic_unlocks] : ['classic_cloak'];
+                    if (list.includes(id)) {
+                        list = list.filter(x => x !== id);
+                        if (!list.length) list = ['classic_cloak'];
+                    } else {
+                        list.push(id);
+                    }
+                    settings.cosmetic_unlocks = list;
+                    renderCosmeticsList();
+                    try {
+                        await apiFetch('/settings', {
+                            method: 'PATCH',
+                            body: JSON.stringify({ cosmetic_unlocks: list }),
+                        });
+                        showToast('🦇 Mascot attire updated');
+                    } catch (_) {}
+                });
+            });
+        }
+
+        // ── Feature: Focus & Pomodoro Engine ──────────────────────────────────────
+        function formatPomodoroTime(secs) {
+            const m = String(Math.floor(secs / 60)).padStart(2, '0');
+            const s = String(secs % 60).padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function renderPomodoroDisplay() {
+            const clockEl = document.getElementById('pomodoro-clock');
+            if (clockEl) clockEl.textContent = formatPomodoroTime(pomodoroSecondsLeft);
+        }
+
+        function startPomodoro() {
+            if (pomodoroRunning) return;
+            pomodoroRunning = true;
+
+            const startBtn = document.getElementById('btn-pomodoro-start');
+            const pauseBtn = document.getElementById('btn-pomodoro-pause');
+            const badge = document.getElementById('focus-mode-badge');
+
+            if (startBtn) startBtn.disabled = true;
+            if (pauseBtn) pauseBtn.disabled = false;
+            if (badge) {
+                badge.textContent = 'FOCUS ACTIVE';
+                badge.className = 'hw-label bg-indigo-600 text-white px-2 py-0.5 rounded border border-indigo-700 text-[0.6rem] animate-pulse';
+            }
+
+            // Put simulator mascot into focused state
+            manualStateOverride = 'working';
+            hardwareLoop();
+
+            pomodoroTimer = setInterval(async () => {
+                pomodoroSecondsLeft--;
+                renderPomodoroDisplay();
+
+                if (pomodoroSecondsLeft <= 0) {
+                    clearInterval(pomodoroTimer);
+                    pomodoroRunning = false;
+                    pomodoroSessionsTodayCount++;
+
+                    const todayEl = document.getElementById('pomodoro-sessions-today');
+                    const totalEl = document.getElementById('pomodoro-sessions-total');
+                    if (todayEl) todayEl.textContent = pomodoroSessionsTodayCount;
+                    if (totalEl) totalEl.textContent = (settings.pomodoro_sessions_completed || 0) + 1;
+
+                    manualStateOverride = null;
+                    hardwareLoop();
+                    playChimeAudio();
+                    showToast('🎯 Focus Sprint Complete! +50 XP awarded!');
+                    sendDesktopNotification('Hollow Focus Complete!', 'Deep work session complete. Take a well-deserved breather.');
+
+                    if (startBtn) startBtn.disabled = false;
+                    if (pauseBtn) pauseBtn.disabled = true;
+                    if (badge) {
+                        badge.textContent = 'COMPLETE';
+                        badge.className = 'hw-label bg-green-100 text-green-700 px-2 py-0.5 rounded border border-green-300 text-[0.6rem]';
+                    }
+
+                    // Award +50 XP and increment pomodoro sessions
+                    const newXP = (settings.xp || 0) + 50;
+                    const newTotal = (settings.pomodoro_sessions_completed || 0) + 1;
+                    settings.xp = newXP;
+                    settings.pomodoro_sessions_completed = newTotal;
+                    renderXPBar();
+
+                    try {
+                        await apiFetch('/settings', {
+                            method: 'PATCH',
+                            body: JSON.stringify({ xp: newXP, pomodoro_sessions_completed: newTotal }),
+                        });
+                    } catch (_) {}
+                }
+            }, 1000);
+        }
+
+        function pausePomodoro() {
+            if (!pomodoroRunning) return;
+            clearInterval(pomodoroTimer);
+            pomodoroRunning = false;
+
+            const startBtn = document.getElementById('btn-pomodoro-start');
+            const pauseBtn = document.getElementById('btn-pomodoro-pause');
+            const badge = document.getElementById('focus-mode-badge');
+
+            if (startBtn) startBtn.disabled = false;
+            if (pauseBtn) pauseBtn.disabled = true;
+            if (badge) {
+                badge.textContent = 'PAUSED';
+                badge.className = 'hw-label bg-amber-100 text-amber-700 px-2 py-0.5 rounded border border-amber-300 text-[0.6rem]';
+            }
+
+            manualStateOverride = null;
+            hardwareLoop();
+        }
+
+        function resetPomodoro(minutes) {
+            clearInterval(pomodoroTimer);
+            pomodoroRunning = false;
+            pomodoroDuration = (minutes || 25) * 60;
+            pomodoroSecondsLeft = pomodoroDuration;
+            renderPomodoroDisplay();
+
+            const startBtn = document.getElementById('btn-pomodoro-start');
+            const pauseBtn = document.getElementById('btn-pomodoro-pause');
+            const badge = document.getElementById('focus-mode-badge');
+            const label = document.getElementById('pomodoro-label');
+
+            if (startBtn) startBtn.disabled = false;
+            if (pauseBtn) pauseBtn.disabled = true;
+            if (badge) {
+                badge.textContent = 'IDLE';
+                badge.className = 'hw-label bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-200 text-[0.6rem]';
+            }
+            if (label) label.textContent = `${minutes || 25}M DEEP WORK SPRINT`;
+
+            manualStateOverride = null;
+            hardwareLoop();
+        }
+
+        function setupFocusHandlers() {
+            document.getElementById('btn-pomodoro-start')?.addEventListener('click', startPomodoro);
+            document.getElementById('btn-pomodoro-pause')?.addEventListener('click', pausePomodoro);
+            document.getElementById('btn-pomodoro-reset')?.addEventListener('click', () => {
+                resetPomodoro(Math.floor(pomodoroDuration / 60));
+            });
+
+            document.querySelectorAll('.pomodoro-preset').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.pomodoro-preset').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    resetPomodoro(parseInt(btn.dataset.minutes, 10));
+                });
+            });
+        }
+
+        // ── Feature: Web Serial USB-C Device Link ─────────────────────────────────
+        function logSerial(msg, type = 'info') {
+            const logEl = document.getElementById('serial-log');
+            if (!logEl) return;
+            const p = document.createElement('p');
+            const colors = {
+                info: 'text-green-400',
+                error: 'text-red-400',
+                send: 'text-amber-400',
+                sys: 'text-gray-400'
+            };
+            p.className = colors[type] || 'text-green-400';
+            const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            p.textContent = `[${ts}] ${msg}`;
+            logEl.appendChild(p);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        async function connectSerial() {
+            if (!('serial' in navigator)) {
+                document.getElementById('serial-unavailable-notice')?.classList.remove('hidden');
+                return;
+            }
+            try {
+                serialPort = await navigator.serial.requestPort();
+                await serialPort.open({ baudRate: 115200 });
+
+                const statusEl = document.getElementById('serial-status-text');
+                const connBtn = document.getElementById('btn-serial-connect');
+                const discBtn = document.getElementById('btn-serial-disconnect');
+                const cmdInput = document.getElementById('serial-cmd-input');
+                const sendBtn = document.getElementById('btn-serial-send');
+
+                if (statusEl) statusEl.textContent = 'CONNECTED · ESP32 USB-C (115200 Baud)';
+                if (connBtn) connBtn.disabled = true;
+                if (discBtn) discBtn.disabled = false;
+                if (cmdInput) cmdInput.disabled = false;
+                if (sendBtn) sendBtn.disabled = false;
+
+                logSerial('USB Serial channel established at 115200 baud.', 'sys');
+                showToast('⚡ ESP32 connected via USB Serial');
+
+                // Read incoming serial packets
+                const textDecoder = new TextDecoderStream();
+                serialPort.readable.pipeTo(textDecoder.writable);
+                serialReader = textDecoder.readable.getReader();
+
+                (async () => {
+                    let buffer = '';
+                    while (true) {
+                        try {
+                            const { value, done } = await serialReader.read();
+                            if (done) break;
+                            buffer += value;
+                            const lines = buffer.split('\n');
+                            buffer = lines.pop();
+                            lines.forEach(line => {
+                                if (line.trim()) logSerial(line.trim(), 'info');
+                            });
+                        } catch {
+                            break;
+                        }
+                    }
+                })();
+            } catch (err) {
+                logSerial(`Connection error: ${err.message}`, 'error');
+                showToast('⚠ Serial connection cancelled or failed');
+            }
+        }
+
+        async function disconnectSerial() {
+            try {
+                if (serialReader) { await serialReader.cancel(); serialReader = null; }
+                if (serialWriter) { serialWriter.releaseLock(); serialWriter = null; }
+                if (serialPort) { await serialPort.close(); serialPort = null; }
+            } catch (_) {}
+
+            const statusEl = document.getElementById('serial-status-text');
+            const connBtn = document.getElementById('btn-serial-connect');
+            const discBtn = document.getElementById('btn-serial-disconnect');
+            const cmdInput = document.getElementById('serial-cmd-input');
+            const sendBtn = document.getElementById('btn-serial-send');
+
+            if (statusEl) statusEl.textContent = 'Disconnected';
+            if (connBtn) connBtn.disabled = false;
+            if (discBtn) discBtn.disabled = true;
+            if (cmdInput) cmdInput.disabled = true;
+            if (sendBtn) sendBtn.disabled = true;
+
+            logSerial('Serial communication closed.', 'sys');
+            showToast('Serial device disconnected');
+        }
+
+        async function sendSerialCommand(cmd) {
+            if (!serialPort || !serialPort.writable) {
+                logSerial('Error: Device not connected. Click CONNECT first.', 'error');
+                return;
+            }
+            try {
+                const encoder = new TextEncoder();
+                const writer = serialPort.writable.getWriter();
+                await writer.write(encoder.encode(cmd + '\n'));
+                writer.releaseLock();
+                logSerial(`> ${cmd}`, 'send');
+            } catch (err) {
+                logSerial(`Send failed: ${err.message}`, 'error');
+            }
+        }
+
+        function setupSerialHandlers() {
+            if (!('serial' in navigator)) {
+                document.getElementById('serial-unavailable-notice')?.classList.remove('hidden');
+            }
+
+            document.getElementById('btn-serial-connect')?.addEventListener('click', connectSerial);
+            document.getElementById('btn-serial-disconnect')?.addEventListener('click', disconnectSerial);
+
+            document.getElementById('btn-serial-send')?.addEventListener('click', () => {
+                const input = document.getElementById('serial-cmd-input');
+                if (input && input.value.trim()) {
+                    sendSerialCommand(input.value.trim());
+                    input.value = '';
+                }
+            });
+
+            document.getElementById('serial-cmd-input')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('btn-serial-send')?.click();
+                }
+            });
+
+            document.getElementById('btn-serial-clear')?.addEventListener('click', () => {
+                const log = document.getElementById('serial-log');
+                if (log) log.innerHTML = '';
+            });
+
+            document.querySelectorAll('.serial-quick-cmd').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    sendSerialCommand(btn.dataset.cmd);
+                });
+            });
+        }
+
+        // ── Feature: External Calendar & iCal Sync ────────────────────────────────
+        function setupCalendarHandlers() {
+            const syncBtn = document.getElementById('btn-sync-calendar');
+            const saveBtn = document.getElementById('btn-save-calendar-feed');
+            const urlInput = document.getElementById('calendar-feed-url');
+            const statusEl = document.getElementById('calendar-sync-status');
+
+            if (syncBtn) {
+                syncBtn.addEventListener('click', async () => {
+                    const url = urlInput?.value.trim();
+                    if (!url && (!settings.calendar_feeds || !settings.calendar_feeds.length)) {
+                        showToast('⚠ Enter a valid .ics calendar URL first');
+                        return;
+                    }
+                    syncBtn.disabled = true;
+                    syncBtn.textContent = 'SYNCING...';
+                    if (statusEl) statusEl.textContent = 'Fetching and parsing .ics events...';
+
+                    try {
+                        const targetUrl = url || (typeof settings.calendar_feeds[0] === 'string' ? settings.calendar_feeds[0] : settings.calendar_feeds[0].url);
+                        const res = await apiFetch(`/calendar/sync?url=${encodeURIComponent(targetUrl)}`);
+                        showToast(`✓ Calendar synced! ${res.added} directives imported.`);
+                        if (statusEl) statusEl.textContent = `Last sync: ${new Date().toLocaleTimeString()} · Added: ${res.added}, Skipped: ${res.skipped}`;
+                        await loadData();
+                        renderTasks();
+                        hardwareLoop();
+                    } catch (err) {
+                        showToast(`⚠ Calendar sync error: ${err.message}`);
+                        if (statusEl) statusEl.textContent = `Sync failed: ${err.message}`;
+                    } finally {
+                        syncBtn.disabled = false;
+                        syncBtn.textContent = '⟳ SYNC NOW';
+                    }
+                });
+            }
+
+            if (saveBtn) {
+                saveBtn.addEventListener('click', async () => {
+                    const url = urlInput?.value.trim();
+                    if (!url) {
+                        showToast('⚠ Enter a calendar feed URL first');
+                        return;
+                    }
+                    try {
+                        settings.calendar_feeds = [url];
+                        await apiFetch('/settings', {
+                            method: 'PATCH',
+                            body: JSON.stringify({ calendar_feeds: [url], calendar_sync_enabled: true }),
+                        });
+                        showToast('✓ Saved as default calendar feed');
+                    } catch (err) {
+                        showToast('⚠ Failed to save feed');
+                    }
+                });
+            }
+        }
+
         // ── Auth Handling & Initialization ────────────────────────────────────────
         let appInitialized = false;
 
@@ -1437,12 +2223,19 @@
             setupTabs();
             setupEventListeners();
             setupEncoder();
+            setupFocusHandlers();
+            setupSerialHandlers();
+            setupCalendarHandlers();
             startMicroAnimations();
             renderTasks();
             updateSettingsUI();
+            renderXPBar();
+            renderPomodoroDisplay();
             renderDiag();
             calculateStreak(tasks);
             renderAnalytics();
+            setupSSE();
+            requestNotificationPermission();
 
             setInterval(hardwareLoop, 1000);
             hardwareLoop();
@@ -1461,6 +2254,7 @@
         }
 
         async function init() {
+            registerServiceWorker();
             setupAuthHandlers();
             const authed = await checkAuth();
             if (authed) {
@@ -1526,17 +2320,21 @@
 
         // ── UI Setup ──────────────────────────────────────────────────────────────
         function setupTabs() {
-            els.tabs.forEach(tab => {
+            const tabs = document.querySelectorAll('[role="tab"]');
+            const panels = document.querySelectorAll('[role="tabpanel"]');
+            tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
-                    els.tabs.forEach(t => { t.setAttribute('aria-selected','false'); t.classList.remove('active'); });
-                    els.panels.forEach(p => p.classList.add('hidden'));
+                    tabs.forEach(t => { t.setAttribute('aria-selected','false'); t.classList.remove('active'); });
+                    panels.forEach(p => p.classList.add('hidden'));
                     tab.setAttribute('aria-selected', 'true');
                     tab.classList.add('active');
-                    document.getElementById(tab.getAttribute('aria-controls')).classList.remove('hidden');
+                    const target = document.getElementById(tab.getAttribute('aria-controls'));
+                    if (target) target.classList.remove('hidden');
 
                     const targetId = tab.getAttribute('aria-controls');
                     if (targetId === 'panel-diag') renderDiag();
                     if (targetId === 'panel-analytics') renderAnalytics();
+                    if (targetId === 'panel-focus') renderPomodoroDisplay();
                 });
             });
         }
@@ -1917,6 +2715,30 @@
                     renderTasks(); hardwareLoop();
                 }
             });
+
+            // Mascot Care & Cosmetics Modal Handlers
+            const openCosmeticsBtn = document.getElementById('btn-open-cosmetics');
+            const closeCosmeticsBtn = document.getElementById('btn-close-cosmetics');
+            const saveCosmeticsBtn = document.getElementById('btn-save-cosmetics');
+            const cosmeticsModal = document.getElementById('cosmetics-modal');
+
+            if (openCosmeticsBtn && cosmeticsModal) {
+                openCosmeticsBtn.addEventListener('click', () => {
+                    renderXPBar();
+                    renderCosmeticsList();
+                    cosmeticsModal.classList.remove('hidden');
+                });
+            }
+            if (closeCosmeticsBtn && cosmeticsModal) {
+                closeCosmeticsBtn.addEventListener('click', () => {
+                    cosmeticsModal.classList.add('hidden');
+                });
+            }
+            if (saveCosmeticsBtn && cosmeticsModal) {
+                saveCosmeticsBtn.addEventListener('click', () => {
+                    cosmeticsModal.classList.add('hidden');
+                });
+            }
         }
 
         // ── Toast System ──────────────────────────────────────────────────────────
@@ -2042,6 +2864,12 @@
                 els.quietStatusBadge.className = `font-mono text-[0.6rem] px-1.5 py-0.5 rounded font-bold ${settings.quiet_hours_enabled ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'}`;
             }
             renderQuietWindows();
+            const calInput = document.getElementById('calendar-feed-url');
+            if (calInput && Array.isArray(settings.calendar_feeds) && settings.calendar_feeds.length && !calInput.value) {
+                const firstFeed = settings.calendar_feeds[0];
+                calInput.value = typeof firstFeed === 'string' ? firstFeed : (firstFeed.url || '');
+            }
+            renderXPBar();
             applySettingsToSimulator();
         }
 

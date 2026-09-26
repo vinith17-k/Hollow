@@ -30,6 +30,18 @@ const DEFAULT_DATA = {
     quiet_hours_enabled: false,
     quiet_hours_windows: [],
     current_streak:      0,
+
+    // ── Feature B: Gamification ──────────────────────────────────────────────
+    xp:                        0,
+    level:                     1,
+    level_name:                'Bat Pup',
+    total_tasks_completed:     0,
+    cosmetic_unlocks:          [],
+    pomodoro_sessions_completed: 0,
+
+    // ── Feature C: Calendar / iCal ───────────────────────────────────────────
+    calendar_feeds:        [],
+    calendar_sync_enabled: false,
   },
 };
 
