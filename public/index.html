@@ -1988,9 +1988,6 @@
                     persistentLabel = 'Sync stale (>1h)';
                 }
 
-                const el = document.getElementById('sync-status-label');
-                if (el) el.textContent = label;
-
                 const persistentEl = document.getElementById('persistent-sync-time');
                 if (persistentEl) persistentEl.textContent = persistentLabel;
 
@@ -4705,15 +4702,10 @@
             const colours = { online: '#22c55e', offline: '#ef4444', stale: '#f59e0b' };
             const statusColor = colours[state] || '#9ca3af';
 
-            const dot = document.getElementById('sync-dot');
-            if (dot) {
-                dot.style.backgroundColor = statusColor;
-                dot.title = { online: 'API connected', offline: 'API offline', stale: 'Sync stale (>5 min)' }[state] || state;
-            }
-
             const headerDot = document.getElementById('device-status-dot');
             if (headerDot) {
                 headerDot.style.backgroundColor = statusColor;
+                headerDot.title = { online: 'API connected', offline: 'API offline', stale: 'Sync stale (>5 min)' }[state] || state;
             }
 
             const headerText = document.getElementById('device-status-text');
