@@ -20,7 +20,7 @@
 
 // ── Pin Configuration ────────────────────────────────────────────────────────
 #define TFT_CS    15
-#define TFT_RST    2
+#define TFT_RST   -1
 #define TFT_DC     5
 #define TFT_MOSI  23
 #define TFT_SCLK  18
