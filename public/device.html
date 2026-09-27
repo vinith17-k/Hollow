@@ -62,6 +62,7 @@
             user-select: none;
             -webkit-user-select: none;
             overflow-x: hidden;
+            overflow-y: auto;
         }
 
         .hw-label {
@@ -384,6 +385,25 @@
             opacity: 0 !important;
             pointer-events: none !important;
         }
+
+        /* Urgent overdue physical LED pulsation */
+        @keyframes led-urgent-pulse {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 4px rgba(239, 68, 68, 0.6)); }
+            50% { filter: brightness(1.7) drop-shadow(0 0 14px rgba(239, 68, 68, 1)); }
+        }
+        .led-urgent-active {
+            animation: led-urgent-pulse 0.9s ease-in-out infinite !important;
+        }
+
+        /* Rotary Dial Precision Tick Ring */
+        .knob-tick-ring {
+            position: absolute;
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            border: 1px dashed rgba(0, 0, 0, 0.18);
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -393,6 +413,12 @@
     <!-- ================================================================= -->
     <div class="hardware-device-chassis" id="device-hardware">
         
+        <!-- USB-C Power Bus Channel & Status Indicator -->
+        <div class="absolute -top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-0.5 bg-[#3a3b3a] rounded-t-md border-t border-x border-black/40 shadow-sm pointer-events-none">
+            <div class="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_5px_#fbbf24]" title="Power: USB-C 5V Active"></div>
+            <span class="text-[0.45rem] font-mono text-gray-300 font-bold tracking-tight">USB-C</span>
+        </div>
+
         <!-- 4 Flush Chassis Assembly Screws -->
         <div class="chassis-screw top-3.5 left-3.5" style="--rot: 25deg;"></div>
         <div class="chassis-screw top-3.5 right-3.5" style="--rot: -45deg;"></div>
@@ -406,8 +432,8 @@
                 <span class="hw-label text-[0.5rem] opacity-50 font-mono">ESP32-S3</span>
             </div>
 
-            <!-- Speaker Array (5x2 Matrix of drilled holes) -->
-            <div class="grid grid-cols-5 gap-1.5 p-1 bg-black/5 rounded-full" title="Internal I2S Chime Transducer">
+            <!-- Speaker Array (5x2 Matrix of drilled holes, interactive click-to-mute) -->
+            <div class="grid grid-cols-5 gap-1.5 p-1.5 bg-black/5 hover:bg-black/10 rounded-full cursor-pointer transition-colors" id="hw-speaker-grill" title="Acoustic Chime Transducer · Click to Toggle Audio Mute">
                 <div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div>
                 <div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div>
             </div>
@@ -532,6 +558,7 @@
 
             <!-- Right Side: Authentic Knurled Rotary Encoder Knob -->
             <div class="encoder-housing">
+                <div class="knob-tick-ring"></div>
                 <div class="knob-knurled-outer" id="hw-rotary-knob" role="button" tabindex="0" title="Rotary Knob: Rotate with Mouse Wheel / Drag / Arrows; Click to Toggle; Hold to Mute" aria-label="Physical Rotary Encoder">
                     <div class="knob-cap">
                         <div class="knob-dimple">
@@ -818,6 +845,12 @@
             document.documentElement.style.setProperty('--led-color', (isMuted || isQuiet) ? 'rgba(255,255,255,0.1)' : ledColor);
             document.documentElement.style.setProperty('--led-glow', (isMuted || isQuiet) ? 'none' : ledGlow);
 
+            if (targetUrgency === 2 && !isMuted && !isQuiet) {
+                els.statusLed?.classList.add('led-urgent-active');
+            } else {
+                els.statusLed?.classList.remove('led-urgent-active');
+            }
+
             // Chime audio when urgent state triggers
             if (currentUrgency !== targetUrgency) {
                 currentUrgency = targetUrgency;
@@ -873,14 +906,17 @@
 
             if (manualStateOverride === 'urgent') {
                 els.statusLabel.className = 'text-[0.6rem] uppercase tracking-wider text-rose-500 font-bold mb-0.5 animate-pulse';
+                els.statusLed?.classList.add('led-urgent-active');
                 document.documentElement.style.setProperty('--led-color', 'rgba(239, 68, 68, 0.95)');
                 document.documentElement.style.setProperty('--led-glow', '0 0 12px rgba(239, 68, 68, 0.8)');
             } else if (manualStateOverride === 'working') {
                 els.statusLabel.className = 'text-[0.6rem] uppercase tracking-wider text-amber-400 font-bold mb-0.5';
+                els.statusLed?.classList.remove('led-urgent-active');
                 document.documentElement.style.setProperty('--led-color', 'rgba(245, 158, 11, 0.85)');
                 document.documentElement.style.setProperty('--led-glow', '0 0 8px rgba(245, 158, 11, 0.6)');
             } else {
                 els.statusLabel.className = 'text-[0.6rem] uppercase tracking-wider text-gray-400 font-bold mb-0.5';
+                els.statusLed?.classList.remove('led-urgent-active');
                 document.documentElement.style.setProperty('--led-color', 'rgba(255, 255, 255, 0.2)');
                 document.documentElement.style.setProperty('--led-glow', 'none');
             }
@@ -915,8 +951,56 @@
             scheduleNext();
         }
 
+        // ── Auto-Return to Companion Mascot Screen (8s Idle) ───────────────────
+        let menuAutoReturnTimer = null;
+        function resetMenuAutoReturnTimer() {
+            clearTimeout(menuAutoReturnTimer);
+            if (isMenuMode) {
+                menuAutoReturnTimer = setTimeout(() => {
+                    toggleMenuMode(false);
+                }, 8000);
+            }
+        }
+
+        // ── Task Completion Celebration Feedback ───────────────────────────────
+        function triggerCelebrationFeedback() {
+            DeviceAudio.play('chime');
+            // Flash emerald green LED
+            const prevColor = getComputedStyle(document.documentElement).getPropertyValue('--led-color');
+            const prevGlow = getComputedStyle(document.documentElement).getPropertyValue('--led-glow');
+            document.documentElement.style.setProperty('--led-color', 'rgba(16, 185, 129, 0.95)');
+            document.documentElement.style.setProperty('--led-glow', '0 0 14px rgba(16, 185, 129, 0.9)');
+            
+            // Mascot celebration wing flutter
+            if (els.mascotContainer) {
+                els.mascotContainer.classList.add('micro-wing-flutter');
+            }
+
+            setTimeout(() => {
+                document.documentElement.style.setProperty('--led-color', prevColor);
+                document.documentElement.style.setProperty('--led-glow', prevGlow);
+                if (els.mascotContainer) {
+                    els.mascotContainer.classList.remove('micro-wing-flutter');
+                }
+            }, 1200);
+        }
+
+        function arcadeSteer(delta) {
+            if (!isArcadeActive) return;
+            batY = Math.max(10, Math.min(180, batY + delta * 6));
+            DeviceAudio.play('tick');
+        }
+
         // ── Interactive Rotary Encoder Mechanics ───────────────────────────────
         function rotateKnob(delta) {
+            if (screensaverActive) {
+                wakeScreensaver();
+                return;
+            }
+            if (isArcadeActive) {
+                arcadeSteer(delta);
+                return;
+            }
             knobRotationDegrees += delta * 20;
             if (els.knobNotch) {
                 els.knobNotch.style.transform = `rotate(${knobRotationDegrees}deg)`;
@@ -926,7 +1010,6 @@
             if (!isMenuMode) {
                 // Turning knob from idle screen immediately reveals directives menu
                 toggleMenuMode(true);
-                return;
             }
 
             const pending = tasks.filter(t => !t.done);
@@ -934,6 +1017,8 @@
                 selectedMenuIndex = (selectedMenuIndex + (delta > 0 ? 1 : -1) + pending.length) % pending.length;
                 renderMenuDirectives();
             }
+
+            resetMenuAutoReturnTimer();
         }
 
         async function clickKnob() {
@@ -943,7 +1028,10 @@
                 arcadeFlap();
                 return;
             }
-            wakeScreensaver();
+            if (screensaverActive) {
+                wakeScreensaver();
+                return;
+            }
 
             const pending = tasks.filter(t => !t.done).sort((a, b) => new Date(a.due_time) - new Date(b.due_time));
             if (pending.length === 0) {
@@ -957,6 +1045,7 @@
                 const top = pending[0];
                 top.done = true;
                 flashHud(`COMPLETED: ${top.title.slice(0, 16)}`);
+                triggerCelebrationFeedback();
                 firmwareHardwareLoop();
                 try {
                     await fetch(`${getApiBase()}/tasks/${top.id}`, {
@@ -971,6 +1060,7 @@
                 const target = pending[selectedMenuIndex] || pending[0];
                 target.done = true;
                 flashHud(`COMPLETED: ${target.title.slice(0, 16)}`);
+                triggerCelebrationFeedback();
                 renderMenuDirectives();
                 firmwareHardwareLoop();
                 try {
@@ -981,6 +1071,7 @@
                     });
                 } catch (_) {}
                 fetchDeviceData();
+                resetMenuAutoReturnTimer();
             }
         }
 
@@ -991,9 +1082,21 @@
             let clickCount = 0;
             let clickTimer = null;
 
-            // Pointer down/up for push & long press
+            // Rotational Circular Pointer Dragging
+            let isDragging = false;
+            let hasDragged = false;
+            let lastAngle = null;
+
             els.rotaryKnob.addEventListener('pointerdown', (e) => {
                 e.preventDefault();
+                isDragging = true;
+                hasDragged = false;
+                const rect = els.rotaryKnob.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                lastAngle = Math.atan2(e.clientY - cy, e.clientX - cx);
+                try { els.rotaryKnob.setPointerCapture(e.pointerId); } catch (_) {}
+
                 isLongPress = false;
                 pressTimer = setTimeout(() => {
                     isLongPress = true;
@@ -1005,10 +1108,35 @@
                 }, 600);
             });
 
+            els.rotaryKnob.addEventListener('pointermove', (e) => {
+                if (!isDragging || lastAngle === null) return;
+                const rect = els.rotaryKnob.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                const curAngle = Math.atan2(e.clientY - cy, e.clientX - cx);
+                let diff = curAngle - lastAngle;
+
+                while (diff > Math.PI) diff -= 2 * Math.PI;
+                while (diff < -Math.PI) diff += 2 * Math.PI;
+
+                if (Math.abs(diff) >= 0.28) {
+                    hasDragged = true;
+                    clearTimeout(pressTimer); // Cancel press if rotating
+                    isLongPress = false;
+                    rotateKnob(Math.sign(diff));
+                    lastAngle = curAngle;
+                }
+            });
+
+            const stopDrag = () => { isDragging = false; lastAngle = null; };
+            els.rotaryKnob.addEventListener('pointercancel', stopDrag);
+
             els.rotaryKnob.addEventListener('pointerup', (e) => {
                 e.preventDefault();
+                const wasDragging = hasDragged;
+                stopDrag();
                 clearTimeout(pressTimer);
-                if (isLongPress) return;
+                if (isLongPress || wasDragging) return;
 
                 clickCount++;
                 if (clickCount === 1) {
@@ -1228,6 +1356,12 @@
             document.getElementById('screen-status-bar')?.addEventListener('click', () => toggleMenuMode());
             document.getElementById('btn-device-arcade')?.addEventListener('click', toggleArcade);
             document.getElementById('btn-close-arcade')?.addEventListener('click', closeArcade);
+            document.getElementById('hw-speaker-grill')?.addEventListener('click', () => {
+                isMuted = !isMuted;
+                flashHud(isMuted ? 'AUDIO MUTED' : 'AUDIO UNMUTED');
+                firmwareHardwareLoop();
+                DeviceAudio.play('click');
+            });
             scvs?.addEventListener('click', wakeScreensaver);
 
             setupKnobInteractions();

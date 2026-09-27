@@ -2243,8 +2243,36 @@
             let clickTimer = null;
             let rotation = 0;
 
+            // Rotational Circular Pointer Dragging
+            let isDragging = false;
+            let hasDragged = false;
+            let lastAngle = null;
+
+            function rotateEncoder(delta) {
+                rotation += delta * 30;
+                if (els.encoderNotch) {
+                    els.encoderNotch.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
+                }
+                if (els.taskList) {
+                    els.taskList.scrollBy({ top: delta * 50, behavior: 'smooth' });
+                }
+                HollowAudioEngine.playTone('tick');
+                wakeScreensaver();
+                if (typeof isArcadeActive !== 'undefined' && isArcadeActive) {
+                    arcadeSteer(delta);
+                }
+            }
+
             els.encoder.addEventListener('pointerdown', (e) => {
                 e.preventDefault();
+                isDragging = true;
+                hasDragged = false;
+                const rect = els.encoder.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                lastAngle = Math.atan2(e.clientY - cy, e.clientX - cx);
+                try { els.encoder.setPointerCapture(e.pointerId); } catch (_) {}
+
                 isLongPress = false;
                 pressTimer = setTimeout(() => {
                     isLongPress = true;
@@ -2256,10 +2284,35 @@
                 }, LONG_PRESS_MS);
             });
 
+            els.encoder.addEventListener('pointermove', (e) => {
+                if (!isDragging || lastAngle === null) return;
+                const rect = els.encoder.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                const curAngle = Math.atan2(e.clientY - cy, e.clientX - cx);
+                let diff = curAngle - lastAngle;
+
+                while (diff > Math.PI) diff -= 2 * Math.PI;
+                while (diff < -Math.PI) diff += 2 * Math.PI;
+
+                if (Math.abs(diff) >= 0.28) {
+                    hasDragged = true;
+                    clearTimeout(pressTimer);
+                    isLongPress = false;
+                    rotateEncoder(Math.sign(diff));
+                    lastAngle = curAngle;
+                }
+            });
+
+            const stopDrag = () => { isDragging = false; lastAngle = null; };
+            els.encoder.addEventListener('pointercancel', stopDrag);
+
             els.encoder.addEventListener('pointerup', (e) => {
                 e.preventDefault();
+                const wasDragging = hasDragged;
+                stopDrag();
                 clearTimeout(pressTimer);
-                if (isLongPress) return;
+                if (isLongPress || wasDragging) return;
 
                 if (typeof isArcadeActive !== 'undefined' && isArcadeActive) {
                     arcadeFlap();
@@ -2279,7 +2332,7 @@
                         }
                         clickCount = 0;
                     }, DOUBLE_CLICK_MS);
-                } else if (clickCount === 2) {
+                } else if (clickCount >= 2) {
                     clearTimeout(clickTimer);
                     clickCount = 0;
                     jumpToNextTask();
@@ -2288,19 +2341,7 @@
 
             els.encoder.addEventListener('wheel', (e) => {
                 e.preventDefault();
-                const delta = Math.sign(e.deltaY);
-                rotation += delta * 30;
-                if (els.encoderNotch) {
-                    els.encoderNotch.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
-                }
-                if (els.taskList) {
-                    els.taskList.scrollBy({ top: delta * 50, behavior: 'smooth' });
-                }
-                HollowAudioEngine.playTone('tick');
-                wakeScreensaver();
-                if (typeof isArcadeActive !== 'undefined' && isArcadeActive) {
-                    arcadeSteer(delta);
-                }
+                rotateEncoder(Math.sign(e.deltaY));
             }, { passive: false });
         }
 
