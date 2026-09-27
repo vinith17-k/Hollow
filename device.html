@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hollow — Physical Hardware Companion</title>
+    <title>Hollow — Physical Desk Companion</title>
     
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#111211">
@@ -13,178 +13,209 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
         :root {
-            /* Hardware Colors - Teenage Engineering Aesthetic (Matches Main Dashboard) */
-            --chassis-main: #d4d2cc;
-            --chassis-light: #e6e4df;
-            --chassis-dark: #a8a6a1;
-            --screen-bezel: #111211;
-            --screen-bg: #0a0b0a;
-            --screen-text: #d7d5d0;
+            /* Authentic Teenage Engineering Hardware Palette */
+            --chassis-body: #d6d4ce;
+            --chassis-highlight: #eceae4;
+            --chassis-shade: #aba9a3;
+            --chassis-dark: #8c8a84;
+            --bezel-outer: #1c1d1c;
+            --bezel-inner: #0d0e0d;
+            --screen-bg: #090a09;
+            --screen-text: #dedcd7;
+            --screen-dim: #6d706e;
             --accent-orange: #ea580c;
+            --accent-amber: #f59e0b;
+            --accent-cyan: #06b6d4;
             --mascot-body: #17111a;
             
-            /* Dynamic State */
+            /* Dynamic Hardware States */
             --eye-glow: #ffffff;
-            --led-brightness: 0.8;
+            --led-color: rgba(255, 255, 255, 0.2);
+            --led-glow: transparent;
+            --knob-angle: 0deg;
         }
 
+        * { box-sizing: border-box; }
+
         body {
-            /* Subtle cutting-mat / workbench background */
-            background-color: #8c8f8d;
-            background-image: radial-gradient(#7a7d7b 1px, transparent 1px);
-            background-size: 20px 20px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            /* Workbench cutting mat background with 20px precision grid */
+            background-color: #828583;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px),
+                radial-gradient(#6d706e 1.5px, transparent 1.5px);
+            background-size: 100px 100px, 100px 100px, 20px 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: #222;
             min-height: 100vh;
             margin: 0;
-            padding: 16px;
+            padding: 24px 16px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-sizing: border-box;
             user-select: none;
             -webkit-user-select: none;
+            overflow-x: hidden;
         }
 
         .hw-label {
-            font-size: 0.65rem;
+            font-family: 'Space Grotesk', -apple-system, sans-serif;
+            font-size: 0.6rem;
             text-transform: uppercase;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.16em;
             font-weight: 700;
-            color: #444;
+            color: #55534e;
         }
 
-        .lcd-text {
-            font-family: 'Space Mono', ui-monospace, monospace;
+        .lcd-font {
+            font-family: 'Space Mono', monospace;
             color: var(--screen-text);
-            text-shadow: 0 0 calc(3px * var(--led-brightness)) var(--screen-text);
-        }
-        
-        .lcd-accent {
-            color: var(--accent-orange);
-            text-shadow: 0 0 calc(3px * var(--led-brightness)) var(--accent-orange);
+            text-shadow: 0 0 3px rgba(222, 220, 215, 0.6);
         }
 
-        /* Tactile Hardware Buttons */
-        .btn-tactile {
-            background-color: var(--chassis-light);
-            border: 2px solid var(--chassis-dark);
-            border-bottom-width: 4px;
-            border-radius: 4px;
-            font-weight: 700;
-            transition: all 0.05s ease;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-size: 0.7rem;
-            letter-spacing: 0.05em;
-            color: #222;
-            display: inline-flex;
+        /* ── 3D Physical Hardware Chassis ─────────────────────────────────── */
+        .hardware-device-chassis {
+            width: 360px;
+            background: linear-gradient(175deg, var(--chassis-highlight) 0%, var(--chassis-body) 35%, var(--chassis-shade) 100%);
+            border-radius: 28px;
+            padding: 22px 20px 24px 20px;
+            position: relative;
+            /* Multi-layer physical desk drop shadow */
+            box-shadow: 
+                0 30px 60px -12px rgba(0, 0, 0, 0.45),
+                0 18px 36px -18px rgba(0, 0, 0, 0.35),
+                0 2px 0 1px rgba(255, 255, 255, 0.6) inset,
+                0 -2px 0 1px rgba(0, 0, 0, 0.25) inset,
+                0 0 0 1px rgba(0, 0, 0, 0.18);
+        }
+
+        /* Chassis Chamfer Edge Highlight */
+        .hardware-device-chassis::before {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border-radius: 26px;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            border-bottom-color: rgba(0, 0, 0, 0.15);
+            pointer-events: none;
+        }
+
+        /* ── Corner Torx/Hex Hardware Screws ──────────────────────────────── */
+        .chassis-screw {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #9c9a94, #44423e);
+            box-shadow: 
+                inset 0 1px 1px rgba(0,0,0,0.6),
+                0 1px 1px rgba(255,255,255,0.7);
+            position: absolute;
+            display: flex;
             align-items: center;
             justify-content: center;
         }
-        .btn-tactile:hover:not(:disabled) { background-color: #f2f0eb; }
-        .btn-tactile:active:not(:disabled), .btn-tactile.active {
-            border-bottom-width: 2px;
-            transform: translateY(2px);
-            background-color: var(--chassis-main);
-            border-color: #888;
+        .chassis-screw::after {
+            content: '';
+            width: 5px;
+            height: 1px;
+            background: #252422;
+            transform: rotate(var(--rot, 35deg));
         }
-        .btn-tactile:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .btn-tactile-primary { background-color: var(--accent-orange); border-color: #b44207; color: white; }
-        .btn-tactile-primary:hover:not(:disabled) { background-color: #f97316; }
-        .btn-tactile-danger { background-color: #dc2626; border-color: #991b1b; color: white; }
 
-        /* Mascot Settings - Identical to Main Dashboard */
+        /* ── Recessed 1.3" IPS LCD Screen Bezel ──────────────────────────── */
+        .screen-bezel-recess {
+            background: linear-gradient(180deg, #0f100f 0%, #1a1b1a 100%);
+            border-radius: 18px;
+            padding: 10px;
+            position: relative;
+            box-shadow: 
+                inset 0 4px 8px rgba(0, 0, 0, 0.9),
+                inset 0 1px 2px rgba(0, 0, 0, 0.8),
+                0 1px 1px rgba(255, 255, 255, 0.5);
+            border-top: 1px solid #000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .screen-glass {
+            background: var(--screen-bg);
+            border-radius: 10px;
+            height: 280px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #141514;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.95);
+        }
+
+        /* Real anti-reflective glass glare */
+        .screen-glass::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(175deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 60%, transparent 100%);
+            border-radius: 10px 10px 0 0;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        /* CRT/LCD Scanline Texture */
+        .screen-scanlines {
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 3px);
+            pointer-events: none;
+            z-index: 15;
+            opacity: 0.75;
+        }
+
+        /* ── Shadow Demon Familiar Mascot (Exact Locked Aesthetic) ────────── */
         #mascot-svg { width: 100%; height: 100%; display: block; }
         .mascot-pixel { fill: var(--mascot-body); }
         .mascot-eye {
             fill: var(--eye-glow);
-            filter: drop-shadow(0 0 calc(4px * var(--led-brightness)) var(--eye-glow));
-            transition: fill 0.4s ease;
+            filter: drop-shadow(0 0 4px var(--eye-glow));
+            transition: fill 0.3s ease;
         }
         #mascot-eyes {
             transform-origin: 32px 26px;
             transition: transform 0.4s ease;
         }
-        .mascot-smoke { fill: #666; opacity: 0; }
+        .mascot-smoke { fill: #555; opacity: 0; }
 
-        /* Mascot States */
+        /* Mascot States matching Device Firmware Spec */
         .state-idle { --eye-glow: #ffffff; }
         .state-idle #mascot-body-group { animation: float-idle 4s ease-in-out infinite; }
-        .state-idle #left-wing { transform-origin: 20px 20px; animation: flap-slow-left 3s ease-in-out infinite; }
-        .state-idle #right-wing { transform-origin: 44px 20px; animation: flap-slow-right 3s ease-in-out infinite; }
+        .state-idle #left-wing { transform-origin: 20px 20px; animation: flap-slow-left 3.5s ease-in-out infinite; }
+        .state-idle #right-wing { transform-origin: 44px 20px; animation: flap-slow-right 3.5s ease-in-out infinite; }
         .state-idle .mascot-tail { transform-origin: 36px 48px; animation: tail-swish-slow 4s ease-in-out infinite; }
         
-        .state-working { --eye-glow: #06b6d4; }
-        .state-working #mascot-body-group { animation: float-work 1.5s ease-in-out infinite; }
-        .state-working #left-wing { transform-origin: 20px 20px; animation: flap-work-left 0.3s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
-        .state-working #right-wing { transform-origin: 44px 20px; animation: flap-work-right 0.3s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
-        .state-working .mascot-tail { transform-origin: 36px 48px; animation: tail-swish-work 1.5s infinite; }
+        .state-working { --eye-glow: #f59e0b; }
+        .state-working #mascot-body-group { animation: float-work 1.8s ease-in-out infinite; }
+        .state-working #left-wing { transform-origin: 20px 20px; animation: flap-work-left 0.4s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
+        .state-working #right-wing { transform-origin: 44px 20px; animation: flap-work-right 0.4s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
+        .state-working .mascot-tail { transform-origin: 36px 48px; animation: tail-swish-work 1.6s infinite; }
         
         .state-urgent { --eye-glow: #ef4444; }
         .state-urgent #mascot-body-group { animation: float-urgent 1s ease-in-out infinite, shake-erratic 0.1s infinite; }
-        .state-urgent #left-wing { transform-origin: 20px 20px; animation: flap-urgent-left 0.15s infinite alternate; }
-        .state-urgent #right-wing { transform-origin: 44px 20px; animation: flap-urgent-right 0.15s infinite alternate; }
-        .state-urgent .mascot-tail { transform-origin: 36px 48px; animation: thrash-fast 0.08s infinite alternate; }
+        .state-urgent #left-wing { transform-origin: 20px 20px; animation: flap-urgent-left 0.16s infinite alternate; }
+        .state-urgent #right-wing { transform-origin: 44px 20px; animation: flap-urgent-right 0.16s infinite alternate; }
+        .state-urgent .mascot-tail { transform-origin: 36px 48px; animation: thrash-fast 0.09s infinite alternate; }
         .state-urgent .mascot-eye { animation: pulse-red 0.3s infinite alternate; }
-        .state-urgent .mascot-smoke { animation: puff 1s infinite; }
+        .state-urgent .mascot-smoke { animation: puff 1.2s infinite; }
 
         .state-sleeping { --eye-glow: #4b5563; }
         .state-sleeping #mascot-body-group { transform-origin: 32px 64px; animation: breathe-sleep 4s ease-in-out infinite; }
-        .state-sleeping #left-wing { transform-origin: 20px 20px; transform: rotate(-25deg); transition: transform 0.5s; }
-        .state-sleeping #right-wing { transform-origin: 44px 20px; transform: rotate(25deg); transition: transform 0.5s; }
-        .state-sleeping #mascot-eyes { transform: scaleY(0.05); transition: transform 1s ease; }
-        .state-sleeping .mascot-smoke { animation: puff-slow 4s infinite; }
-
-        .state-focus { --eye-glow: #818cf8; }
-        .state-focus #mascot-body-group { animation: float-work 1.8s ease-in-out infinite; }
-        .state-focus .mascot-eye { fill: #c7d2fe !important; animation: focus-pulse 2.5s ease-in-out infinite alternate; }
-        @keyframes focus-pulse { 0% { opacity: 0.7; filter: drop-shadow(0 0 2px #818cf8); } 100% { opacity: 1; filter: drop-shadow(0 0 8px #818cf8); } }
-
-        @media (prefers-reduced-motion: reduce) {
-            #mascot-body-group, #left-wing, #right-wing, .mascot-tail, .mascot-eye, .mascot-smoke {
-                animation: none !important; transform: none !important;
-            }
-        }
-
-        /* Keyframes */
-        @keyframes float-idle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-        @keyframes float-work { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-        @keyframes float-urgent { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
-        
-        @keyframes flap-slow-left { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(10deg); } }
-        @keyframes flap-slow-right { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-10deg); } }
-        @keyframes flap-work-left { from { transform: rotate(-10deg); } to { transform: rotate(45deg); } }
-        @keyframes flap-work-right { from { transform: rotate(10deg); } to { transform: rotate(-45deg); } }
-        @keyframes flap-urgent-left { from { transform: rotate(20deg); } to { transform: rotate(45deg); } }
-        @keyframes flap-urgent-right { from { transform: rotate(-20deg); } to { transform: rotate(-45deg); } }
-
-        @keyframes tail-swish-slow { 0%, 100% { transform: skewX(0deg); } 50% { transform: skewX(15deg); } }
-        @keyframes tail-swish-work { 0%, 100% { transform: skewX(-10deg); } 50% { transform: skewX(10deg); } }
-        @keyframes shake-erratic { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-1.5px, 1.5px) rotate(1deg); } 50% { transform: translate(1.5px, -1.5px) rotate(-1deg); } 75% { transform: translate(-1.5px, -1.5px) rotate(0deg); } }
-        @keyframes thrash-fast { from { transform: skewX(-30deg); } to { transform: skewX(30deg); } }
-        @keyframes pulse-red { from { opacity: 1; filter: drop-shadow(0 0 2px var(--eye-glow)); } to { opacity: 0.5; filter: drop-shadow(0 0 8px var(--eye-glow)); } }
-        @keyframes breathe-sleep { 0%, 100% { transform: translateY(8px) scaleY(1) scaleX(1); } 50% { transform: translateY(8px) scaleY(0.92) scaleX(1.03); } }
-        @keyframes puff { 0% { transform: translateY(0) scale(1); opacity: 0.9; } 100% { transform: translateY(-16px) scale(2); opacity: 0; } }
-        @keyframes puff-slow { 0% { transform: translateY(0) scale(1); opacity: 0.6; } 100% { transform: translateY(-12px) scale(1.5); opacity: 0; } }
-
-        /* Secondary Mascot Mood Overlays */
-        .mood-content #mascot-body-group { filter: drop-shadow(0 0 3px rgba(251, 191, 36, 0.45)); }
-        .mood-content .mascot-eye { fill: #fef08a !important; }
-        .mood-satisfied #mascot-body-group { filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.45)); }
-        .mood-satisfied .mascot-eye { fill: #86efac !important; }
-        .mood-satisfied #left-wing { transform: rotate(12deg); }
-        .mood-satisfied #right-wing { transform: rotate(-12deg); }
-        .mood-restless #mascot-body-group { animation: jitter-restless 0.18s infinite alternate !important; filter: drop-shadow(0 0 3px rgba(249, 115, 22, 0.5)); }
-        .mood-restless .mascot-eye { fill: #fdba74 !important; }
-        .mood-restless .mascot-tail { animation: thrash-fast 0.12s infinite alternate !important; }
-        @keyframes jitter-restless { from { transform: translateY(0); } to { transform: translateY(-1.5px) skewX(2deg); } }
+        .state-sleeping #left-wing { transform-origin: 20px 20px; transform: rotate(-25deg); }
+        .state-sleeping #right-wing { transform-origin: 44px 20px; transform: rotate(25deg); }
+        .state-sleeping #mascot-eyes { transform: scaleY(0.05); }
 
         /* Idle Micro-Animations */
         .micro-blink #mascot-eyes { transform: scaleY(0.08); transition: transform 0.12s ease-in-out; }
@@ -192,218 +223,345 @@
         .micro-wing-flutter #left-wing { transform: rotate(22deg) scaleX(1.1); transition: transform 0.15s ease; }
         .micro-wing-flutter #right-wing { transform: rotate(-22deg) scaleX(1.1); transition: transform 0.15s ease; }
 
-        /* Screen Badges & HUD */
-        .sim-indicator { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 0.55rem; font-weight: bold; border-radius: 2px; padding: 1px 3px; display: inline-flex; align-items: center; gap: 2px; }
-        #sim-hud-popup { transition: opacity 0.25s ease, transform 0.25s ease; }
+        @keyframes float-idle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+        @keyframes float-work { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes float-urgent { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+        @keyframes flap-slow-left { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(10deg); } }
+        @keyframes flap-slow-right { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-10deg); } }
+        @keyframes flap-work-left { from { transform: rotate(-10deg); } to { transform: rotate(40deg); } }
+        @keyframes flap-work-right { from { transform: rotate(10deg); } to { transform: rotate(-40deg); } }
+        @keyframes flap-urgent-left { from { transform: rotate(20deg); } to { transform: rotate(45deg); } }
+        @keyframes flap-urgent-right { from { transform: rotate(-20deg); } to { transform: rotate(-45deg); } }
+        @keyframes tail-swish-slow { 0%, 100% { transform: skewX(0deg); } 50% { transform: skewX(14deg); } }
+        @keyframes tail-swish-work { 0%, 100% { transform: skewX(-8deg); } 50% { transform: skewX(8deg); } }
+        @keyframes shake-erratic { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-1.5px, 1.5px) rotate(1deg); } 50% { transform: translate(1.5px, -1.5px) rotate(-1deg); } 75% { transform: translate(-1.5px, -1.5px) rotate(0deg); } }
+        @keyframes thrash-fast { from { transform: skewX(-28deg); } to { transform: skewX(28deg); } }
+        @keyframes pulse-red { from { opacity: 1; filter: drop-shadow(0 0 2px var(--eye-glow)); } to { opacity: 0.5; filter: drop-shadow(0 0 8px var(--eye-glow)); } }
+        @keyframes breathe-sleep { 0%, 100% { transform: translateY(6px) scaleY(1); } 50% { transform: translateY(6px) scaleY(0.93); } }
+        @keyframes puff { 0% { transform: translateY(0) scale(1); opacity: 0.8; } 100% { transform: translateY(-16px) scale(2); opacity: 0; } }
 
-        /* Knurled Encoder Knob Realistic Styling */
-        .encoder-wheel-knurled {
-            background: conic-gradient(
-                #777 0deg, #333 15deg, #888 30deg, #444 45deg,
-                #777 60deg, #333 75deg, #888 90deg, #444 105deg,
-                #777 120deg, #333 135deg, #888 150deg, #444 165deg,
-                #777 180deg, #333 195deg, #888 210deg, #444 225deg,
-                #777 240deg, #333 255deg, #888 270deg, #444 285deg,
-                #777 300deg, #333 315deg, #888 330deg, #444 345deg,
-                #777 360deg
-            );
+        /* ── Physical Rotary Encoder (Teenage Engineering Industrial Dial) ── */
+        .encoder-housing {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
-        .custom-scroll::-webkit-scrollbar-track { background: var(--chassis-main); border-radius: 3px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: var(--chassis-dark); border-radius: 3px; }
+        .knob-knurled-outer {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #3b3c3b 0deg, #878987 10deg, #3b3c3b 20deg, #878987 30deg,
+                #3b3c3b 40deg, #878987 50deg, #3b3c3b 60deg, #878987 70deg,
+                #3b3c3b 80deg, #878987 90deg, #3b3c3b 100deg, #878987 110deg,
+                #3b3c3b 120deg, #878987 130deg, #3b3c3b 140deg, #878987 150deg,
+                #3b3c3b 160deg, #878987 170deg, #3b3c3b 180deg, #878987 190deg,
+                #3b3c3b 200deg, #878987 210deg, #3b3c3b 220deg, #878987 230deg,
+                #3b3c3b 240deg, #878987 250deg, #3b3c3b 260deg, #878987 270deg,
+                #3b3c3b 280deg, #878987 290deg, #3b3c3b 300deg, #878987 310deg,
+                #3b3c3b 320deg, #878987 330deg, #3b3c3b 340deg, #878987 350deg,
+                #3b3c3b 360deg
+            );
+            box-shadow: 
+                0 10px 20px rgba(0, 0, 0, 0.4),
+                0 2px 5px rgba(0, 0, 0, 0.3),
+                0 1px 1px rgba(255, 255, 255, 0.6) inset;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.05s ease, box-shadow 0.05s ease;
+        }
+
+        .knob-knurled-outer:active {
+            transform: scale(0.97) translateY(2px);
+            box-shadow: 
+                0 4px 8px rgba(0, 0, 0, 0.5),
+                0 1px 2px rgba(0, 0, 0, 0.4),
+                0 1px 1px rgba(0, 0, 0, 0.2) inset;
+        }
+
+        .knob-cap {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #dedcd6 0%, #b8b6b0 100%);
+            box-shadow: 
+                inset 0 1px 2px rgba(255, 255, 255, 0.9),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.35),
+                0 0 0 1px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Center machined thumb dimple */
+        .knob-dimple {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 45% 45%, #c8c6c0 0%, #a4a29c 100%);
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.35),
+                0 1px 1px rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* The signature TE Confident Warm Orange Index Notch */
+        .knob-notch {
+            position: absolute;
+            top: 5px;
+            width: 4px;
+            height: 12px;
+            background-color: var(--accent-orange);
+            border-radius: 2px;
+            box-shadow: 0 0 4px rgba(234, 88, 12, 0.6);
+        }
+
+        /* ── Diffused Acrylic RGB Status LED (Light Pipe) ─────────────────── */
+        .light-pipe-led {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.9) 0%, var(--led-color) 60%, rgba(0, 0, 0, 0.4) 100%);
+            box-shadow: 
+                inset 0 1px 2px rgba(255, 255, 255, 0.8),
+                0 1px 2px rgba(0, 0, 0, 0.4),
+                var(--led-glow);
+            border: 2px solid #55534e;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ── Laser-drilled Acoustic Speaker Grill Array ──────────────────── */
+        .speaker-hole {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: #252422;
+            box-shadow: 
+                inset 0 1px 1px rgba(0,0,0,0.8),
+                0 1px 0 rgba(255,255,255,0.4);
+        }
+
+        /* ── Tactile Hardware Micro-Switches ──────────────────────────────── */
+        .hw-mini-btn {
+            background: linear-gradient(180deg, var(--chassis-highlight) 0%, var(--chassis-body) 100%);
+            border: 1px solid var(--chassis-shade);
+            border-bottom: 2px solid var(--chassis-dark);
+            border-radius: 6px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.55rem;
+            font-weight: 700;
+            color: #44423e;
+            padding: 4px 8px;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+            transition: all 0.05s ease;
+        }
+        .hw-mini-btn:hover { background: #f2f0eb; color: #111; }
+        .hw-mini-btn:active, .hw-mini-btn.active {
+            border-bottom-width: 1px;
+            transform: translateY(1px);
+            background: #c8c6c0;
+            color: #ea580c;
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
     </style>
 </head>
 <body>
 
-    <!-- Main Physical Hardware Chassis Container -->
-    <main class="w-full max-w-[420px] bg-[var(--chassis-main)] border-4 border-[var(--chassis-dark)] rounded-2xl p-5 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5),0_0_0_1px_rgba(0,0,0,0.2)] flex flex-col relative select-none">
+    <!-- ================================================================= -->
+    <!-- PHYSICAL HARDWARE ENCLOSURE (TE Industrial Design)               -->
+    <!-- ================================================================= -->
+    <div class="hardware-device-chassis" id="device-hardware">
         
-        <!-- 4 Corner Hardware Screws (Teenage Engineering signature) -->
-        <div class="absolute top-3 left-3 w-2.5 h-2.5 rounded-full bg-[var(--chassis-dark)] shadow-inner flex items-center justify-center">
-            <div class="w-1.5 h-0.5 bg-[#444] rotate-45"></div>
-        </div>
-        <div class="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-[var(--chassis-dark)] shadow-inner flex items-center justify-center">
-            <div class="w-1.5 h-0.5 bg-[#444] -rotate-12"></div>
-        </div>
-        <div class="absolute bottom-3 left-3 w-2.5 h-2.5 rounded-full bg-[var(--chassis-dark)] shadow-inner flex items-center justify-center">
-            <div class="w-1.5 h-0.5 bg-[#444] rotate-90"></div>
-        </div>
-        <div class="absolute bottom-3 right-3 w-2.5 h-2.5 rounded-full bg-[var(--chassis-dark)] shadow-inner flex items-center justify-center">
-            <div class="w-1.5 h-0.5 bg-[#444] rotate-30"></div>
-        </div>
+        <!-- 4 Flush Chassis Assembly Screws -->
+        <div class="chassis-screw top-3.5 left-3.5" style="--rot: 25deg;"></div>
+        <div class="chassis-screw top-3.5 right-3.5" style="--rot: -45deg;"></div>
+        <div class="chassis-screw bottom-3.5 left-3.5" style="--rot: 80deg;"></div>
+        <div class="chassis-screw bottom-3.5 right-3.5" style="--rot: 15deg;"></div>
 
-        <!-- Top Header & Device Branding -->
-        <header class="w-full flex justify-between items-center mb-3 px-1">
+        <!-- Chassis Header Bar: Brand Mark & Acoustic Speaker Grill -->
+        <div class="flex justify-between items-center mb-3 px-2 pt-1">
             <div class="flex items-center gap-2">
-                <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" id="conn-indicator" title="Connected to Hollow Core"></div>
-                <h1 class="hw-label text-left text-xs font-black tracking-widest text-[#222]">HOL·LOW</h1>
-                <span class="hw-label opacity-60 text-[0.6rem]">PHYSICAL COMPANION</span>
+                <span class="hw-label text-[0.65rem] tracking-[0.2em] font-black text-[#2a2926]">HOL·LOW</span>
+                <span class="hw-label text-[0.5rem] opacity-50 font-mono">ESP32-S3</span>
             </div>
-            <div class="flex items-center gap-1.5">
-                <button id="btn-toggle-screensaver" type="button" class="btn-tactile text-[0.55rem] px-2 py-1" title="Toggle Screensaver Mode (S)">📺 TV</button>
-                <button id="btn-toggle-arcade" type="button" class="btn-tactile text-[0.55rem] px-2 py-1 bg-amber-100 text-amber-900 border-amber-400 font-bold" title="Launch Flappy Bat Arcade (A)">🎮 ARCADE</button>
-                <button id="btn-toggle-mute" type="button" class="btn-tactile text-[0.55rem] px-2 py-1" title="Toggle Mute (M)">🔔 AUDIO</button>
+
+            <!-- Speaker Array (5x2 Matrix of drilled holes) -->
+            <div class="grid grid-cols-5 gap-1.5 p-1 bg-black/5 rounded-full" title="Internal I2S Chime Transducer">
+                <div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div>
+                <div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div><div class="speaker-hole"></div>
             </div>
-        </header>
+        </div>
 
-        <!-- LCD Screen Bezel Frame (Exact same styling and dimensions) -->
-        <div class="bg-[var(--screen-bezel)] p-4 rounded-xl shadow-[inset_0_4px_10px_rgba(0,0,0,0.8)] w-full aspect-[4/5] max-h-[460px] flex flex-col justify-between border-b border-r border-[#333] border-t-4 border-l-4 border-black relative">
-            
-            <!-- Screen Glass Reflection -->
-            <div class="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/10 to-transparent pointer-events-none rounded-t-xl z-20"></div>
+        <!-- ============================================================= -->
+        <!-- RECESSED 1.3" IPS LCD SCREEN FRAME (FIRMWARE EMBEDDED DISPLAY) -->
+        <!-- ============================================================= -->
+        <div class="screen-bezel-recess">
+            <div class="screen-glass" id="device-screen">
+                
+                <!-- CRT/LCD Pixel Scanlines Layer -->
+                <div class="screen-scanlines"></div>
 
-            <!-- Screen Active Area -->
-            <div class="bg-[var(--screen-bg)] w-full h-full rounded shadow-inner p-3 flex flex-col relative overflow-hidden" id="sim-screen">
-                
-                <!-- Scanline Overlay -->
-                <div class="absolute inset-0 pointer-events-none opacity-20 bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.4)_50%)] bg-[length:100%_4px] z-10"></div>
-                
                 <!-- Ambient Screensaver Canvas Layer -->
-                <canvas id="lcd-screensaver-canvas" class="hidden absolute inset-0 w-full h-full z-15 pointer-events-auto cursor-pointer" title="Click or turn knob to wake up"></canvas>
+                <canvas id="lcd-screensaver-canvas" class="hidden absolute inset-0 w-full h-full z-25 pointer-events-auto cursor-pointer" title="Click knob to wake up"></canvas>
 
-                <!-- Flappy Bat Retro Arcade Overlay Layer -->
-                <div id="lcd-arcade-container" class="hidden absolute inset-0 w-full h-full z-25 bg-[#080d0a] flex flex-col justify-between p-2.5 font-mono select-none">
-                    <div class="flex justify-between items-center text-[0.65rem] text-emerald-400 border-b border-emerald-900/50 pb-1">
+                <!-- Retro Flappy Bat Arcade Overlay Layer -->
+                <div id="lcd-arcade-container" class="hidden absolute inset-0 w-full h-full z-30 bg-[#060a07] flex flex-col justify-between p-3 font-mono select-none">
+                    <div class="flex justify-between items-center text-[0.65rem] text-emerald-400 border-b border-emerald-900/60 pb-1">
                         <span class="font-bold flex items-center gap-1">🦇 FLAPPY BAT</span>
                         <span>SCORE: <strong id="arcade-score" class="text-amber-300">0</strong> | BEST: <strong id="arcade-best" class="text-emerald-300">0</strong></span>
-                        <button type="button" id="btn-close-arcade" class="text-gray-400 hover:text-white text-[0.6rem] px-1 font-bold">✕</button>
+                        <button type="button" id="btn-close-arcade" class="text-gray-400 hover:text-white text-[0.65rem] font-bold px-1">✕</button>
                     </div>
-                    <canvas id="arcade-canvas" width="240" height="240" class="w-full flex-grow my-1 border border-emerald-950/80 rounded bg-[#040805]"></canvas>
+                    <canvas id="arcade-canvas" width="260" height="200" class="w-full flex-grow my-1 border border-emerald-950 rounded bg-[#030604]"></canvas>
                     <div class="text-center text-[0.55rem] text-emerald-500/80">
-                        CLICK KNOB / SPACE to Flap! Turn Knob to Glide.
+                        PRESS KNOB / SPACE to Flap! Turn Knob to Glide.
                     </div>
                 </div>
-                
-                <!-- Top Status Bar -->
-                <div class="flex justify-between items-start lcd-text text-xs z-0 relative">
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                        <div id="sim-wifi" class="flex gap-[2px] items-end h-3" aria-label="Wi-Fi">
-                            <span class="block w-1 h-1 bg-current opacity-30" id="wifi-1"></span>
-                            <span class="block w-1 h-2 bg-current opacity-30" id="wifi-2"></span>
-                            <span class="block w-1 h-3 bg-current" id="wifi-3"></span>
+
+                <!-- ── SCREEN TOP STATUS BAR ───────────────────────────── -->
+                <div class="flex justify-between items-center px-3 pt-2.5 lcd-font text-xs relative z-10">
+                    <div class="flex items-center gap-1.5">
+                        <!-- Wi-Fi 3-bar signal icon -->
+                        <div id="sim-wifi" class="flex gap-[2px] items-end h-3" title="Wi-Fi Signal: Connected">
+                            <span class="block w-1 h-1 bg-current opacity-30"></span>
+                            <span class="block w-1 h-2 bg-current opacity-30"></span>
+                            <span class="block w-1 h-3 bg-current text-emerald-400"></span>
                         </div>
-                        <span id="sim-sync-icon" class="hidden text-[0.7rem] animate-spin">⟳</span>
-                        <span id="sim-quiet-badge" class="hidden sim-indicator bg-[#1e293b] text-amber-300 border border-amber-500/40">🌙 QUIET</span>
-                        <span id="sim-streak-badge" class="hidden sim-indicator bg-[#1e293b] text-orange-400 border border-orange-500/40">🔥 0D</span>
-                        <span id="sim-mute-badge" class="hidden sim-indicator bg-[#1e293b] text-red-400 border border-red-500/40">🔇 MUTED</span>
+                        <span id="screen-quiet-icon" class="hidden text-[0.65rem] text-amber-300" title="Quiet Hours Active">🌙</span>
+                        <span id="screen-mute-icon" class="hidden text-[0.65rem] text-rose-400" title="Audio Muted">🔇</span>
+                        <span id="screen-sync-icon" class="hidden text-[0.6rem] text-cyan-400 animate-spin">⟳</span>
                     </div>
-                    <div id="sim-clock" class="text-base font-bold tracking-widest" aria-live="polite">--:--</div>
+                    <!-- Live Hardware RTC Time Readout -->
+                    <div id="sim-clock" class="text-sm font-bold tracking-widest text-[#dedcd7]">--:--</div>
                 </div>
 
-                <!-- HUD Popup Notification -->
-                <div id="sim-hud-popup" class="hidden absolute top-8 left-1/2 -translate-x-1/2 bg-black/90 text-white font-mono text-[0.65rem] px-2.5 py-1 rounded shadow-lg border border-gray-600 z-30 uppercase tracking-widest pointer-events-none"></div>
+                <!-- On-Screen HUD Flash Notification -->
+                <div id="sim-hud-popup" class="hidden absolute top-9 left-1/2 -translate-x-1/2 bg-black/95 text-white font-mono text-[0.6rem] px-2.5 py-1 rounded border border-gray-600 z-30 uppercase tracking-widest pointer-events-none shadow-lg"></div>
 
-                <!-- Center: Exact Same Bat Mascot SVG & Animations -->
-                <div class="flex-grow flex items-center justify-center z-0 relative" aria-hidden="true">
-                    <div id="mascot-container" class="w-36 h-36 state-calm">
+                <!-- ── SCREEN CENTER: SHADOW DEMON FAMILIAR MASCOT ──────── -->
+                <div class="flex-grow flex items-center justify-center relative z-10 py-1" id="screen-center-view">
+                    
+                    <!-- Firmware View A: Mascot Idle Screen -->
+                    <div id="mascot-display-container" class="w-36 h-36 state-idle transition-all duration-300">
                         <svg viewBox="0 0 64 64" id="mascot-svg" shape-rendering="crispEdges">
                             <g id="mascot-body-group">
+                                <!-- Tail -->
                                 <path class="mascot-pixel mascot-tail" d="M 32 48 H 36 V 52 H 38 V 56 H 42 V 54 H 44 V 50 H 42 V 52 H 40 V 48 H 36 Z" />
+                                <!-- Wings -->
                                 <g id="left-wing"><path class="mascot-pixel" d="M 20 20 H 16 V 16 H 12 V 12 H 8 V 16 H 4 V 24 H 8 V 32 H 12 V 28 H 16 V 24 H 20 Z" /></g>
                                 <g id="right-wing"><path class="mascot-pixel" d="M 44 20 H 48 V 16 H 52 V 12 H 56 V 16 H 60 V 24 H 56 V 32 H 52 V 28 H 48 V 24 H 44 Z" /></g>
+                                <!-- Pointed Ears -->
                                 <path class="mascot-pixel" d="M 24 12 H 28 V 16 H 24 Z M 36 12 H 40 V 16 H 36 Z" />
+                                <!-- Rounded Blob Body -->
                                 <path class="mascot-pixel" d="M 24 16 H 40 V 20 H 44 V 44 H 40 V 48 H 24 V 44 H 20 V 20 H 24 Z" />
+                                <!-- Glowing White Dot Eyes (no pupils, no mouth) -->
                                 <g id="mascot-eyes">
                                     <rect x="26" y="24" width="4" height="4" class="mascot-eye" />
                                     <rect x="34" y="24" width="4" height="4" class="mascot-eye" />
                                 </g>
                             </g>
+                            <!-- Detached Soot / Smoke Puffs -->
                             <rect x="10" y="45" width="2" height="2" class="mascot-smoke" style="animation-delay: 0s;" />
-                            <rect x="48" y="40" width="2" height="2" class="mascot-smoke" style="animation-delay: 0.5s;" />
-                            <rect x="52" y="50" width="2" height="2" class="mascot-smoke" style="animation-delay: 1s;" />
+                            <rect x="48" y="40" width="2" height="2" class="mascot-smoke" style="animation-delay: 0.6s;" />
+                            <rect x="52" y="50" width="2" height="2" class="mascot-smoke" style="animation-delay: 1.2s;" />
                         </svg>
                     </div>
-                </div>
 
-                <!-- Bottom Bar: Status / Next Task -->
-                <div class="lcd-text text-center border-t-2 border-[#222] pt-2 mt-2 h-14 flex flex-col justify-center overflow-hidden z-0 relative cursor-pointer" id="screen-bottom-bar" title="Click or push knob to cycle directive details">
-                    <span id="sim-status-label" class="opacity-80 text-[0.6rem] uppercase tracking-widest mb-0.5">NO TASKS</span>
-                    <span id="sim-task-title" class="truncate font-bold text-sm">All clear.</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Hardware Physical Controls Underneath Display -->
-        <div class="mt-4 w-full flex flex-col gap-3">
-            
-            <!-- Mascot State Override Buttons (Identical to Main Dashboard) -->
-            <div class="w-full bg-[var(--chassis-light)] border-2 border-[var(--chassis-dark)] rounded p-2 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]">
-                <div class="flex justify-between items-center mb-1.5">
-                    <h2 class="hw-label text-[0.55rem] opacity-80">MASCOT_STATE_TEST</h2>
-                    <span class="hw-label text-[0.5rem] text-gray-500 font-mono">KEYS 1-5</span>
-                </div>
-                <div class="grid grid-cols-5 gap-1 bg-[var(--chassis-main)] p-1 rounded shadow-inner border border-[#b5b3ad]">
-                    <button id="btn-state-auto" data-state="auto" class="btn-tactile px-0 py-1 text-[0.55rem] active">AUTO</button>
-                    <button id="btn-state-idle" data-state="idle" class="btn-tactile px-0 py-1 text-[0.55rem]">IDLE</button>
-                    <button id="btn-state-working" data-state="working" class="btn-tactile px-0 py-1 text-[0.55rem]">WORK</button>
-                    <button id="btn-state-urgent" data-state="urgent" class="btn-tactile px-0 py-1 text-[0.55rem]">URGENT</button>
-                    <button id="btn-state-sleeping" data-state="sleeping" class="btn-tactile px-0 py-1 text-[0.55rem]">SLEEP</button>
-                </div>
-            </div>
-
-            <!-- Lower Controls: SYS_LED & Full Interactive Knurled Rotary Knob -->
-            <div class="w-full flex items-center justify-between px-3 py-1">
-                
-                <!-- SYS_LED with Acrylic Lens & Glow -->
-                <div class="flex flex-col items-center gap-1.5">
-                    <div id="hw-led" class="w-6 h-6 rounded-full bg-white/20 border-2 border-[var(--chassis-dark)] shadow-[inset_0_2px_5px_rgba(0,0,0,0.8)] transition-all duration-300"></div>
-                    <span class="hw-label text-[0.6rem]">SYS_LED</span>
-                </div>
-
-                <!-- Directives Quick Peek / Active Directive Status -->
-                <div class="flex-grow mx-4 text-center">
-                    <div class="bg-[var(--chassis-light)] border border-[var(--chassis-dark)] rounded px-2 py-1 shadow-inner">
-                        <span class="hw-label text-[0.5rem] block opacity-70">ENCODER ACTION</span>
-                        <span id="encoder-action-hint" class="font-mono text-[0.6rem] font-bold text-gray-700 block truncate">Turn to cycle · Click to toggle</span>
-                    </div>
-                </div>
-
-                <!-- Realistic Knurled Rotary Encoder (Identical to Dashboard, fully interactive) -->
-                <div class="flex flex-col items-center gap-1.5">
-                    <div id="hw-encoder" role="button" tabindex="0" class="w-14 h-14 rounded-full encoder-wheel-knurled shadow-[0_6px_12px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.4)] border-b-4 border-[#555] flex items-center justify-center cursor-pointer select-none active:border-b-0 active:translate-y-1 transition-all focus:outline-none focus:ring-2 focus:ring-amber-500" title="Rotary Encoder: Scroll to Rotate, Click to Toggle Directive, Double Click to Skip, Hold (>600ms) to Mute" aria-label="Rotary Encoder Knob">
-                        <div class="w-10 h-10 rounded-full bg-[var(--chassis-light)] border border-white/80 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] flex items-center justify-center pointer-events-none relative">
-                            <!-- Amber Rotary Indicator Notch -->
-                            <div id="hw-encoder-notch" class="w-1.5 h-5 bg-[#ea580c] rounded-full shadow-[0_0_4px_#ea580c] transition-transform duration-75"></div>
+                    <!-- Firmware View B: Directives Browser (Toggled on knob rotate) -->
+                    <div id="firmware-task-menu" class="hidden absolute inset-0 bg-[#090a09]/95 p-3 flex flex-col justify-between lcd-font z-20">
+                        <div class="text-[0.6rem] text-amber-400 border-b border-white/10 pb-1 flex justify-between font-bold">
+                            <span>DIRECTIVES MENU</span>
+                            <span id="menu-counter">0/0</span>
+                        </div>
+                        <div id="menu-task-items" class="space-y-1.5 my-auto max-h-36 overflow-y-auto custom-scroll text-xs">
+                            <!-- Injected by JS -->
+                        </div>
+                        <div class="text-[0.5rem] text-gray-400 border-t border-white/10 pt-1 text-center font-mono">
+                            TURN: SCROLL · CLICK: TOGGLE · HOLD: EXIT
                         </div>
                     </div>
-                    <span class="hw-label text-[0.6rem]">ENCODER</span>
                 </div>
-            </div>
 
-            <!-- Directives Drawer List (Interactive Directive selection synced via encoder) -->
-            <div class="w-full bg-[var(--chassis-light)] border-2 border-[var(--chassis-dark)] rounded p-2.5 shadow-inner mt-1">
-                <div class="flex justify-between items-center mb-1.5">
-                    <span class="hw-label text-[0.55rem]">DIRECTIVES WHEEL (<span id="task-count-badge">0</span>)</span>
-                    <button id="btn-refresh-sync" type="button" class="hw-label text-[0.55rem] text-indigo-700 hover:text-black font-bold">↻ SYNC</button>
-                </div>
-                <div id="device-task-list" class="space-y-1 max-h-28 overflow-y-auto custom-scroll pr-1 font-mono text-xs">
-                    <div class="text-gray-500 text-center py-2 text-[0.65rem]">Loading directives...</div>
+                <!-- ── SCREEN BOTTOM STATUS TICKER ─────────────────────── -->
+                <div class="px-3 pb-2.5 pt-1 border-t border-[#1f201f] lcd-font text-center relative z-10 cursor-pointer" id="screen-status-bar" title="Click or turn knob to browse directives">
+                    <div id="sim-status-label" class="text-[0.6rem] uppercase tracking-wider text-amber-400/90 font-bold mb-0.5">ALL CLEAR</div>
+                    <div id="sim-task-title" class="text-xs truncate text-[#dedcd7] font-bold">Awaiting directives.</div>
                 </div>
             </div>
         </div>
 
-        <!-- Footer Speaker Holes & Chassis Info -->
-        <footer class="w-full flex justify-between items-center mt-3 pt-2 border-t border-[var(--chassis-dark)]/40 px-1">
-            <div class="flex items-center gap-1" title="Piezo Speaker Grill">
-                <span class="w-1 h-1 rounded-full bg-[var(--chassis-dark)]"></span>
-                <span class="w-1 h-1 rounded-full bg-[var(--chassis-dark)]"></span>
-                <span class="w-1 h-1 rounded-full bg-[var(--chassis-dark)]"></span>
-                <span class="w-1 h-1 rounded-full bg-[var(--chassis-dark)]"></span>
-                <span class="w-1 h-1 rounded-full bg-[var(--chassis-dark)]"></span>
+        <!-- ============================================================= -->
+        <!-- PHYSICAL CONTROLS CLUSTER (LED, ENCODER, TACTILE SWITCHES)    -->
+        <!-- ============================================================= -->
+        <div class="mt-5 px-2 flex items-center justify-between">
+            
+            <!-- Left Side: Diffused Acrylic Status LED (Light Pipe) -->
+            <div class="flex flex-col items-center gap-1.5">
+                <div class="light-pipe-led" id="hw-status-led" title="Hardware RGB Urgency Status LED"></div>
+                <span class="hw-label text-[0.55rem] text-gray-500">SYS_LED</span>
             </div>
-            <span class="hw-label text-[0.5rem] opacity-50">HOL-01 / ESP32-S3 SIM</span>
-            <div class="flex items-center gap-1.5 text-[0.55rem] font-mono text-gray-500">
-                <span>[↑/↓ ROTATE]</span>
-                <span>[SPACE CLICK]</span>
-            </div>
-        </footer>
-    </main>
 
-    <!-- JavaScript Hardware Simulation Logic (Identical Engine & Bi-directional Sync) -->
+            <!-- Center: Mode & Directives Quick Toggle Indicator -->
+            <div class="flex flex-col items-center gap-1 text-center">
+                <div class="flex items-center gap-1">
+                    <button type="button" class="hw-mini-btn active" id="btn-device-mode" title="Toggle Screen between Mascot and Directives List">DIRECTIVES</button>
+                    <button type="button" class="hw-mini-btn" id="btn-device-arcade" title="Play Flappy Bat Arcade (Key: A)">ARCADE</button>
+                </div>
+                <span class="hw-label text-[0.5rem] opacity-60 font-mono tracking-normal">TURN KNOB / SCROLL</span>
+            </div>
+
+            <!-- Right Side: Authentic Knurled Rotary Encoder Knob -->
+            <div class="encoder-housing">
+                <div class="knob-knurled-outer" id="hw-rotary-knob" role="button" tabindex="0" title="Rotary Knob: Rotate with Mouse Wheel / Drag / Arrows; Click to Toggle; Hold to Mute" aria-label="Physical Rotary Encoder">
+                    <div class="knob-cap">
+                        <div class="knob-dimple">
+                            <div class="w-1.5 h-1.5 rounded-full bg-[#8c8a84] shadow-inner"></div>
+                        </div>
+                        <!-- Orange Directional Index Marker -->
+                        <div class="knob-notch" id="knob-notch-marker"></div>
+                    </div>
+                </div>
+                <span class="hw-label text-[0.55rem] text-gray-500 mt-1.5">ENCODER</span>
+            </div>
+        </div>
+
+        <!-- Bottom Tactile State Test Switches -->
+        <div class="mt-4 pt-3 border-t border-[var(--chassis-dark)]/40 flex justify-between items-center px-1">
+            <span class="hw-label text-[0.5rem] opacity-60">FIRMWARE STATE</span>
+            <div class="flex gap-1">
+                <button type="button" class="hw-mini-btn active" data-state="auto">AUTO</button>
+                <button type="button" class="hw-mini-btn" data-state="idle">IDLE</button>
+                <button type="button" class="hw-mini-btn" data-state="working">WORK</button>
+                <button type="button" class="hw-mini-btn" data-state="urgent">ALERT</button>
+                <button type="button" class="hw-mini-btn" data-state="sleeping">SLEEP</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sub-Chassis Workbench Helper Note -->
+    <div class="mt-4 text-center font-mono text-[0.6rem] text-gray-700/80 flex items-center justify-center gap-3">
+        <span><kbd class="px-1.5 py-0.5 bg-black/10 rounded">↑/↓</kbd> or <kbd class="px-1.5 py-0.5 bg-black/10 rounded">Wheel</kbd> Rotate</span>
+        <span><kbd class="px-1.5 py-0.5 bg-black/10 rounded">Space/Click</kbd> Push</span>
+        <span><kbd class="px-1.5 py-0.5 bg-black/10 rounded">M</kbd> Mute</span>
+        <span><kbd class="px-1.5 py-0.5 bg-black/10 rounded">S</kbd> Screensaver</span>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- FIRMWARE SIMULATION ENGINE & BI-DIRECTIONAL CLOUD SYNC            -->
+    <!-- ================================================================= -->
     <script>
-        // ── Shared Audio Engine (Identical to Main Dashboard) ───────────────────
-        const HollowAudioEngine = {
+        // ── Synthesized I2S Hardware Audio Transducer ──────────────────────────
+        const DeviceAudio = {
             ctx: null,
             init() {
                 if (!this.ctx) {
@@ -415,95 +573,90 @@
                 }
                 return this.ctx;
             },
-            playTone(type = 'chime') {
+            play(type = 'tick') {
                 if (isMuted) return;
                 const ctx = this.init();
                 if (!ctx) return;
                 try {
                     const now = ctx.currentTime;
                     if (type === 'tick') {
+                        // Sharp mechanical rotary detent click
                         const osc = ctx.createOscillator();
                         const gain = ctx.createGain();
                         osc.type = 'triangle';
-                        osc.frequency.setValueAtTime(800, now);
-                        osc.frequency.exponentialRampToValueAtTime(100, now + 0.03);
-                        gain.gain.setValueAtTime(0.08, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+                        osc.frequency.setValueAtTime(950, now);
+                        osc.frequency.exponentialRampToValueAtTime(120, now + 0.025);
+                        gain.gain.setValueAtTime(0.09, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
                         osc.connect(gain); gain.connect(ctx.destination);
-                        osc.start(now); osc.stop(now + 0.03);
+                        osc.start(now); osc.stop(now + 0.026);
                     } else if (type === 'click') {
+                        // Solid switch tact switch click
                         const osc = ctx.createOscillator();
                         const gain = ctx.createGain();
                         osc.type = 'square';
-                        osc.frequency.setValueAtTime(520, now);
-                        osc.frequency.exponentialRampToValueAtTime(180, now + 0.06);
-                        gain.gain.setValueAtTime(0.12, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+                        osc.frequency.setValueAtTime(540, now);
+                        osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+                        gain.gain.setValueAtTime(0.14, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
                         osc.connect(gain); gain.connect(ctx.destination);
-                        osc.start(now); osc.stop(now + 0.06);
+                        osc.start(now); osc.stop(now + 0.052);
                     } else if (type === 'chime') {
-                        const notes = [523.25, 659.25, 783.99, 1046.50];
-                        notes.forEach((freq, idx) => {
+                        // 4-note ascending familiar alert
+                        [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
                             const osc = ctx.createOscillator();
                             const gain = ctx.createGain();
                             osc.type = 'sine';
-                            osc.frequency.setValueAtTime(freq, now + idx * 0.07);
-                            gain.gain.setValueAtTime(0.15, now + idx * 0.07);
-                            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.25);
+                            osc.frequency.setValueAtTime(freq, now + i * 0.07);
+                            gain.gain.setValueAtTime(0.12, now + i * 0.07);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.24);
                             osc.connect(gain); gain.connect(ctx.destination);
-                            osc.start(now + idx * 0.07);
-                            osc.stop(now + idx * 0.07 + 0.26);
+                            osc.start(now + i * 0.07);
+                            osc.stop(now + i * 0.07 + 0.25);
                         });
                     }
                 } catch (_) {}
             }
         };
 
-        // ── Device State ────────────────────────────────────────────────────────
+        // ── Device Firmware State ──────────────────────────────────────────────
         let tasks = [];
-        let settings = {
-            chime_enabled: true,
-            led_brightness: 80,
-            snooze_minutes: 15,
-            time_format: '12',
-            timezone: 'UTC',
-            sound_pack: '8bit'
-        };
+        let settings = { chime_enabled: true, led_brightness: 80, time_format: '12', timezone: 'UTC' };
         let isMuted = false;
         let manualStateOverride = null;
         let currentUrgency = 0;
-        let selectedTaskIndex = 0;
-        let encoderRotation = 0;
+        let selectedMenuIndex = 0;
+        let knobRotationDegrees = 0;
+        let isMenuMode = false;
         let activeMicroAnim = null;
         let microAnimTimer = null;
         let hudTimer = null;
 
-        // ── DOM References ──────────────────────────────────────────────────────
+        // ── DOM References ─────────────────────────────────────────────────────
         const els = {
-            screen:          document.getElementById('sim-screen'),
+            screen:          document.getElementById('device-screen'),
             clock:           document.getElementById('sim-clock'),
             statusLabel:     document.getElementById('sim-status-label'),
             taskTitle:       document.getElementById('sim-task-title'),
-            mascotContainer: document.getElementById('mascot-container'),
-            hwLed:           document.getElementById('hw-led'),
-            encoder:         document.getElementById('hw-encoder'),
-            encoderNotch:    document.getElementById('hw-encoder-notch'),
+            mascotContainer: document.getElementById('mascot-display-container'),
+            taskMenu:        document.getElementById('firmware-task-menu'),
+            menuItems:       document.getElementById('menu-task-items'),
+            menuCounter:     document.getElementById('menu-counter'),
+            statusLed:       document.getElementById('hw-status-led'),
+            rotaryKnob:      document.getElementById('hw-rotary-knob'),
+            knobNotch:       document.getElementById('knob-notch-marker'),
             hudPopup:        document.getElementById('sim-hud-popup'),
-            quietBadge:      document.getElementById('sim-quiet-badge'),
-            streakBadge:     document.getElementById('sim-streak-badge'),
-            muteBadge:       document.getElementById('sim-mute-badge'),
-            syncIcon:        document.getElementById('sim-sync-icon'),
-            taskList:        document.getElementById('device-task-list'),
-            taskCountBadge:  document.getElementById('task-count-badge'),
-            actionHint:      document.getElementById('encoder-action-hint'),
-            connIndicator:   document.getElementById('conn-indicator')
+            quietIcon:       document.getElementById('screen-quiet-icon'),
+            muteIcon:        document.getElementById('screen-mute-icon'),
+            syncIcon:        document.getElementById('screen-sync-icon'),
+            btnMode:         document.getElementById('btn-device-mode')
         };
 
-        // ── API & Cloud Sync ────────────────────────────────────────────────────
         function getApiBase() {
             return (typeof window !== 'undefined' && window.location.origin) ? window.location.origin + '/api' : '/api';
         }
 
+        // ── Cloud / Local Sync ─────────────────────────────────────────────────
         async function fetchDeviceData() {
             els.syncIcon?.classList.remove('hidden');
             try {
@@ -527,68 +680,145 @@
                     const cached = localStorage.getItem('dc_cached_settings');
                     if (cached) settings = { ...settings, ...JSON.parse(cached) };
                 }
-
-                els.connIndicator.classList.remove('bg-amber-500', 'bg-red-500');
-                els.connIndicator.classList.add('bg-emerald-500');
-            } catch (err) {
+            } catch (_) {
                 const cachedTasks = localStorage.getItem('dc_cached_tasks');
                 const cachedSettings = localStorage.getItem('dc_cached_settings');
                 if (cachedTasks) tasks = JSON.parse(cachedTasks);
                 if (cachedSettings) settings = { ...settings, ...JSON.parse(cachedSettings) };
-                els.connIndicator.classList.remove('bg-emerald-500');
-                els.connIndicator.classList.add('bg-amber-500');
             } finally {
                 els.syncIcon?.classList.add('hidden');
-                renderTaskList();
-                hardwareLoop();
+                renderMenuDirectives();
+                firmwareHardwareLoop();
             }
         }
 
-        // ── Directives Drawer Rendering ─────────────────────────────────────────
-        function renderTaskList() {
-            if (!els.taskList) return;
+        // ── Screen Rendering: Firmware Directive Browser ──────────────────────
+        function renderMenuDirectives() {
             const pending = tasks.filter(t => !t.done).sort((a, b) => new Date(a.due_time) - new Date(b.due_time));
-            if (els.taskCountBadge) els.taskCountBadge.textContent = pending.length;
+            if (els.menuCounter) els.menuCounter.textContent = `${pending.length ? selectedMenuIndex + 1 : 0}/${pending.length}`;
 
             if (pending.length === 0) {
-                els.taskList.innerHTML = `<div class="text-gray-500 text-center py-2 text-[0.65rem]">✓ All directives complete</div>`;
-                if (els.actionHint) els.actionHint.textContent = 'All clear · Idle';
+                els.menuItems.innerHTML = `<div class="text-gray-500 text-center py-4">✓ All clear.<br><span class="text-[0.55rem]">No pending directives</span></div>`;
                 return;
             }
 
-            if (selectedTaskIndex >= pending.length) selectedTaskIndex = 0;
-            if (selectedTaskIndex < 0) selectedTaskIndex = pending.length - 1;
+            if (selectedMenuIndex >= pending.length) selectedMenuIndex = 0;
+            if (selectedMenuIndex < 0) selectedMenuIndex = pending.length - 1;
 
-            const selected = pending[selectedTaskIndex];
-            if (els.actionHint && selected) {
-                els.actionHint.textContent = `[${selectedTaskIndex + 1}/${pending.length}] ${selected.title}`;
-            }
-
-            els.taskList.innerHTML = pending.map((task, idx) => {
-                const isSelected = idx === selectedTaskIndex;
+            els.menuItems.innerHTML = pending.map((task, idx) => {
+                const isSelected = idx === selectedMenuIndex;
                 const isDue = new Date(task.due_time) <= new Date();
                 return `
-                    <div class="flex items-center justify-between p-1.5 rounded transition-colors ${isSelected ? 'bg-amber-100 border border-amber-300 font-bold text-black' : 'hover:bg-gray-100 text-gray-700'}" data-index="${idx}">
+                    <div class="flex items-center justify-between p-1.5 rounded transition-all ${isSelected ? 'bg-amber-500 text-black font-bold shadow' : 'text-gray-300 hover:text-white'}" data-menu-idx="${idx}">
                         <div class="flex items-center gap-1.5 min-w-0">
-                            <span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-amber-500 animate-ping' : 'bg-gray-300'}"></span>
-                            <span class="truncate ${isDue ? 'text-red-700 font-bold' : ''}">${task.title}</span>
+                            <span class="text-[0.6rem] font-black">${isSelected ? '▶' : '·'}</span>
+                            <span class="truncate">${task.title}</span>
                         </div>
-                        <span class="text-[0.55rem] text-gray-500 shrink-0 ml-1">${new Date(task.due_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span class="text-[0.55rem] shrink-0 ml-1 opacity-80">${new Date(task.due_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                 `;
             }).join('');
-
-            // Allow clicking items directly
-            els.taskList.querySelectorAll('[data-index]').forEach(row => {
-                row.addEventListener('click', () => {
-                    selectedTaskIndex = parseInt(row.dataset.index, 10);
-                    renderTaskList();
-                    HollowAudioEngine.playTone('tick');
-                });
-            });
         }
 
-        // ── Hardware Loop (Exact Same Logic & Animation Classes) ───────────────
+        function toggleMenuMode(forceState = null) {
+            isMenuMode = (forceState !== null) ? forceState : !isMenuMode;
+            if (isMenuMode) {
+                els.taskMenu.classList.remove('hidden');
+                els.btnMode.classList.add('active');
+                renderMenuDirectives();
+            } else {
+                els.taskMenu.classList.add('hidden');
+                els.btnMode.classList.remove('active');
+            }
+            DeviceAudio.play('click');
+        }
+
+        // ── Firmware Hardware Loop (Identical Logic to Device Firmware Spec) ──
+        function firmwareHardwareLoop() {
+            const now = new Date();
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: settings.time_format === '12' };
+            if (settings.timezone) {
+                try { timeOptions.timeZone = settings.timezone; } catch (_) {}
+            }
+            els.clock.textContent = now.toLocaleTimeString([], timeOptions);
+
+            const isQuiet = isQuietHoursActive(now, settings);
+            if (els.quietIcon) els.quietIcon.classList.toggle('hidden', !isQuiet);
+            if (els.muteIcon) els.muteIcon.classList.toggle('hidden', !isMuted);
+
+            // Manual Override active
+            if (manualStateOverride) {
+                applyManualOverride();
+                return;
+            }
+
+            const brightness = Math.max(0.1, (settings.led_brightness || 80) / 100);
+            const pendingTasks = tasks.filter(t => !t.done);
+            const activeTasks  = pendingTasks.filter(t => !t.snoozed_until || new Date(t.snoozed_until) <= now);
+            const snoozedTasks = pendingTasks.filter(t => t.snoozed_until && new Date(t.snoozed_until) > now);
+
+            let targetUrgency = 0;
+            let statusText = "ALL CLEAR";
+            let taskTitle  = "Awaiting directives.";
+            let ledColor = `rgba(255, 255, 255, ${(0.15 * brightness).toFixed(2)})`;
+            let ledGlow = 'none';
+
+            if (activeTasks.length > 0) {
+                activeTasks.sort((a, b) => new Date(a.due_time) - new Date(b.due_time));
+                const nextTask = activeTasks[0];
+                const diffMin  = (new Date(nextTask.due_time) - now) / 60000;
+                taskTitle = nextTask.title;
+
+                if (diffMin <= 0) {
+                    targetUrgency = 2; // Overdue / Alert
+                    statusText = isQuiet ? "[QUIET: OVERDUE]" : "OVERDUE DIRECTIVE";
+                    ledColor = `rgba(239, 68, 68, ${(0.95 * brightness).toFixed(2)})`;
+                    ledGlow = `0 0 12px rgba(239, 68, 68, 0.8)`;
+                } else if (diffMin <= 60) {
+                    targetUrgency = 1; // Due soon
+                    statusText = `DUE IN ${Math.ceil(diffMin)}M`;
+                    ledColor = `rgba(245, 158, 11, ${(0.85 * brightness).toFixed(2)})`;
+                    ledGlow = `0 0 8px rgba(245, 158, 11, 0.6)`;
+                } else {
+                    const h = Math.floor(diffMin / 60);
+                    statusText = h < 24 ? `DUE IN ${h}H` : `NEXT DIRECTIVE`;
+                    ledColor = `rgba(6, 182, 212, ${(0.6 * brightness).toFixed(2)})`;
+                    ledGlow = `0 0 6px rgba(6, 182, 212, 0.4)`;
+                }
+            } else if (snoozedTasks.length > 0) {
+                snoozedTasks.sort((a, b) => new Date(a.snoozed_until) - new Date(b.snoozed_until));
+                const nextSnoozed = snoozedTasks[0];
+                const remMin = Math.ceil((new Date(nextSnoozed.snoozed_until) - now) / 60000);
+                statusText = `SNOOZED ${remMin}M`;
+                taskTitle = nextSnoozed.title;
+                targetUrgency = 0;
+            }
+
+            els.statusLabel.textContent = statusText;
+            els.taskTitle.textContent   = taskTitle;
+            if (targetUrgency === 2) {
+                els.statusLabel.className = 'text-[0.6rem] uppercase tracking-wider text-rose-500 font-bold mb-0.5 animate-pulse';
+            } else if (targetUrgency === 1) {
+                els.statusLabel.className = 'text-[0.6rem] uppercase tracking-wider text-amber-400 font-bold mb-0.5';
+            } else {
+                els.statusLabel.className = 'text-[0.6rem] uppercase tracking-wider text-gray-400 font-bold mb-0.5';
+            }
+
+            // Set Physical Light Pipe Status LED Styles
+            document.documentElement.style.setProperty('--led-color', (isMuted || isQuiet) ? 'rgba(255,255,255,0.1)' : ledColor);
+            document.documentElement.style.setProperty('--led-glow', (isMuted || isQuiet) ? 'none' : ledGlow);
+
+            // Chime audio when urgent state triggers
+            if (currentUrgency !== targetUrgency) {
+                currentUrgency = targetUrgency;
+                if (targetUrgency === 2 && settings.chime_enabled && !isMuted && !isQuiet) {
+                    DeviceAudio.play('chime');
+                }
+            }
+
+            updateMascotDisplay();
+        }
+
         function isQuietHoursActive(now, conf) {
             if (!conf || !conf.quiet_hours_enabled) return false;
             const currentMin = now.getHours() * 60 + now.getMinutes();
@@ -604,86 +834,7 @@
             return false;
         }
 
-        function hardwareLoop() {
-            const now = new Date();
-            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: settings.time_format === '12' };
-            if (settings.timezone) {
-                try { timeOptions.timeZone = settings.timezone; } catch (_) {}
-            }
-            els.clock.textContent = now.toLocaleTimeString([], timeOptions);
-
-            const isQuiet = isQuietHoursActive(now, settings);
-            if (els.quietBadge) els.quietBadge.classList.toggle('hidden', !isQuiet);
-            if (els.muteBadge) els.muteBadge.classList.toggle('hidden', !isMuted);
-
-            // Manual Override active
-            if (manualStateOverride) {
-                applyManualState();
-                return;
-            }
-
-            const brightness = Math.max(0.1, (settings.led_brightness || 80) / 100);
-            const pendingTasks = tasks.filter(t => !t.done);
-            const activeTasks  = pendingTasks.filter(t => !t.snoozed_until || new Date(t.snoozed_until) <= now);
-            const snoozedTasks = pendingTasks.filter(t => t.snoozed_until && new Date(t.snoozed_until) > now);
-
-            let targetUrgency = 0;
-            let statusText = "NO TASKS";
-            let taskTitle  = "All clear.";
-            let hwLedColor = 'transparent';
-
-            if (activeTasks.length > 0) {
-                activeTasks.sort((a, b) => new Date(a.due_time) - new Date(b.due_time));
-                const nextTask = activeTasks[0];
-                const diffMin  = (new Date(nextTask.due_time) - now) / 60000;
-                taskTitle = nextTask.title;
-
-                if (diffMin <= 0) {
-                    targetUrgency = 2;
-                    statusText = isQuiet ? "[QUIET: OVERDUE]" : "[OVERDUE]";
-                    hwLedColor = `rgba(220,38,38,${(0.9 * brightness).toFixed(2)})`;
-                } else if (diffMin <= 60) {
-                    targetUrgency = 1;
-                    statusText = `DUE IN ${Math.ceil(diffMin)}M`;
-                    hwLedColor = `rgba(217,119,6,${(0.8 * brightness).toFixed(2)})`;
-                } else {
-                    const h = Math.floor(diffMin / 60);
-                    statusText = h < 24 ? `DUE IN ${h}H` : `NEXT TASK`;
-                }
-            } else if (snoozedTasks.length > 0) {
-                snoozedTasks.sort((a, b) => new Date(a.snoozed_until) - new Date(b.snoozed_until));
-                const nextSnoozed = snoozedTasks[0];
-                const remainingMin = Math.ceil((new Date(nextSnoozed.snoozed_until) - now) / 60000);
-                statusText = `SNOOZED ${remainingMin}M`;
-                taskTitle = nextSnoozed.title;
-                targetUrgency = 0;
-            }
-
-            els.statusLabel.textContent = statusText;
-            els.taskTitle.textContent   = taskTitle;
-            targetUrgency === 2 ? els.statusLabel.classList.add('lcd-accent') : els.statusLabel.classList.remove('lcd-accent');
-
-            const suppressAlerts = isQuiet || isMuted;
-
-            if (targetUrgency === 0 || suppressAlerts) {
-                els.hwLed.style.backgroundColor = `rgba(255,255,255,${(0.1 * brightness).toFixed(2)})`;
-                els.hwLed.style.boxShadow = '';
-            } else {
-                els.hwLed.style.backgroundColor = hwLedColor;
-                els.hwLed.style.boxShadow = `0 0 10px ${hwLedColor}, inset 0 2px 4px rgba(0,0,0,0.5)`;
-            }
-
-            if (currentUrgency !== targetUrgency) {
-                currentUrgency = targetUrgency;
-                if (targetUrgency === 2 && settings.chime_enabled && !suppressAlerts) {
-                    HollowAudioEngine.playTone('chime');
-                }
-            }
-
-            updateMascotClass();
-        }
-
-        function updateMascotClass() {
+        function updateMascotDisplay() {
             if (manualStateOverride) return;
             const stateClass = currentUrgency === 2 ? 'state-urgent' : currentUrgency === 1 ? 'state-working' : 'state-idle';
             const animClass = (currentUrgency === 0 && activeMicroAnim) ? activeMicroAnim : '';
@@ -692,42 +843,39 @@
             }
         }
 
-        function applyManualState() {
+        function applyManualOverride() {
             const states = {
                 'idle':     { class: 'state-idle',     status: 'SYSTEM IDLE',   title: 'Awaiting directives.' },
-                'working':  { class: 'state-working',  status: 'WORKING...',    title: 'Focus mode active.' },
-                'urgent':   { class: 'state-urgent',   status: 'URGENT TASK!',  title: 'Immediate action req!' },
-                'sleeping': { class: 'state-sleeping', status: 'SLEEP MODE',    title: 'Low power state.' }
+                'working':  { class: 'state-working',  status: 'WORKING...',    title: 'Focus session active.' },
+                'urgent':   { class: 'state-urgent',   status: 'URGENT DIRECTIVE', title: 'Immediate action req!' },
+                'sleeping': { class: 'state-sleeping', status: 'SLEEP MODE',    title: 'Low power sleep.' }
             };
             const conf = states[manualStateOverride];
             if (!conf) return;
 
-            const brightness = Math.max(0.1, (settings.led_brightness || 80) / 100);
             els.mascotContainer.className = `w-36 h-36 ${conf.class}`;
             els.statusLabel.textContent = conf.status;
             els.taskTitle.textContent   = conf.title;
 
             if (manualStateOverride === 'urgent') {
-                els.statusLabel.classList.add('lcd-accent');
-                const red = `rgba(220,38,38,${(0.9 * brightness).toFixed(2)})`;
-                els.hwLed.style.backgroundColor = red;
-                els.hwLed.style.boxShadow = `0 0 10px ${red}, inset 0 2px 4px rgba(0,0,0,0.5)`;
+                els.statusLabel.className = 'text-[0.6rem] uppercase tracking-wider text-rose-500 font-bold mb-0.5 animate-pulse';
+                document.documentElement.style.setProperty('--led-color', 'rgba(239, 68, 68, 0.95)');
+                document.documentElement.style.setProperty('--led-glow', '0 0 12px rgba(239, 68, 68, 0.8)');
             } else if (manualStateOverride === 'working') {
-                els.statusLabel.classList.remove('lcd-accent');
-                const cyan = `rgba(6,182,212,${(0.8 * brightness).toFixed(2)})`;
-                els.hwLed.style.backgroundColor = cyan;
-                els.hwLed.style.boxShadow = `0 0 8px ${cyan}, inset 0 2px 4px rgba(0,0,0,0.5)`;
+                els.statusLabel.className = 'text-[0.6rem] uppercase tracking-wider text-amber-400 font-bold mb-0.5';
+                document.documentElement.style.setProperty('--led-color', 'rgba(245, 158, 11, 0.85)');
+                document.documentElement.style.setProperty('--led-glow', '0 0 8px rgba(245, 158, 11, 0.6)');
             } else {
-                els.statusLabel.classList.remove('lcd-accent');
-                els.hwLed.style.backgroundColor = `rgba(255,255,255,${(0.1 * brightness).toFixed(2)})`;
-                els.hwLed.style.boxShadow = '';
+                els.statusLabel.className = 'text-[0.6rem] uppercase tracking-wider text-gray-400 font-bold mb-0.5';
+                document.documentElement.style.setProperty('--led-color', 'rgba(255, 255, 255, 0.2)');
+                document.documentElement.style.setProperty('--led-glow', 'none');
             }
         }
 
-        function showHudPopup(msg) {
+        function flashHud(text) {
             if (!els.hudPopup) return;
             clearTimeout(hudTimer);
-            els.hudPopup.textContent = msg;
+            els.hudPopup.textContent = text;
             els.hudPopup.classList.remove('hidden');
             hudTimer = setTimeout(() => { els.hudPopup.classList.add('hidden'); }, 1800);
         }
@@ -736,16 +884,16 @@
         function startMicroAnimations() {
             if (microAnimTimer) clearTimeout(microAnimTimer);
             const scheduleNext = () => {
-                const delay = Math.floor(Math.random() * 12000) + 10000;
+                const delay = Math.floor(Math.random() * 12000) + 12000;
                 microAnimTimer = setTimeout(() => {
                     if (!manualStateOverride && currentUrgency === 0 && els.mascotContainer) {
                         const anims = ['micro-blink', 'micro-ear-twitch', 'micro-wing-flutter'];
                         activeMicroAnim = anims[Math.floor(Math.random() * anims.length)];
-                        updateMascotClass();
+                        updateMascotDisplay();
                         setTimeout(() => {
                             activeMicroAnim = null;
-                            updateMascotClass();
-                        }, 600);
+                            updateMascotDisplay();
+                        }, 500);
                     }
                     scheduleNext();
                 }, delay);
@@ -753,144 +901,149 @@
             scheduleNext();
         }
 
-        // ── Interactive Rotary Encoder Knob Setup ──────────────────────────────
-        function rotateEncoder(delta) {
-            encoderRotation += delta * 18;
-            if (els.encoderNotch) {
-                els.encoderNotch.style.transform = `rotate(${encoderRotation}deg)`;
+        // ── Interactive Rotary Encoder Mechanics ───────────────────────────────
+        function rotateKnob(delta) {
+            knobRotationDegrees += delta * 20;
+            if (els.knobNotch) {
+                els.knobNotch.style.transform = `rotate(${knobRotationDegrees}deg)`;
             }
-            HollowAudioEngine.playTone('tick');
+            DeviceAudio.play('tick');
 
-            const pending = tasks.filter(t => !t.done);
-            if (pending.length > 0) {
-                selectedTaskIndex = (selectedTaskIndex + (delta > 0 ? 1 : -1) + pending.length) % pending.length;
-                renderTaskList();
-            }
-        }
-
-        async function toggleActiveTask() {
-            HollowAudioEngine.playTone('click');
-            const pending = tasks.filter(t => !t.done).sort((a, b) => new Date(a.due_time) - new Date(b.due_time));
-            if (pending.length === 0) {
-                showHudPopup("NO ACTIVE TASKS");
+            if (!isMenuMode) {
+                // Turning knob from idle screen immediately reveals directives menu
+                toggleMenuMode(true);
                 return;
             }
 
-            const targetTask = pending[selectedTaskIndex] || pending[0];
-            targetTask.done = true;
-            showHudPopup(`COMPLETED: ${targetTask.title.slice(0, 16)}`);
-            renderTaskList();
-            hardwareLoop();
-
-            try {
-                await fetch(`${getApiBase()}/tasks/${targetTask.id}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ done: true })
-                });
-            } catch (_) {}
-            fetchDeviceData();
+            const pending = tasks.filter(t => !t.done);
+            if (pending.length > 0) {
+                selectedMenuIndex = (selectedMenuIndex + (delta > 0 ? 1 : -1) + pending.length) % pending.length;
+                renderMenuDirectives();
+            }
         }
 
-        function setupEncoder() {
-            if (!els.encoder) return;
+        async function clickKnob() {
+            DeviceAudio.play('click');
+
+            if (isArcadeActive) {
+                arcadeFlap();
+                return;
+            }
+            wakeScreensaver();
+
+            const pending = tasks.filter(t => !t.done).sort((a, b) => new Date(a.due_time) - new Date(b.due_time));
+            if (pending.length === 0) {
+                flashHud("ALL DIRECTIVES CLEAR");
+                if (isMenuMode) toggleMenuMode(false);
+                return;
+            }
+
+            if (!isMenuMode) {
+                // If on idle screen, pressing knob completes top urgent task
+                const top = pending[0];
+                top.done = true;
+                flashHud(`COMPLETED: ${top.title.slice(0, 16)}`);
+                firmwareHardwareLoop();
+                try {
+                    await fetch(`${getApiBase()}/tasks/${top.id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ done: true })
+                    });
+                } catch (_) {}
+                fetchDeviceData();
+            } else {
+                // Complete selected task in menu
+                const target = pending[selectedMenuIndex] || pending[0];
+                target.done = true;
+                flashHud(`COMPLETED: ${target.title.slice(0, 16)}`);
+                renderMenuDirectives();
+                firmwareHardwareLoop();
+                try {
+                    await fetch(`${getApiBase()}/tasks/${target.id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ done: true })
+                    });
+                } catch (_) {}
+                fetchDeviceData();
+            }
+        }
+
+        function setupKnobInteractions() {
+            if (!els.rotaryKnob) return;
             let pressTimer = null;
             let isLongPress = false;
             let clickCount = 0;
             let clickTimer = null;
 
-            // Pointer down/up for click & long press (>600ms Mute)
-            els.encoder.addEventListener('pointerdown', (e) => {
+            // Pointer down/up for push & long press
+            els.rotaryKnob.addEventListener('pointerdown', (e) => {
                 e.preventDefault();
                 isLongPress = false;
                 pressTimer = setTimeout(() => {
                     isLongPress = true;
+                    // Long press (>600ms): Toggle Mute
                     isMuted = !isMuted;
-                    showHudPopup(isMuted ? 'AUDIO MUTED' : 'AUDIO UNMUTED');
-                    if (els.muteBadge) els.muteBadge.classList.toggle('hidden', !isMuted);
-                    HollowAudioEngine.playTone('click');
-                    hardwareLoop();
+                    flashHud(isMuted ? 'AUDIO MUTED' : 'AUDIO UNMUTED');
+                    firmwareHardwareLoop();
+                    DeviceAudio.play('click');
                 }, 600);
             });
 
-            els.encoder.addEventListener('pointerup', (e) => {
+            els.rotaryKnob.addEventListener('pointerup', (e) => {
                 e.preventDefault();
                 clearTimeout(pressTimer);
                 if (isLongPress) return;
 
-                if (isArcadeActive) {
-                    arcadeFlap();
-                    return;
-                }
-                wakeScreensaver();
-
                 clickCount++;
                 if (clickCount === 1) {
                     clickTimer = setTimeout(() => {
-                        toggleActiveTask();
+                        clickKnob();
                         clickCount = 0;
-                    }, 280);
+                    }, 260);
                 } else if (clickCount >= 2) {
                     clearTimeout(clickTimer);
                     clickCount = 0;
-                    // Double click: Snooze or cycle
-                    showHudPopup("DIRECTIVE SNOOZED");
-                    rotateEncoder(1);
+                    // Double click: Toggle view mode
+                    toggleMenuMode();
                 }
             });
 
-            // Mouse wheel scroll to rotate knob
-            els.encoder.addEventListener('wheel', (e) => {
+            // Wheel scroll
+            els.rotaryKnob.addEventListener('wheel', (e) => {
                 e.preventDefault();
-                const delta = e.deltaY > 0 ? 1 : -1;
-                rotateEncoder(delta);
+                rotateKnob(e.deltaY > 0 ? 1 : -1);
             }, { passive: false });
 
             // Keyboard navigation
             window.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
-                    rotateEncoder(1);
+                    rotateKnob(1);
                 } else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
-                    rotateEncoder(-1);
+                    rotateKnob(-1);
                 } else if (e.key === ' ' || e.key === 'Enter') {
                     e.preventDefault();
-                    if (isArcadeActive) {
-                        arcadeFlap();
-                    } else {
-                        toggleActiveTask();
-                    }
-                } else if (e.key === '1') setManualState('auto');
-                else if (e.key === '2') setManualState('idle');
-                else if (e.key === '3') setManualState('working');
-                else if (e.key === '4') setManualState('urgent');
-                else if (e.key === '5') setManualState('sleeping');
-                else if (e.key.toLowerCase() === 'm') {
+                    clickKnob();
+                } else if (e.key.toLowerCase() === 'm') {
                     isMuted = !isMuted;
-                    showHudPopup(isMuted ? 'AUDIO MUTED' : 'AUDIO UNMUTED');
-                    hardwareLoop();
+                    flashHud(isMuted ? 'AUDIO MUTED' : 'AUDIO UNMUTED');
+                    firmwareHardwareLoop();
                 } else if (e.key.toLowerCase() === 's') {
-                    cycleScreensaver();
+                    toggleScreensaver();
                 } else if (e.key.toLowerCase() === 'a') {
                     toggleArcade();
+                } else if (e.key.toLowerCase() === 'd') {
+                    toggleMenuMode();
                 }
             });
-        }
-
-        // ── State Overrides ────────────────────────────────────────────────────
-        function setManualState(state) {
-            manualStateOverride = (state === 'auto') ? null : state;
-            document.querySelectorAll('[data-state]').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.state === (manualStateOverride || 'auto'));
-            });
-            hardwareLoop();
-            HollowAudioEngine.playTone('tick');
         }
 
         // ── Flappy Bat Retro Arcade Overlay ────────────────────────────────────
         let isArcadeActive = false;
         let arcadeAnimId = null;
         let arcadeState = 'start';
-        let batY = 100, batVy = 0, pipes = [], arcadeScore = 0;
+        let batY = 90, batVy = 0, pipes = [], arcadeScore = 0;
         const cvs = document.getElementById('arcade-canvas');
         const actx = cvs?.getContext('2d');
 
@@ -904,27 +1057,27 @@
             isArcadeActive = true;
             document.getElementById('lcd-arcade-container')?.classList.remove('hidden');
             arcadeState = 'start';
-            batY = 100; batVy = 0; pipes = []; arcadeScore = 0;
+            batY = 90; batVy = 0; pipes = []; arcadeScore = 0;
             document.getElementById('arcade-score').textContent = '0';
             if (arcadeAnimId) cancelAnimationFrame(arcadeAnimId);
             runArcade();
-            HollowAudioEngine.playTone('chime');
+            DeviceAudio.play('chime');
         }
 
         function closeArcade() {
             isArcadeActive = false;
             if (arcadeAnimId) cancelAnimationFrame(arcadeAnimId);
             document.getElementById('lcd-arcade-container')?.classList.add('hidden');
-            HollowAudioEngine.playTone('tick');
+            DeviceAudio.play('tick');
         }
 
         function arcadeFlap() {
             if (arcadeState === 'start') {
                 arcadeState = 'play';
-                batVy = -4.5;
+                batVy = -4.2;
             } else if (arcadeState === 'play') {
-                batVy = -4.5;
-                HollowAudioEngine.playTone('tick');
+                batVy = -4.2;
+                DeviceAudio.play('tick');
             } else if (arcadeState === 'over') {
                 openArcade();
             }
@@ -932,28 +1085,27 @@
 
         function runArcade() {
             if (!isArcadeActive || !actx) return;
-            actx.fillStyle = '#040805';
-            actx.fillRect(0, 0, 240, 240);
+            actx.fillStyle = '#040705';
+            actx.fillRect(0, 0, 260, 200);
 
             if (arcadeState === 'play') {
-                batVy += 0.25;
+                batVy += 0.24;
                 batY += batVy;
 
-                if (Math.random() < 0.02 && (pipes.length === 0 || pipes[pipes.length - 1].x < 160)) {
-                    pipes.push({ x: 240, top: Math.floor(Math.random() * 80) + 30, passed: false });
+                if (Math.random() < 0.025 && (pipes.length === 0 || pipes[pipes.length - 1].x < 170)) {
+                    pipes.push({ x: 260, top: Math.floor(Math.random() * 70) + 25, passed: false });
                 }
 
                 pipes.forEach(p => {
                     p.x -= 1.8;
                     actx.fillStyle = '#10b981';
-                    actx.fillRect(p.x, 0, 22, p.top);
-                    actx.fillRect(p.x, p.top + 70, 22, 240 - (p.top + 70));
+                    actx.fillRect(p.x, 0, 20, p.top);
+                    actx.fillRect(p.x, p.top + 65, 20, 200 - (p.top + 65));
 
-                    // Collision
-                    if (p.x < 55 && p.x + 22 > 35) {
-                        if (batY < p.top || batY + 14 > p.top + 70) {
+                    if (p.x < 55 && p.x + 20 > 35) {
+                        if (batY < p.top || batY + 12 > p.top + 65) {
                             arcadeState = 'over';
-                            HollowAudioEngine.playTone('click');
+                            DeviceAudio.play('click');
                         }
                     }
 
@@ -961,31 +1113,31 @@
                         p.passed = true;
                         arcadeScore++;
                         document.getElementById('arcade-score').textContent = arcadeScore;
-                        HollowAudioEngine.playTone('tick');
+                        DeviceAudio.play('tick');
                     }
                 });
 
-                pipes = pipes.filter(p => p.x > -30);
-                if (batY > 230 || batY < 0) arcadeState = 'over';
+                pipes = pipes.filter(p => p.x > -25);
+                if (batY > 190 || batY < 0) arcadeState = 'over';
             }
 
             // Draw Bat
             actx.fillStyle = '#f59e0b';
-            actx.fillRect(35, batY, 16, 12);
+            actx.fillRect(35, batY, 15, 11);
             actx.fillStyle = '#fff';
-            actx.fillRect(43, batY + 2, 4, 4);
+            actx.fillRect(42, batY + 2, 4, 4);
 
             if (arcadeState === 'start') {
                 actx.fillStyle = '#10b981';
                 actx.font = '10px monospace';
-                actx.fillText('PRESS KNOB / SPACE', 55, 120);
+                actx.fillText('CLICK KNOB / SPACE', 65, 100);
             } else if (arcadeState === 'over') {
                 actx.fillStyle = '#ef4444';
-                actx.font = 'bold 12px monospace';
-                actx.fillText('GAME OVER', 80, 110);
+                actx.font = 'bold 11px monospace';
+                actx.fillText('GAME OVER', 95, 95);
                 actx.fillStyle = '#d1d5db';
-                actx.font = '10px monospace';
-                actx.fillText('CLICK TO RETRY', 72, 130);
+                actx.font = '9px monospace';
+                actx.fillText('CLICK TO RETRY', 85, 115);
             }
 
             arcadeAnimId = requestAnimationFrame(runArcade);
@@ -993,12 +1145,10 @@
 
         // ── Screensaver ────────────────────────────────────────────────────────
         let screensaverActive = false;
-        let screensaverMode = 0; // 0=off, 1=matrix
         const scvs = document.getElementById('lcd-screensaver-canvas');
         const sctx = scvs?.getContext('2d');
         let scAnim = null;
-        const matrixChars = '0123456789ABCDEFHIJKLMNOPQRSTUVWXYZ';
-        let drops = [];
+        let matrixDrops = [];
 
         function wakeScreensaver() {
             if (screensaverActive) {
@@ -1008,86 +1158,69 @@
             }
         }
 
-        function cycleScreensaver() {
+        function toggleScreensaver() {
             screensaverActive = !screensaverActive;
             if (!screensaverActive) {
                 wakeScreensaver();
                 return;
             }
             scvs?.classList.remove('hidden');
-            scvs.width = 240; scvs.height = 240;
-            const cols = 24;
-            drops = Array(cols).fill(1);
-            runMatrixScreensaver();
+            scvs.width = 260; scvs.height = 280;
+            const cols = 26;
+            matrixDrops = Array(cols).fill(1);
+            runMatrix();
         }
 
-        function runMatrixScreensaver() {
+        function runMatrix() {
             if (!screensaverActive || !sctx) return;
-            sctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-            sctx.fillRect(0, 0, 240, 240);
+            sctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+            sctx.fillRect(0, 0, 260, 280);
             sctx.fillStyle = '#10b981';
             sctx.font = '10px monospace';
 
-            for (let i = 0; i < drops.length; i++) {
-                const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-                sctx.fillText(text, i * 10, drops[i] * 10);
-                if (drops[i] * 10 > 240 && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
+            const chars = '0123456789ABCDEFHIJKLMNOPQRSTUVWXYZ';
+            for (let i = 0; i < matrixDrops.length; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                sctx.fillText(char, i * 10, matrixDrops[i] * 10);
+                if (matrixDrops[i] * 10 > 280 && Math.random() > 0.975) matrixDrops[i] = 0;
+                matrixDrops[i]++;
             }
-            scAnim = requestAnimationFrame(runMatrixScreensaver);
+            scAnim = requestAnimationFrame(runMatrix);
         }
-
-        // ── Server-Sent Events (SSE) Client ───────────────────────────────────
-        function setupSSE() {
-            if (!('EventSource' in window)) return;
-            try {
-                const es = new EventSource(`${getApiBase()}/events`);
-                es.onmessage = (e) => {
-                    try {
-                        const data = JSON.parse(e.data);
-                        if (data.type === 'tasks_changed' || data.type === 'settings_changed') {
-                            fetchDeviceData();
-                        }
-                    } catch (_) {}
-                };
-            } catch (_) {}
-        }
-
-        // ── Storage Event Listener for Cross-Window Instant Sync ───────────────
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'dc_cached_tasks' || e.key === 'dc_cached_settings') {
-                fetchDeviceData();
-            }
-        });
 
         // ── Initialization ─────────────────────────────────────────────────────
         function init() {
+            // Tactile State Test buttons
             document.querySelectorAll('[data-state]').forEach(btn => {
-                btn.addEventListener('click', () => setManualState(btn.dataset.state));
+                btn.addEventListener('click', () => {
+                    manualStateOverride = (btn.dataset.state === 'auto') ? null : btn.dataset.state;
+                    document.querySelectorAll('[data-state]').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    firmwareHardwareLoop();
+                    DeviceAudio.play('tick');
+                });
             });
 
-            document.getElementById('btn-toggle-screensaver')?.addEventListener('click', cycleScreensaver);
-            document.getElementById('btn-toggle-arcade')?.addEventListener('click', toggleArcade);
+            els.btnMode?.addEventListener('click', () => toggleMenuMode());
+            document.getElementById('screen-status-bar')?.addEventListener('click', () => toggleMenuMode());
+            document.getElementById('btn-device-arcade')?.addEventListener('click', toggleArcade);
             document.getElementById('btn-close-arcade')?.addEventListener('click', closeArcade);
-            document.getElementById('btn-toggle-mute')?.addEventListener('click', () => {
-                isMuted = !isMuted;
-                showHudPopup(isMuted ? 'AUDIO MUTED' : 'AUDIO UNMUTED');
-                hardwareLoop();
-            });
-            document.getElementById('btn-refresh-sync')?.addEventListener('click', () => {
-                fetchDeviceData();
-                HollowAudioEngine.playTone('tick');
-            });
             scvs?.addEventListener('click', wakeScreensaver);
 
-            setupEncoder();
+            setupKnobInteractions();
             startMicroAnimations();
-            setupSSE();
             fetchDeviceData();
 
-            // Periodic hardware tick
-            setInterval(hardwareLoop, 1000);
+            // Periodic sync & ticks
+            setInterval(firmwareHardwareLoop, 1000);
             setInterval(fetchDeviceData, 15000);
+
+            // Listen for cross-window localStorage changes
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'dc_cached_tasks' || e.key === 'dc_cached_settings') {
+                    fetchDeviceData();
+                }
+            });
         }
 
         window.addEventListener('DOMContentLoaded', init);
