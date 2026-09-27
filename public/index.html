@@ -3049,7 +3049,7 @@
 
         const DEMO_STEPS = [
             {
-                title: 'Step 1/8: Mascot Awakening & Micro-Animations',
+                title: 'Step 1/12: Mascot Awakening & Micro-Animations',
                 desc: 'Bat Pup (Level 1) in calm state. Watch for automatic ear-twitches, wing-flutters, and blinks.',
                 run: () => {
                     const tasksTab = document.getElementById('tab-tasks');
@@ -3077,7 +3077,7 @@
                 }
             },
             {
-                title: 'Step 2/8: Deadline Urgency & LED Alert',
+                title: 'Step 2/12: Deadline Urgency & LED Alert',
                 desc: 'Simulating an imminent overdue deadline. Mascot enters frantic urgent state with flashing red alerts.',
                 run: () => {
                     manualStateOverride = 'urgent';
@@ -3101,7 +3101,7 @@
                 }
             },
             {
-                title: 'Step 3/8: Rotary Knob Interaction & Resolution',
+                title: 'Step 3/12: Rotary Knob Interaction & Resolution',
                 desc: 'Simulating hardware knob rotation and physical click to mark the critical directive complete.',
                 run: () => {
                     if (els.encoderNotch) {
@@ -3118,7 +3118,7 @@
                 }
             },
             {
-                title: 'Step 4/8: Mascot Evolution — Level Up!',
+                title: 'Step 4/12: Mascot Evolution — Level Up!',
                 desc: 'XP explodes (+150 XP)! Bat evolves into Night Scout (Lv 2) and unlocks "Silver Fangs" attire.',
                 run: () => {
                     settings.xp = 175;
@@ -3139,7 +3139,7 @@
                 }
             },
             {
-                title: 'Step 5/8: Tactile Pomodoro Focus Sprint',
+                title: 'Step 5/12: Tactile Pomodoro Focus Sprint',
                 desc: 'Switching to Focus bay. Starting deep-work sprint countdown with purple indigo focus aura.',
                 run: () => {
                     const focusTab = document.getElementById('tab-focus');
@@ -3157,7 +3157,7 @@
                 }
             },
             {
-                title: 'Step 6/8: Schedule-Aware Quiet Hours',
+                title: 'Step 6/12: Schedule-Aware Quiet Hours',
                 desc: 'Overnight quiet window activates (11:00 PM – 7:30 AM). Alerts & chimes are suppressed silently.',
                 run: () => {
                     const settingsTab = document.getElementById('tab-settings');
@@ -3171,7 +3171,7 @@
                 }
             },
             {
-                title: 'Step 7/8: Calendar Sync & 7-Day Velocity Analytics',
+                title: 'Step 7/12: Calendar Sync & 7-Day Velocity Analytics',
                 desc: 'Simulating Google Calendar import and 7-day velocity analytics chart with 100% velocity.',
                 run: () => {
                     const analyticsTab = document.getElementById('tab-analytics');
@@ -3189,7 +3189,7 @@
                 }
             },
             {
-                title: 'Step 8/8: USB-C Web Serial & Sovereign Evolution (Apex)',
+                title: 'Step 8/12: USB-C Web Serial & Sovereign Evolution (Apex)',
                 desc: 'Switching to Web Serial terminal with telemetry packets. Bat reaches Vampire Sovereign (Lv 8)!',
                 run: () => {
                     const serialTab = document.getElementById('tab-serial');
@@ -3209,6 +3209,78 @@
                     showHudPopup('APEX SOVEREIGN REACHED!');
                     playChimeAudio();
                     showToast('👑 Vampire Sovereign (Level 8) Reached! Golden Aura Unlocked.');
+                }
+            },
+            {
+                title: 'Step 9/12: Web Audio Procedural Synthesizer & Sound Packs',
+                desc: 'Testing zero-dependency procedural sound chips. Switching to Cyberpunk FM Resonant synth with live chime preview.',
+                run: () => {
+                    const settingsTab = document.getElementById('tab-settings');
+                    if (settingsTab) settingsTab.click();
+
+                    const spSelect = document.getElementById('setting-soundpack');
+                    if (spSelect) spSelect.value = 'cyberpunk';
+                    settings.sound_pack = 'cyberpunk';
+
+                    HollowAudioEngine.playTone('chime');
+                    showHudPopup('CYBERPUNK SYNTH ACTIVE');
+                    showToast('🔊 Synthesizer Pack: Cyberpunk Terminal FM Resonant audio.');
+                }
+            },
+            {
+                title: 'Step 10/12: Smart Natural Language Directive Parsing',
+                desc: 'Simulating natural sentence input: "Deploy Quantum API in 45m #high". Live badge auto-extracts time & priority.',
+                run: () => {
+                    const tasksTab = document.getElementById('tab-tasks');
+                    if (tasksTab) tasksTab.click();
+
+                    const titleInp = document.getElementById('new-task-title');
+                    const pillEl = document.getElementById('nl-parse-pill');
+                    const textEl = document.getElementById('nl-parsed-text');
+
+                    if (titleInp) titleInp.value = 'Deploy Quantum API in 45m #high';
+                    const parsed = parseNaturalLanguageDirective('Deploy Quantum API in 45m #high');
+                    if (parsed && pillEl && textEl) {
+                        textEl.textContent = `Clean: "${parsed.cleanTitle}" • ${parsed.summary}`;
+                        pillEl.classList.remove('hidden');
+                    }
+
+                    showHudPopup('⚡ PARSED IN 45M #HIGH');
+                    HollowAudioEngine.playTone('tick');
+                }
+            },
+            {
+                title: 'Step 11/12: Ambient LCD Screensaver Modes',
+                desc: 'Hardware display enters Matrix Digital Rain with cascading phosphor katakana glyphs on simulated 1.3" LCD.',
+                run: () => {
+                    startScreensaver('matrix');
+                    showHudPopup('📺 MATRIX RAIN ACTIVE');
+                    HollowAudioEngine.playTone('tick');
+                    showToast('📺 Hardware LCD Screensaver active: Matrix Digital Rain.');
+                }
+            },
+            {
+                title: 'Step 12/12: Calamity Boss Battle & Flappy Bat Break',
+                desc: 'Waking display from screensaver. Summoning Procrastination Behemoth in Focus bay & landing a critical focus strike!',
+                run: () => {
+                    wakeScreensaver();
+                    const focusTab = document.getElementById('tab-focus');
+                    if (focusTab) focusTab.click();
+
+                    const arena = document.getElementById('boss-arena');
+                    const toggleBtn = document.getElementById('btn-toggle-boss');
+                    bossActive = true;
+                    if (arena) arena.classList.remove('hidden');
+                    if (toggleBtn) {
+                        toggleBtn.textContent = '⚔️ DISMISS BOSS';
+                        toggleBtn.className = 'btn-tactile text-[0.6rem] px-2.5 py-1 font-mono font-bold bg-amber-100 text-amber-900 border-amber-300';
+                    }
+                    renderBossUI();
+
+                    setTimeout(() => {
+                        damageBoss(35, 'DEEP FOCUS STRIKE!');
+                        showHudPopup('BEHEMOTH -35 HP!');
+                    }, 500);
                 }
             }
         ];
