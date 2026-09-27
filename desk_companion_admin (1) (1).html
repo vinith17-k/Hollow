@@ -206,6 +206,16 @@
         .micro-wing-flutter #left-wing { transform: rotate(22deg) scaleX(1.1); transition: transform 0.15s ease; }
         .micro-wing-flutter #right-wing { transform: rotate(-22deg) scaleX(1.1); transition: transform 0.15s ease; }
 
+        /* Complete mascot hiding during screensaver mode */
+        .screensaver-active #mascot-container,
+        .screensaver-active #mascot-svg,
+        .screensaver-active #mascot-body-group {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
         /* Simulator Screen Badges & HUD popup */
         .sim-indicator { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 0.55rem; font-weight: bold; border-radius: 2px; padding: 1px 3px; display: inline-flex; align-items: center; gap: 2px; }
         #sim-hud-popup { transition: opacity 0.25s ease, transform 0.25s ease; }
@@ -2328,6 +2338,10 @@
         }
 
         function updateMascotClass() {
+            if (typeof isScreensaverActive !== 'undefined' && isScreensaverActive) {
+                if (els.mascotContainer) els.mascotContainer.classList.add('hidden');
+                return;
+            }
             if (manualStateOverride) return;
             const stateClass = currentUrgency === 2 ? 'state-urgent' : currentUrgency === 1 ? 'state-working' : 'state-idle';
             const moodClass = computeMascotMood(tasks);
@@ -3840,6 +3854,9 @@
                 if (screensaverAnimId) cancelAnimationFrame(screensaverAnimId);
                 const cvs = document.getElementById('lcd-screensaver-canvas');
                 if (cvs) cvs.classList.add('hidden');
+                const simScreen = document.getElementById('sim-screen');
+                if (simScreen) simScreen.classList.remove('screensaver-active');
+                if (els.mascotContainer) els.mascotContainer.classList.remove('hidden');
                 HollowAudioEngine.playTone('tick');
             }
             resetIdleTimer();
@@ -3861,6 +3878,9 @@
             if (!cvs) return;
             cvs.width = 240;
             cvs.height = 240;
+            const simScreen = document.getElementById('sim-screen');
+            if (simScreen) simScreen.classList.add('screensaver-active');
+            if (els.mascotContainer) els.mascotContainer.classList.add('hidden');
             cvs.classList.remove('hidden');
             isScreensaverActive = true;
             screensaverMode = mode;
@@ -3868,6 +3888,8 @@
             if (screensaverAnimId) cancelAnimationFrame(screensaverAnimId);
 
             const ctx = cvs.getContext('2d');
+            ctx.fillStyle = '#0a0b0a';
+            ctx.fillRect(0, 0, cvs.width, cvs.height);
 
             if (mode === 'matrix') {
                 runMatrixScreensaver(ctx, cvs);

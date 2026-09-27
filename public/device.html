@@ -374,6 +374,16 @@
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+        /* Complete mascot hiding during screensaver mode */
+        .screensaver-active #mascot-display-container,
+        .screensaver-active #mascot-svg,
+        .screensaver-active #mascot-body-group {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
     </style>
 </head>
 <body>
@@ -835,6 +845,10 @@
         }
 
         function updateMascotDisplay() {
+            if (screensaverActive) {
+                if (els.mascotContainer) els.mascotContainer.classList.add('hidden');
+                return;
+            }
             if (manualStateOverride) return;
             const stateClass = currentUrgency === 2 ? 'state-urgent' : currentUrgency === 1 ? 'state-working' : 'state-idle';
             const animClass = (currentUrgency === 0 && activeMicroAnim) ? activeMicroAnim : '';
@@ -1154,6 +1168,8 @@
             if (screensaverActive) {
                 screensaverActive = false;
                 scvs?.classList.add('hidden');
+                els.screen?.classList.remove('screensaver-active');
+                els.mascotContainer?.classList.remove('hidden');
                 if (scAnim) cancelAnimationFrame(scAnim);
             }
         }
@@ -1164,8 +1180,15 @@
                 wakeScreensaver();
                 return;
             }
+            if (isMenuMode) toggleMenuMode(false);
+            els.screen?.classList.add('screensaver-active');
+            els.mascotContainer?.classList.add('hidden');
             scvs?.classList.remove('hidden');
             scvs.width = 260; scvs.height = 280;
+            if (sctx) {
+                sctx.fillStyle = '#090a09';
+                sctx.fillRect(0, 0, scvs.width, scvs.height);
+            }
             const cols = 26;
             matrixDrops = Array(cols).fill(1);
             runMatrix();
