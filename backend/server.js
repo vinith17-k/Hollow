@@ -246,6 +246,11 @@ app.locals.logEvent = logEvent;
 const PUBLIC_DIR = path.join(__dirname, '../public');
 app.use(express.static(PUBLIC_DIR));
 
+// Dedicated route for standalone hardware companion simulator
+app.get('/device', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'device.html'));
+});
+
 // ── 404 catch-all ─────────────────────────────────────────────────────────────
 
 app.use((req, res) => {

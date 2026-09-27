@@ -10,6 +10,14 @@
       "destination": "/api/index.js"
     },
     {
+      "source": "/device",
+      "destination": "/device.html"
+    },
+    {
+      "source": "/device.html",
+      "destination": "/device.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Hollow — Physical Desk Companion</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦇</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --chassis-dark: #121413;
+            --chassis-metal: #232725;
+            --chassis-edge: #383e3b;
+            --screen-bezel: #0d0f0e;
+            --screen-bg: #060907;
+            --screen-text: #34d399;
+            --led-color: #22c55e;
+            --knob-angle: 0deg;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: radial-gradient(circle at 50% 30%, #1a1e1c, #0a0c0b);
+            user-select: none;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .font-mono {
+            font-family: 'Space Mono', monospace;
+        }
+
+        .font-pixel {
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        /* 3D Hardware Enclosure */
+        .hardware-enclosure {
+            background: linear-gradient(165deg, #2e3330 0%, #1c201e 50%, #101211 100%);
+            box-shadow: 
+                0 25px 60px -15px rgba(0,0,0,0.9),
+                0 0 0 1px rgba(255,255,255,0.08),
+                inset 0 2px 3px rgba(255,255,255,0.2),
+                inset 0 -3px 8px rgba(0,0,0,0.8);
+            border-radius: 28px;
+            position: relative;
+        }
+
+        /* Screw Head */
+        .chassis-screw {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #7e8783, #2a2e2c);
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.4), 0 1px 2px rgba(0,0,0,0.8);
+            position: absolute;
+        }
+        .chassis-screw::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(42deg);
+            width: 5px;
+            height: 1px;
+            background: #111;
+        }
+
+        /* 1.3" IPS LCD Screen Bezel */
+        .screen-recess {
+            background: #090b0a;
+            border-radius: 16px;
+            box-shadow: 
+                inset 0 4px 12px rgba(0,0,0,0.95),
+                inset 0 0 0 2px #040504,
+                0 1px 0 rgba(255,255,255,0.12);
+            padding: 12px;
+            position: relative;
+        }
+
+        /* LCD Screen Inner Glass */
+        .screen-inner {
+            background-color: var(--screen-bg);
+            border-radius: 8px;
+            box-shadow: inset 0 0 16px rgba(0,0,0,0.9);
+            position: relative;
+            overflow: hidden;
+            width: 250px;
+            height: 250px;
+        }
+
+        /* Glass Glare Reflection */
+        .screen-glare {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(175deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            z-index: 30;
+        }
+
+        /* CRT Scanline Overlay */
+        .scanlines {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            opacity: 0.6;
+            z-index: 25;
+        }
+
+        /* Knurled Metal Rotary Encoder */
+        .rotary-knob-outer {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #4a504c, #161817);
+            box-shadow: 
+                0 14px 28px rgba(0,0,0,0.8),
+                0 4px 8px rgba(0,0,0,0.6),
+                inset 0 2px 4px rgba(255,255,255,0.3),
+                inset 0 -4px 8px rgba(0,0,0,0.8);
+            border: 4px solid #2e3431;
+            position: relative;
+            cursor: grab;
+            transition: transform 0.08s ease, box-shadow 0.08s ease;
+        }
+        .rotary-knob-outer:active {
+            cursor: grabbing;
+            transform: scale(0.96) translateY(2px);
+            box-shadow: 
+                0 6px 14px rgba(0,0,0,0.9),
+                inset 0 1px 2px rgba(255,255,255,0.15),
+                inset 0 -2px 4px rgba(0,0,0,0.9);
+        }
+
+        /* Knob Notch */
+        .knob-notch {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            width: 6px;
+            height: 22px;
+            background: #f59e0b;
+            border-radius: 3px;
+            box-shadow: 0 0 10px #f59e0b, inset 0 1px 2px rgba(255,255,255,0.6);
+            transform: translateX(-50%);
+            transform-origin: 50% 45px;
+        }
+
+        /* Physical RGB Status LED */
+        .hardware-led {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--led-color);
+            border: 2px solid #1a1c1b;
+            box-shadow: 
+                0 0 12px var(--led-color),
+                0 0 24px var(--led-color),
+                inset 0 1px 2px rgba(255,255,255,0.8);
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Mascot Eye Glow */
+        .mascot-pixel { fill: #c7d2fe; transition: fill 0.3s; }
+        .mascot-eye { fill: #f59e0b; transition: fill 0.3s; }
+        .mascot-smoke { fill: #6366f1; opacity: 0; }
+
+        .state-calm .mascot-eye { fill: #38bdf8; }
+        .state-working .mascot-eye { fill: #818cf8; }
+        .state-urgent .mascot-eye { fill: #ef4444; }
+        .state-sleep .mascot-eye { fill: #64748b; }
+
+        @keyframes float-idle {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+        }
+        #mascot-body-group { animation: float-idle 3s ease-in-out infinite; }
+
+        /* Tactical HUD Popup */
+        #hud-popup {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-3 select-none">
+
+    <!-- Top Window Controls (Popout / Help) -->
+    <header class="w-full max-w-[360px] flex items-center justify-between text-xs text-gray-400 font-mono mb-2 px-1">
+        <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+            <span class="font-bold text-gray-300">HOLLOW HARDWARE LINK</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="btn-sync-now" class="hover:text-emerald-400 transition" title="Force Sync with Backend">⟳ SYNC</button>
+            <button id="btn-fullscreen" class="hover:text-amber-400 transition" title="Toggle Fullscreen">⛶ FULLSCREEN</button>
+            <button id="btn-close-window" class="hover:text-red-400 transition" title="Close Window" onclick="window.close()">✕</button>
+        </div>
+    </header>
+
+    <!-- Main Physical Hardware Chassis -->
+    <main class="hardware-enclosure p-5 w-full max-w-[360px] flex flex-col items-center border border-white/10">
+
+        <!-- 4 Hex Screws on Enclosure Corners -->
+        <div class="chassis-screw top-3 left-3"></div>
+        <div class="chassis-screw top-3 right-3"></div>
+        <div class="chassis-screw bottom-3 left-3"></div>
+        <div class="chassis-screw bottom-3 right-3"></div>
+
+        <!-- Top Header: Logo, Model & Hardware LED -->
+        <div class="w-full flex items-center justify-between mb-3 px-2">
+            <div>
+                <span class="font-bold tracking-widest text-[0.7rem] text-gray-200 block font-mono">HOLLOW // DC-01</span>
+                <span class="text-[0.55rem] text-emerald-400 font-mono">ESP32-S3 CORE • REV 2.4</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div id="hw-led" class="hardware-led" title="Hardware Status LED"></div>
+            </div>
+        </div>
+
+        <!-- Screen Outer Bezel Recess -->
+        <div class="screen-recess w-full flex items-center justify-center mb-5">
+            <div class="screen-inner" id="lcd-screen">
+                <div class="screen-glare"></div>
+                <div class="scanlines"></div>
+
+                <!-- HUD Temporary Notification -->
+                <div id="hud-popup" class="hidden absolute top-8 left-1/2 -translate-x-1/2 bg-black/90 text-amber-300 border border-amber-500/60 font-mono text-[0.6rem] px-2 py-0.5 rounded shadow-lg z-40 uppercase tracking-widest pointer-events-none text-center"></div>
+
+                <!-- Screensaver Canvas Layer -->
+                <canvas id="screensaver-canvas" width="250" height="250" class="hidden absolute inset-0 w-full h-full z-20 cursor-pointer"></canvas>
+
+                <!-- Flappy Bat Arcade Layer -->
+                <div id="arcade-container" class="hidden absolute inset-0 w-full h-full z-30 bg-[#060a08] flex flex-col justify-between p-2 font-mono">
+                    <div class="flex justify-between items-center text-[0.6rem] text-emerald-400 border-b border-emerald-900/50 pb-1">
+                        <span class="font-bold">🦇 FLAPPY BAT</span>
+                        <span>SCORE: <b id="arcade-score" class="text-amber-300">0</b> | BEST: <b id="arcade-best" class="text-emerald-300">0</b></span>
+                    </div>
+                    <canvas id="arcade-canvas" width="234" height="200" class="w-full flex-grow my-1 border border-emerald-950 rounded bg-[#030604]"></canvas>
+                    <div class="text-[0.5rem] text-emerald-500/80 text-center">
+                        CLICK KNOB or SPACE TO FLAP
+                    </div>
+                </div>
+
+                <!-- Main LCD UI View -->
+                <div id="lcd-ui" class="h-full flex flex-col justify-between p-2.5 text-[var(--screen-text)] font-mono relative z-10">
+                    
+                    <!-- LCD Top Status Bar -->
+                    <div class="flex justify-between items-center text-[0.65rem] border-b border-emerald-900/50 pb-1">
+                        <div class="flex items-center gap-1.5">
+                            <span id="lcd-wifi" class="text-emerald-400 font-bold">📶 OK</span>
+                            <span id="lcd-quiet" class="hidden text-amber-300 text-[0.55rem]">🌙</span>
+                            <span id="lcd-mute" class="hidden text-red-400 text-[0.55rem]">🔇</span>
+                        </div>
+                        <div id="lcd-clock" class="text-xs font-bold tracking-wider">12:00:00</div>
+                    </div>
+
+                    <!-- Center: Pixel Art Mascot & Level -->
+                    <div class="flex-grow flex flex-col items-center justify-center my-1 relative">
+                        <div id="mascot-avatar" class="w-20 h-20 state-calm cursor-pointer" title="Bat Companion">
+                            <svg viewBox="0 0 64 64" id="mascot-svg" shape-rendering="crispEdges">
+                                <g id="mascot-body-group">
+                                    <path class="mascot-pixel" d="M 32 48 H 36 V 52 H 38 V 56 H 42 V 54 H 44 V 50 H 42 V 52 H 40 V 48 H 36 Z" />
+                                    <g id="left-wing"><path class="mascot-pixel" d="M 20 20 H 16 V 16 H 12 V 12 H 8 V 16 H 4 V 24 H 8 V 32 H 12 V 28 H 16 V 24 H 20 Z" /></g>
+                                    <g id="right-wing"><path class="mascot-pixel" d="M 44 20 H 48 V 16 H 52 V 12 H 56 V 16 H 60 V 24 H 56 V 32 H 52 V 28 H 48 V 24 H 44 Z" /></g>
+                                    <path class="mascot-pixel" d="M 24 12 H 28 V 16 H 24 Z M 36 12 H 40 V 16 H 36 Z" />
+                                    <path class="mascot-pixel" d="M 24 16 H 40 V 20 H 44 V 44 H 40 V 48 H 24 V 44 H 20 V 20 H 24 Z" />
+                                    <g id="mascot-eyes">
+                                        <rect x="26" y="24" width="4" height="4" class="mascot-eye" />
+                                        <rect x="34" y="24" width="4" height="4" class="mascot-eye" />
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <span id="lcd-level-name" class="text-[0.6rem] text-gray-300 font-bold">Bat Pup</span>
+                            <span id="lcd-level-num" class="text-[0.55rem] px-1 py-0.2 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded">LV 1</span>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Directive Bar (Scrollable with Knob) -->
+                    <div class="border-t border-emerald-900/60 pt-1 text-center">
+                        <div class="flex items-center justify-between text-[0.55rem] text-gray-400 mb-0.5">
+                            <span id="lcd-task-idx">TASK 1/1</span>
+                            <span id="lcd-task-time" class="text-amber-300">Due 15:30</span>
+                        </div>
+                        <div id="lcd-task-title" class="font-bold text-xs text-white truncate px-1">
+                            Deploy Quantum API
+                        </div>
+                        <div class="text-[0.5rem] text-emerald-500/80 mt-0.5">
+                            CLICK KNOB TO COMPLETE [X]
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Physical Controls Zone: Speaker Grille & Knurled Knob -->
+        <div class="w-full flex items-center justify-between px-3 mt-1">
+            
+            <!-- Left: Speaker Grille Micro-Perforations -->
+            <div class="flex flex-col gap-1.5">
+                <div class="flex gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-black/80 shadow-inner"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-black/80 shadow-inner"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-black/80 shadow-inner"></span>
+                </div>
+                <div class="flex gap-1.5 pl-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-black/80 shadow-inner"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-black/80 shadow-inner"></span>
+                </div>
+                <div class="flex gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-black/80 shadow-inner"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-black/80 shadow-inner"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-black/80 shadow-inner"></span>
+                </div>
+                <span class="font-mono text-[0.5rem] text-gray-500 uppercase tracking-widest mt-1">I2S AUDIO</span>
+            </div>
+
+            <!-- Center/Right: Physical Rotary Encoder Knob -->
+            <div class="flex flex-col items-center">
+                <div id="physical-knob" class="rotary-knob-outer flex items-center justify-center select-none" title="Rotate with Mouse Wheel or Drag • Click to Complete">
+                    <div id="knob-notch" class="knob-notch"></div>
+                    <div class="w-8 h-8 rounded-full bg-radial from-white/10 to-black/60 shadow-inner"></div>
+                </div>
+                <div class="flex items-center gap-2 mt-2 font-mono text-[0.55rem] text-gray-400">
+                    <span>↺ TURN</span>
+                    <span>•</span>
+                    <span class="text-amber-400 font-bold">CLICK ⬇</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Tactile Quick Controls -->
+        <div class="w-full grid grid-cols-3 gap-1.5 mt-4 pt-3 border-t border-white/10">
+            <button id="btn-device-arcade" class="py-1 px-2 rounded bg-[#181c1a] border border-white/10 text-gray-300 hover:text-amber-300 font-mono text-[0.6rem] transition">🎮 ARCADE</button>
+            <button id="btn-device-screen" class="py-1 px-2 rounded bg-[#181c1a] border border-white/10 text-gray-300 hover:text-emerald-300 font-mono text-[0.6rem] transition">📺 SAVER</button>
+            <button id="btn-device-focus" class="py-1 px-2 rounded bg-[#181c1a] border border-white/10 text-gray-300 hover:text-indigo-300 font-mono text-[0.6rem] transition">🎯 FOCUS</button>
+        </div>
+
+        <!-- Bottom USB-C Port Simulation -->
+        <div class="mt-4 flex flex-col items-center">
+            <div class="w-12 h-2.5 rounded-full bg-black border border-white/20 shadow-inner flex items-center justify-center">
+                <div class="w-8 h-1 rounded-full bg-[#111]"></div>
+            </div>
+            <span class="font-mono text-[0.5rem] text-gray-500 mt-1">USB-C POWER & WEB SERIAL LINK</span>
+        </div>
+
+    </main>
+
+    <!-- Keyboard Shortcuts Guide Card -->
+    <footer class="mt-3 text-center font-mono text-[0.6rem] text-gray-500 space-y-0.5">
+        <p><b class="text-gray-400">MOUSE WHEEL</b> or <b class="text-gray-400">↑ / ↓ ARROWS</b>: Turn Knob</p>
+        <p><b class="text-gray-400">CLICK</b> or <b class="text-gray-400">SPACE / ENTER</b>: Press Knob Button</p>
+        <p><b class="text-gray-400">M</b>: Mute Alerts • <b class="text-gray-400">S</b>: Screensaver • <b class="text-gray-400">A</b>: Arcade</p>
+    </footer>
+
+    <!-- Dedicated Hardware Device Logic Script -->
+    <script>
+        // ── Hardware Audio Synthesizer ─────────────────────────────────────────
+        const AudioEngine = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    const AC = window.AudioContext || window.webkitAudioContext;
+                    if (AC) this.ctx = new AC();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume().catch(() => {});
+                }
+                return this.ctx;
+            },
+            play(type = 'click') {
+                if (isMuted) return;
+                const ctx = this.init();
+                if (!ctx) return;
+                try {
+                    const now = ctx.currentTime;
+                    if (type === 'click') {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(2400, now);
+                        gain.gain.setValueAtTime(0.12, now);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.015);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 0.015);
+                    } else if (type === 'chime' || type === 'done') {
+                        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc.type = 'square';
+                            osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+                            gain.gain.setValueAtTime(0.12, now + idx * 0.06);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.15);
+                            osc.connect(gain);
+                            gain.connect(ctx.destination);
+                            osc.start(now + idx * 0.06);
+                            osc.stop(now + idx * 0.06 + 0.15);
+                        });
+                    } else if (type === 'flap') {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'square';
+                        osc.frequency.setValueAtTime(320, now);
+                        osc.frequency.exponentialRampToValueAtTime(740, now + 0.08);
+                        gain.gain.setValueAtTime(0.1, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 0.08);
+                    } else if (type === 'hit') {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(220, now);
+                        osc.frequency.exponentialRampToValueAtTime(40, now + 0.18);
+                        gain.gain.setValueAtTime(0.2, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 0.18);
+                    }
+                } catch (_) {}
+            }
+        };
+
+        // ── Device State ───────────────────────────────────────────────────────
+        let tasks = [];
+        let currentTaskIdx = 0;
+        let settings = {
+            xp: 0,
+            level: 1,
+            level_name: 'Bat Pup',
+            sound_pack: '8bit',
+            screensaver_mode: 'off',
+            flappy_high_score: 0
+        };
+        let isMuted = false;
+        let knobRotation = 0;
+        let isArcadeRunning = false;
+        let isScreensaverRunning = false;
+        let screensaverMode = 'matrix';
+        let screensaverAnim = null;
+        let arcadeAnim = null;
+
+        // ── HUD Notifications ──────────────────────────────────────────────────
+        let hudTimer = null;
+        function showHud(text) {
+            const el = document.getElementById('hud-popup');
+            if (!el) return;
+            el.textContent = text;
+            el.classList.remove('hidden');
+            if (hudTimer) clearTimeout(hudTimer);
+            hudTimer = setTimeout(() => el.classList.add('hidden'), 1800);
+        }
+
+        // ── Data Sync (Live Backend + Local Storage Fallback) ──────────────────
+        async function fetchDeviceData() {
+            try {
+                const res = await fetch('/api/tasks');
+                if (res.ok) {
+                    tasks = await res.json();
+                } else {
+                    readLocal();
+                }
+            } catch (_) {
+                readLocal();
+            }
+
+            try {
+                const sres = await fetch('/api/settings');
+                if (sres.ok) {
+                    const s = await sres.json();
+                    settings = { ...settings, ...s };
+                }
+            } catch (_) {}
+
+            renderDeviceScreen();
+        }
+
+        function readLocal() {
+            try {
+                const local = localStorage.getItem('dc_tasks');
+                if (local) tasks = JSON.parse(local);
+                const s = localStorage.getItem('dc_settings');
+                if (s) settings = { ...settings, ...JSON.parse(s) };
+            } catch (_) {}
+
+            if (!tasks || !tasks.length) {
+                tasks = [
+                    { id: 'dev_1', title: 'Deploy Quantum API', due_time: new Date(Date.now() + 3600000).toISOString(), done: false },
+                    { id: 'dev_2', title: 'Review Hardware BOM', due_time: new Date(Date.now() + 7200000).toISOString(), done: false },
+                    { id: 'dev_3', title: 'Calibrate Rotary Encoder', due_time: new Date().toISOString(), done: true }
+                ];
+            }
+        }
+
+        // ── Screen Rendering ───────────────────────────────────────────────────
+        function renderDeviceScreen() {
+            // Level & Name
+            const nameEl = document.getElementById('lcd-level-name');
+            const numEl = document.getElementById('lcd-level-num');
+            if (nameEl) nameEl.textContent = settings.level_name || 'Bat Pup';
+            if (numEl) numEl.textContent = `LV ${settings.level || 1}`;
+
+            // LED Color
+            const led = document.getElementById('hw-led');
+            const pending = tasks.filter(t => !t.done);
+            const now = new Date();
+            const hasOverdue = pending.some(t => new Date(t.due_time) < now);
+
+            if (hasOverdue) {
+                document.documentElement.style.setProperty('--led-color', '#ef4444');
+                document.getElementById('mascot-avatar').className = 'w-20 h-20 state-urgent';
+            } else if (pending.length === 0) {
+                document.documentElement.style.setProperty('--led-color', '#10b981');
+                document.getElementById('mascot-avatar').className = 'w-20 h-20 state-calm';
+            } else {
+                document.documentElement.style.setProperty('--led-color', '#38bdf8');
+                document.getElementById('mascot-avatar').className = 'w-20 h-20 state-working';
+            }
+
+            // Task Navigation
+            if (tasks.length === 0) {
+                document.getElementById('lcd-task-idx').textContent = 'TASK 0/0';
+                document.getElementById('lcd-task-time').textContent = 'All clear';
+                document.getElementById('lcd-task-title').textContent = 'No directives pending';
+                return;
+            }
+
+            currentTaskIdx = Math.max(0, Math.min(currentTaskIdx, tasks.length - 1));
+            const cur = tasks[currentTaskIdx];
+
+            document.getElementById('lcd-task-idx').textContent = `TASK ${currentTaskIdx + 1}/${tasks.length}`;
+            const dueD = new Date(cur.due_time);
+            const timeStr = `${String(dueD.getHours()).padStart(2,'0')}:${String(dueD.getMinutes()).padStart(2,'0')}`;
+            document.getElementById('lcd-task-time').textContent = cur.done ? 'COMPLETED ✓' : (dueD < now ? '⚠ OVERDUE' : `Due ${timeStr}`);
+            document.getElementById('lcd-task-title').textContent = (cur.done ? '[X] ' : '[ ] ') + cur.title;
+        }
+
+        // ── Physical Knob Interaction ──────────────────────────────────────────
+        function rotateKnob(delta) {
+            wakeScreensaver();
+            if (isArcadeRunning) {
+                arcadeSteer(delta);
+                return;
+            }
+
+            knobRotation += delta * 24;
+            const notch = document.getElementById('knob-notch');
+            if (notch) notch.style.transform = `translateX(-50%) rotate(${knobRotation}deg)`;
+
+            if (tasks.length > 0) {
+                currentTaskIdx = (currentTaskIdx + delta + tasks.length) % tasks.length;
+                renderDeviceScreen();
+            }
+
+            AudioEngine.play('click');
+        }
+
+        async function clickKnob() {
+            wakeScreensaver();
+            if (isArcadeRunning) {
+                arcadeFlap();
+                return;
+            }
+
+            AudioEngine.play('click');
+            const knob = document.getElementById('physical-knob');
+            knob.classList.add('scale-95');
+            setTimeout(() => knob.classList.remove('scale-95'), 120);
+
+            if (tasks.length === 0) {
+                showHud('ALL CLEAR');
+                return;
+            }
+
+            const task = tasks[currentTaskIdx];
+            task.done = !task.done;
+            renderDeviceScreen();
+
+            if (task.done) {
+                AudioEngine.play('done');
+                showHud(`DONE: ${task.title.slice(0, 10).toUpperCase()}`);
+                
+                // Flash LED green
+                const prevColor = getComputedStyle(document.documentElement).getPropertyValue('--led-color');
+                document.documentElement.style.setProperty('--led-color', '#22c55e');
+                setTimeout(() => document.documentElement.style.setProperty('--led-color', prevColor), 600);
+
+                // Add XP
+                settings.xp = (settings.xp || 0) + 25;
+                if (settings.xp >= 100 && settings.level === 1) {
+                    settings.level = 2;
+                    settings.level_name = 'Night Scout';
+                    showHud('LEVEL UP: NIGHT SCOUT!');
+                }
+            } else {
+                showHud('MARKED PENDING');
+            }
+
+            // Sync mutation to backend
+            try {
+                await fetch(`/api/tasks/${task.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ done: task.done })
+                });
+            } catch (_) {
+                try {
+                    localStorage.setItem('dc_tasks', JSON.stringify(tasks));
+                } catch (_) {}
+            }
+        }
+
+        // ── Screensaver Mode ───────────────────────────────────────────────────
+        function startScreensaver(mode = 'matrix') {
+            if (isArcadeRunning) return;
+            const cvs = document.getElementById('screensaver-canvas');
+            if (!cvs) return;
+            cvs.classList.remove('hidden');
+            isScreensaverRunning = true;
+            screensaverMode = mode;
+
+            const ctx = cvs.getContext('2d');
+            if (mode === 'matrix') {
+                const cols = 25;
+                const ypos = Array(cols).fill(0);
+                const chars = '0123456789ABCDEF日ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘ';
+
+                function render() {
+                    if (!isScreensaverRunning) return;
+                    ctx.fillStyle = 'rgba(4, 10, 6, 0.2)';
+                    ctx.fillRect(0, 0, 250, 250);
+                    ctx.font = '10px monospace';
+
+                    for (let i = 0; i < cols; i++) {
+                        const char = chars[Math.floor(Math.random() * chars.length)];
+                        const x = i * 10;
+                        const y = ypos[i] * 10;
+                        ctx.fillStyle = '#86efac';
+                        ctx.fillText(char, x, y);
+                        if (y > 250 + Math.random() * 50) ypos[i] = 0;
+                        else ypos[i]++;
+                    }
+                    screensaverAnim = requestAnimationFrame(render);
+                }
+                ctx.fillStyle = '#040a06';
+                ctx.fillRect(0, 0, 250, 250);
+                render();
+            }
+            showHud('SCREENSAVER ACTIVE');
+        }
+
+        function wakeScreensaver() {
+            if (isScreensaverRunning) {
+                isScreensaverRunning = false;
+                if (screensaverAnim) cancelAnimationFrame(screensaverAnim);
+                document.getElementById('screensaver-canvas')?.classList.add('hidden');
+                AudioEngine.play('click');
+            }
+        }
+
+        // ── Flappy Bat Arcade Mode ─────────────────────────────────────────────
+        let bat = { y: 120, vy: 0 };
+        let arcadeScore = 0;
+        let pipes = [];
+        let arcadeFrame = 0;
+
+        function openArcade() {
+            wakeScreensaver();
+            isArcadeRunning = true;
+            document.getElementById('arcade-container')?.classList.remove('hidden');
+            bat = { y: 120, vy: 0 };
+            arcadeScore = 0;
+            pipes = [];
+            arcadeFrame = 0;
+            document.getElementById('arcade-score').textContent = '0';
+            document.getElementById('arcade-best').textContent = settings.flappy_high_score || 0;
+            runArcade();
+            AudioEngine.play('chime');
+        }
+
+        function closeArcade() {
+            isArcadeRunning = false;
+            if (arcadeAnim) cancelAnimationFrame(arcadeAnim);
+            document.getElementById('arcade-container')?.classList.add('hidden');
+        }
+
+        function arcadeFlap() {
+            bat.vy = -4.5;
+            AudioEngine.play('flap');
+        }
+
+        function arcadeSteer(delta) {
+            bat.vy += (delta < 0 ? -1.5 : 1.2);
+            AudioEngine.play('click');
+        }
+
+        function runArcade() {
+            const cvs = document.getElementById('arcade-canvas');
+            if (!cvs || !isArcadeRunning) return;
+            const ctx = cvs.getContext('2d');
+            arcadeFrame++;
+
+            // Clear
+            ctx.fillStyle = '#040805';
+            ctx.fillRect(0, 0, 234, 200);
+
+            // Bat physics
+            bat.vy += 0.3;
+            bat.y += bat.vy;
+
+            // Spawn pipes
+            if (arcadeFrame % 75 === 0) {
+                const gap = 70;
+                const topH = Math.floor(Math.random() * 80) + 20;
+                pipes.push({ x: 234, topH, botY: topH + gap, passed: false });
+            }
+
+            // Update pipes
+            for (let i = pipes.length - 1; i >= 0; i--) {
+                const p = pipes[i];
+                p.x -= 2;
+
+                if (!p.passed && p.x < 40) {
+                    p.passed = true;
+                    arcadeScore++;
+                    document.getElementById('arcade-score').textContent = arcadeScore;
+                    AudioEngine.play('click');
+                }
+
+                // Collision
+                if (40 > p.x && 30 < p.x + 20) {
+                    if (bat.y < p.topH || bat.y > p.botY) {
+                        AudioEngine.play('hit');
+                        if (arcadeScore > (settings.flappy_high_score || 0)) {
+                            settings.flappy_high_score = arcadeScore;
+                            document.getElementById('arcade-best').textContent = arcadeScore;
+                        }
+                        showHud(`CRASH! SCORE: ${arcadeScore}`);
+                        closeArcade();
+                        return;
+                    }
+                }
+
+                if (p.x < -30) pipes.splice(i, 1);
+            }
+
+            // Floor collision
+            if (bat.y > 195 || bat.y < 5) {
+                AudioEngine.play('hit');
+                closeArcade();
+                return;
+            }
+
+            // Draw Pipes
+            pipes.forEach(p => {
+                ctx.fillStyle = '#065f46';
+                ctx.fillRect(p.x, 0, 20, p.topH);
+                ctx.fillRect(p.x, p.botY, 20, 200 - p.botY);
+            });
+
+            // Draw Bat
+            ctx.fillStyle = '#818cf8';
+            ctx.beginPath();
+            ctx.arc(35, bat.y, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            arcadeAnim = requestAnimationFrame(runArcade);
+        }
+
+        // ── Clock & Micro-Animations ───────────────────────────────────────────
+        setInterval(() => {
+            const now = new Date();
+            const clockEl = document.getElementById('lcd-clock');
+            if (clockEl) {
+                const h = String(now.getHours()).padStart(2, '0');
+                const m = String(now.getMinutes()).padStart(2, '0');
+                const s = String(now.getSeconds()).padStart(2, '0');
+                clockEl.textContent = `${h}:${m}:${s}`;
+            }
+        }, 1000);
+
+        // ── Event Listeners ────────────────────────────────────────────────────
+        function setupEventListeners() {
+            const knob = document.getElementById('physical-knob');
+
+            // Mouse wheel on physical knob
+            knob?.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                rotateKnob(Math.sign(e.deltaY));
+            }, { passive: false });
+
+            // Wheel anywhere on chassis
+            window.addEventListener('wheel', (e) => {
+                rotateKnob(Math.sign(e.deltaY));
+            });
+
+            // Click knob
+            knob?.addEventListener('click', (e) => {
+                e.preventDefault();
+                clickKnob();
+            });
+
+            // Touch / Drag on knob
+            let isDragging = false;
+            let startY = 0;
+            knob?.addEventListener('pointerdown', (e) => {
+                isDragging = true;
+                startY = e.clientY;
+            });
+            window.addEventListener('pointerup', () => { isDragging = false; });
+            window.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+                const diff = e.clientY - startY;
+                if (Math.abs(diff) > 18) {
+                    rotateKnob(Math.sign(diff));
+                    startY = e.clientY;
+                }
+            });
+
+            // Screen tap
+            document.getElementById('lcd-screen')?.addEventListener('click', () => {
+                if (isScreensaverRunning) wakeScreensaver();
+                else if (isArcadeRunning) arcadeFlap();
+                else clickKnob();
+            });
+
+            // Keyboard navigation
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    rotateKnob(-1);
+                } else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    rotateKnob(1);
+                } else if (e.code === 'Space' || e.key === 'Enter') {
+                    e.preventDefault();
+                    clickKnob();
+                } else if (e.key === 'm' || e.key === 'M') {
+                    isMuted = !isMuted;
+                    document.getElementById('lcd-mute')?.classList.toggle('hidden', !isMuted);
+                    showHud(isMuted ? 'AUDIO MUTED' : 'AUDIO UNMUTED');
+                } else if (e.key === 's' || e.key === 'S') {
+                    if (isScreensaverRunning) wakeScreensaver();
+                    else startScreensaver('matrix');
+                } else if (e.key === 'a' || e.key === 'A') {
+                    if (isArcadeRunning) closeArcade();
+                    else openArcade();
+                }
+            });
+
+            // Quick button bar
+            document.getElementById('btn-device-arcade')?.addEventListener('click', () => {
+                if (isArcadeRunning) closeArcade();
+                else openArcade();
+            });
+            document.getElementById('btn-device-screen')?.addEventListener('click', () => {
+                if (isScreensaverRunning) wakeScreensaver();
+                else startScreensaver('matrix');
+            });
+            document.getElementById('btn-device-focus')?.addEventListener('click', () => {
+                showHud('FOCUS SPRINT STARTED');
+                AudioEngine.play('done');
+                document.getElementById('mascot-avatar').className = 'w-20 h-20 state-working';
+            });
+
+            // Fullscreen & Sync
+            document.getElementById('btn-fullscreen')?.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                } else {
+                    document.exitFullscreen().catch(() => {});
+                }
+            });
+            document.getElementById('btn-sync-now')?.addEventListener('click', () => {
+                fetchDeviceData();
+                showHud('DEVICE SYNCED');
+                AudioEngine.play('click');
+            });
+        }
+
+        // ── Boot sequence ──────────────────────────────────────────────────────
+        window.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            fetchDeviceData();
+            showHud('ESP32 READY');
+            AudioEngine.play('done');
+        });
+    </script>
+</body>
+</html>

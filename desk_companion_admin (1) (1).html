@@ -367,6 +367,7 @@
                     <span class="hw-label opacity-50">DC-01</span>
                 </div>
                 <div class="flex items-center gap-1">
+                    <button id="btn-popout-device" type="button" class="btn-tactile text-[0.55rem] px-1.5 py-0.5 bg-indigo-100 text-indigo-900 border-indigo-300 font-bold" title="Open Full-Size Standalone Hardware Device Window!">🪟 POP-OUT</button>
                     <button id="btn-toggle-screensaver" type="button" class="btn-tactile text-[0.55rem] px-1.5 py-0.5" title="Cycle Screensaver Mode (Matrix / Starfield / Nixie / Game of Life)">📺 SCREENSAVER</button>
                     <button id="btn-toggle-arcade" type="button" class="btn-tactile text-[0.55rem] px-1.5 py-0.5 bg-amber-100 text-amber-900 border-amber-300 font-bold" title="Launch Flappy Bat Break Arcade!">🎮 ARCADE</button>
                 </div>
@@ -498,6 +499,7 @@
                         <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <span id="persistent-sync-time">checking sync...</span>
                     </div>
+                    <button id="btn-nav-popout" type="button" class="btn-tactile text-[0.6rem] px-2 py-0.5 ml-1 bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 font-bold flex items-center gap-1" title="Launch Standalone Physical Hardware Companion Window">🪟 PHYSICAL DEVICE</button>
                     <button id="btn-start-demo" type="button" class="btn-tactile text-[0.6rem] px-2 py-0.5 ml-1 bg-amber-100 text-amber-900 border-amber-400 hover:bg-amber-200 font-bold flex items-center gap-1" title="Start Interactive Feature Demo (Safe & Non-destructive)">✨ DEMO</button>
                     <button id="btn-open-guide" type="button" class="btn-tactile text-[0.6rem] px-2 py-0.5 ml-1 bg-white text-gray-700 hover:text-black font-bold flex items-center gap-1" title="Open Starter Guide & Tutorials">📖 GUIDE</button>
                     <button id="btn-lock-session" class="btn-tactile text-[0.6rem] px-2 py-0.5 ml-1 text-gray-600 hover:text-red-700" title="Lock Dashboard">🔒 Lock</button>
@@ -5151,6 +5153,21 @@
                     cosmeticsModal.classList.add('hidden');
                 });
             }
+
+            // Standalone Physical Hardware Device Pop-out Window
+            const openPhysicalPopout = () => {
+                const width = 460;
+                const height = 780;
+                const left = Math.max(0, Math.round((screen.width - width) / 2));
+                const top = Math.max(0, Math.round((screen.height - height) / 2));
+                window.open(
+                    '/device.html',
+                    'HollowPhysicalCompanion',
+                    `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no`
+                );
+            };
+            document.getElementById('btn-popout-device')?.addEventListener('click', openPhysicalPopout);
+            document.getElementById('btn-nav-popout')?.addEventListener('click', openPhysicalPopout);
         }
 
         // ── Toast System ──────────────────────────────────────────────────────────
