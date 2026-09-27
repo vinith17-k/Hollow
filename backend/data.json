@@ -29,10 +29,10 @@
     "quiet_hours_enabled": false,
     "quiet_hours_windows": [],
     "current_streak": 0,
-    "xp": 250,
+    "xp": 275,
     "level": 3,
     "level_name": "Cave Keeper",
-    "total_tasks_completed": 10,
+    "total_tasks_completed": 11,
     "cosmetic_unlocks": [],
     "pomodoro_sessions_completed": 0,
     "calendar_feeds": [],
@@ -43,78 +43,6 @@
     "bosses_defeated": 0
   },
   "logs": [
-    {
-      "ts": "2026-09-27T11:22:02.259Z",
-      "level": "API",
-      "message": "GET /device.html",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-27T11:22:02.263Z",
-      "level": "API",
-      "message": "GET /",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-27T11:40:43.367Z",
-      "level": "SYS",
-      "message": "Hollow API initialized",
-      "detail": "port=4000"
-    },
-    {
-      "ts": "2026-09-27T11:40:43.398Z",
-      "level": "API",
-      "message": "GET /api/health",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-27T11:40:43.404Z",
-      "level": "API",
-      "message": "GET /api/settings",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-27T11:40:43.407Z",
-      "level": "API",
-      "message": "GET /api/tasks",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-27T11:40:43.419Z",
-      "level": "API",
-      "message": "POST /api/tasks",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-27T11:40:43.425Z",
-      "level": "API",
-      "message": "POST /api/tasks",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-27T11:40:43.428Z",
-      "level": "API",
-      "message": "PATCH /api/tasks/99244fc9-de37-441a-a9a7-599140c594cd",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-27T11:40:43.432Z",
-      "level": "API",
-      "message": "GET /api/settings",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-27T11:40:43.434Z",
-      "level": "API",
-      "message": "DELETE /api/tasks/99244fc9-de37-441a-a9a7-599140c594cd",
-      "detail": ""
-    },
-    {
-      "ts": "2026-09-27T11:40:43.439Z",
-      "level": "API",
-      "message": "GET /device",
-      "detail": ""
-    },
     {
       "ts": "2026-09-27T11:40:43.444Z",
       "level": "API",
@@ -339,6 +267,78 @@
     },
     {
       "ts": "2026-09-27T11:55:29.560Z",
+      "level": "API",
+      "message": "GET /",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-27T12:29:31.524Z",
+      "level": "SYS",
+      "message": "Hollow API initialized",
+      "detail": "port=4000"
+    },
+    {
+      "ts": "2026-09-27T12:29:31.557Z",
+      "level": "API",
+      "message": "GET /api/health",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-27T12:29:31.564Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-27T12:29:31.568Z",
+      "level": "API",
+      "message": "GET /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-27T12:29:31.583Z",
+      "level": "API",
+      "message": "POST /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-27T12:29:31.589Z",
+      "level": "API",
+      "message": "POST /api/tasks",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-27T12:29:31.591Z",
+      "level": "API",
+      "message": "PATCH /api/tasks/b391a2ce-fff0-47b9-b82d-b3c31b0245bb",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-27T12:29:31.596Z",
+      "level": "API",
+      "message": "GET /api/settings",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-27T12:29:31.599Z",
+      "level": "API",
+      "message": "DELETE /api/tasks/b391a2ce-fff0-47b9-b82d-b3c31b0245bb",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-27T12:29:31.602Z",
+      "level": "API",
+      "message": "GET /device",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-27T12:29:31.608Z",
+      "level": "API",
+      "message": "GET /device.html",
+      "detail": ""
+    },
+    {
+      "ts": "2026-09-27T12:29:31.613Z",
       "level": "API",
       "message": "GET /",
       "detail": ""
