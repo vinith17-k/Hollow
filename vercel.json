@@ -10,6 +10,18 @@
       "destination": "/api/index.js"
     },
     {
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
+    },
+    {
+      "source": "/manifest.json",
+      "destination": "/manifest.json"
+    },
+    {
+      "source": "/sw.js",
+      "destination": "/sw.js"
+    },
+    {
       "source": "/device",
       "destination": "/device.html"
     },

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hollow Control</title>
+    <meta name="description" content="Hollow ESP32 Desk Companion & Digital Twin - Real-time directives, ambient mascot life cycle, tactile pomodoro focus sprints, and hardware telemetry.">
     
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#111211">
@@ -87,8 +88,8 @@
         }
         .btn-tactile:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        .btn-tactile-primary { background-color: var(--accent-orange); border-color: #b44207; color: white; }
-        .btn-tactile-primary:hover:not(:disabled) { background-color: #f97316; }
+        .btn-tactile-primary { background-color: #c2410c; border-color: #9a3412; color: #ffffff; font-weight: 800; }
+        .btn-tactile-primary:hover:not(:disabled) { background-color: #ea580c; }
         
         .btn-tactile-danger { background-color: #dc2626; border-color: #991b1b; color: white; }
 
@@ -374,7 +375,7 @@
             <div class="w-full flex justify-between items-center mb-2 px-1 flex-wrap gap-1.5">
                 <div class="flex items-center gap-1.5">
                     <h2 id="sim-title" class="hw-label text-left">Display Out</h2>
-                    <span class="hw-label opacity-50">DC-01</span>
+                    <span class="hw-label text-gray-700 font-bold">DC-01</span>
                 </div>
                 <div class="flex items-center gap-1 flex-wrap">
                     <button id="btn-popout-device" type="button" class="btn-tactile text-[0.55rem] px-1.5 py-0.5 bg-indigo-100 text-indigo-900 border-indigo-300 font-bold" title="Open Full-Size Standalone Hardware Device Window!">🪟 POP-OUT</button>
@@ -410,7 +411,7 @@
                     <!-- Top Bar -->
                     <div class="flex justify-between items-start lcd-text text-xs z-0 relative">
                         <div class="flex items-center gap-1.5 flex-wrap">
-                            <div id="sim-wifi" class="flex gap-[2px] items-end h-3" aria-label="Wi-Fi">
+                            <div id="sim-wifi" role="img" class="flex gap-[2px] items-end h-3" aria-label="Wi-Fi">
                                 <span class="block w-1 h-1 bg-current opacity-30" id="wifi-1"></span>
                                 <span class="block w-1 h-2 bg-current opacity-30" id="wifi-2"></span>
                                 <span class="block w-1 h-3 bg-current" id="wifi-3"></span>
