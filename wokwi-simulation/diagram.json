@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "author": "Hollow Team",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 100, "left": 40, "attrs": {} },
+    { "type": "board-ili9341", "id": "lcd", "top": -170, "left": 180, "attrs": {} },
+    { "type": "wokwi-ky-040", "id": "encoder", "top": 180, "left": 280, "attrs": {} },
+    { "type": "wokwi-neopixel", "id": "led", "top": -90, "left": 70, "attrs": {} },
+    { "type": "wokwi-buzzer", "id": "buzzer", "top": 240, "left": -80, "attrs": { "volume": "0.15" } }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+
+    [ "esp:GND.1", "lcd:GND", "black", [ "v-20", "h120" ] ],
+    [ "esp:3V3", "lcd:VCC", "red", [ "v-30", "h130" ] ],
+    [ "esp:15", "lcd:CS", "blue", [ "v-40", "h90" ] ],
+    [ "esp:2", "lcd:RESET", "gray", [ "v-50", "h80" ] ],
+    [ "esp:5", "lcd:D/C", "purple", [ "v-60", "h70" ] ],
+    [ "esp:23", "lcd:MOSI", "green", [ "v-70", "h60" ] ],
+    [ "esp:18", "lcd:SCK", "gold", [ "v-80", "h50" ] ],
+    [ "esp:3V3", "lcd:LED", "orange", [ "v-30", "h150" ] ],
+
+    [ "esp:GND.2", "encoder:GND", "black", [ "v40", "h140" ] ],
+    [ "esp:3V3", "encoder:VCC", "red", [ "v30", "h150" ] ],
+    [ "esp:4", "encoder:CLK", "orange", [ "v20", "h160" ] ],
+    [ "esp:16", "encoder:DT", "yellow", [ "v10", "h170" ] ],
+    [ "esp:17", "encoder:SW", "cyan", [ "v0", "h180" ] ],
+
+    [ "esp:GND.1", "led:GND", "black", [ "v-20", "h-20" ] ],
+    [ "esp:5V", "led:VCC", "red", [ "v-25", "h-15" ] ],
+    [ "esp:21", "led:DIN", "green", [ "v-15", "h-25" ] ],
+
+    [ "esp:22", "buzzer:2", "purple", [ "v60", "h-70" ] ],
+    [ "esp:GND.2", "buzzer:1", "black", [ "v70", "h-80" ] ]
+  ],
+  "dependencies": {}
+}

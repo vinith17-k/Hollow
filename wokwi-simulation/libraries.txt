@@ -1,0 +1,5 @@
+# Wokwi Arduino Library Dependencies
+Adafruit GFX Library
+Adafruit ILI9341
+Adafruit NeoPixel
+ArduinoJson
