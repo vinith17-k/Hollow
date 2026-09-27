@@ -44,11 +44,11 @@
         }
 
         .hw-label {
-            font-size: 0.65rem;
+            font-size: 0.68rem;
             text-transform: uppercase;
             letter-spacing: 0.15em;
             font-weight: 700;
-            color: #444;
+            color: #1f2220;
         }
 
         .lcd-text {
@@ -91,7 +91,7 @@
         .btn-tactile-primary { background-color: #c2410c; border-color: #9a3412; color: #ffffff; font-weight: 800; }
         .btn-tactile-primary:hover:not(:disabled) { background-color: #ea580c; }
         
-        .btn-tactile-danger { background-color: #dc2626; border-color: #991b1b; color: white; }
+        .btn-tactile-danger { background-color: #b91c1c; border-color: #7f1d1d; color: white; font-weight: 800; }
 
         /* Tactile Inputs */
         .input-tactile {
@@ -505,15 +505,15 @@
                         <div id="device-status-dot" class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse transition-colors"></div>
                         <span id="device-status-text" class="font-mono text-xs font-bold text-green-700">ONLINE</span>
                     </div>
-                    <span class="text-gray-300">|</span>
-                    <div class="font-mono text-[0.65rem] text-gray-500 flex items-center gap-1" id="device-last-sync-container">
-                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="text-gray-500 font-bold" aria-hidden="true">|</span>
+                    <div class="font-mono text-[0.68rem] text-gray-700 font-medium flex items-center gap-1" id="device-last-sync-container">
+                        <svg class="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <span id="persistent-sync-time">checking sync...</span>
                     </div>
-                    <button id="btn-nav-popout" type="button" class="btn-tactile text-[0.6rem] px-2 py-0.5 ml-1 bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 font-bold flex items-center gap-1" title="Launch Standalone Physical Hardware Companion Window">🪟 PHYSICAL DEVICE</button>
-                    <button id="btn-start-demo" type="button" class="btn-tactile text-[0.6rem] px-2 py-0.5 ml-1 bg-amber-100 text-amber-900 border-amber-400 hover:bg-amber-200 font-bold flex items-center gap-1" title="Start Interactive Feature Demo (Safe & Non-destructive)">✨ DEMO</button>
-                    <button id="btn-open-guide" type="button" class="btn-tactile text-[0.6rem] px-2 py-0.5 ml-1 bg-white text-gray-700 hover:text-black font-bold flex items-center gap-1" title="Open Starter Guide & Tutorials">📖 GUIDE</button>
-                    <button id="btn-lock-session" class="btn-tactile text-[0.6rem] px-2 py-0.5 ml-1 text-gray-600 hover:text-red-700" title="Lock Dashboard">🔒 Lock</button>
+                    <button id="btn-nav-popout" type="button" class="btn-tactile text-[0.65rem] px-2 py-0.5 ml-1 bg-indigo-50 text-indigo-900 border-indigo-300 hover:bg-indigo-100 font-bold flex items-center gap-1" title="Launch Standalone Physical Hardware Companion Window">🪟 PHYSICAL DEVICE</button>
+                    <button id="btn-start-demo" type="button" class="btn-tactile text-[0.65rem] px-2 py-0.5 ml-1 bg-amber-100 text-amber-950 border-amber-400 hover:bg-amber-200 font-bold flex items-center gap-1" title="Start Interactive Feature Demo (Safe & Non-destructive)">✨ DEMO</button>
+                    <button id="btn-open-guide" type="button" class="btn-tactile text-[0.65rem] px-2 py-0.5 ml-1 bg-white text-gray-800 hover:text-black font-bold flex items-center gap-1" title="Open Starter Guide & Tutorials">📖 GUIDE</button>
+                    <button id="btn-lock-session" class="btn-tactile text-[0.65rem] px-2 py-0.5 ml-1 text-gray-800 hover:text-red-700 font-medium" title="Lock Dashboard">🔒 Lock</button>
                 </div>
             </div>
             
@@ -537,23 +537,23 @@
             <!-- Mascot Evolution & XP Gamification Bar -->
             <div class="flex items-center gap-3 bg-white px-3 py-1.5 rounded border border-[var(--chassis-dark)] shadow-sm mb-3">
                 <div class="flex-shrink-0 text-center">
-                    <span class="hw-label text-[0.55rem] block">LVL</span>
+                    <span class="hw-label text-[0.65rem] block text-gray-800">LVL</span>
                     <span id="xp-level-display" class="text-base font-bold font-mono text-gray-800 leading-tight">1</span>
                 </div>
                 <div class="flex-grow min-w-0">
                     <div class="flex justify-between items-center mb-1">
                         <div class="flex items-center gap-1.5 truncate">
                             <span id="xp-level-name" class="font-mono text-xs font-bold text-gray-800 truncate">Bat Pup</span>
-                            <span id="xp-stage-badge" class="hw-label text-[0.5rem] bg-indigo-50 text-indigo-700 px-1 py-0.2 rounded border border-indigo-200">STAGE I</span>
+                            <span id="xp-stage-badge" class="hw-label text-[0.62rem] bg-indigo-50 text-indigo-900 px-1.5 py-0.5 rounded border border-indigo-200">STAGE I</span>
                         </div>
-                        <span id="xp-display" class="font-mono text-[0.65rem] text-gray-500 whitespace-nowrap ml-2">0 / 100 XP</span>
+                        <span id="xp-display" class="font-mono text-[0.68rem] text-gray-700 font-semibold whitespace-nowrap ml-2">0 / 100 XP</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2 border border-gray-300 overflow-hidden relative">
                         <div id="xp-bar-fill" class="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-indigo-600 rounded-full transition-all duration-500" style="width: 0%"></div>
                     </div>
                 </div>
                 <div class="flex-shrink-0 flex items-center gap-1">
-                    <button id="btn-open-cosmetics" type="button" class="btn-tactile px-2 py-1 text-[0.65rem] text-gray-700" title="Mascot Care & Cosmetic Unlocks">🦇 CARE</button>
+                    <button id="btn-open-cosmetics" type="button" class="btn-tactile px-2 py-1 text-[0.68rem] text-gray-800 font-bold" title="Mascot Care & Cosmetic Unlocks">🦇 CARE</button>
                 </div>
             </div>
 
@@ -581,8 +581,8 @@
                             <span id="streak-badge" class="hidden font-mono text-[0.65rem] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300" title="Daily Completion Streak">🔥 0 day streak</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button id="btn-mark-all-done" class="btn-tactile px-2 py-1 text-[0.6rem]" title="Mark all tasks done">✓ ALL</button>
-                            <span id="task-count" class="hw-label bg-[var(--chassis-light)] px-2 py-1 rounded border border-[var(--chassis-dark)]" title="pending / total">0 / 0</span>
+                            <button id="btn-mark-all-done" class="btn-tactile px-2 py-1 text-[0.65rem] text-gray-800 font-bold" title="Mark all tasks done">✓ ALL</button>
+                            <span id="task-count" class="hw-label bg-[var(--chassis-light)] px-2 py-1 rounded border border-[var(--chassis-dark)] text-gray-800" title="pending / total">0 / 0</span>
                         </div>
                     </div>
 
@@ -609,7 +609,7 @@
                                 <span class="text-amber-700 font-bold">✨ PARSED:</span>
                                 <span id="nl-parsed-text" class="truncate font-semibold text-gray-800">Title: "Deploy API" · Today 4:30 PM · High Priority</span>
                             </div>
-                            <button type="button" id="btn-apply-nl" class="btn-tactile text-[0.6rem] px-2 py-0.5 bg-amber-200 text-amber-950 font-bold shrink-0">✓ APPLY</button>
+                            <button type="button" id="btn-apply-nl" class="btn-tactile text-[0.65rem] px-2 py-0.5 bg-amber-200 text-amber-950 font-bold shrink-0">✓ APPLY</button>
                         </div>
                     </form>
 
@@ -627,7 +627,7 @@
                         <div class="flex items-center justify-between bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
                             <div>
                                 <span class="block font-bold text-sm">I2S Chime Audio</span>
-                                <span class="text-xs text-gray-500 font-mono mt-1">Play sound on alert state</span>
+                                <span class="text-xs text-gray-700 font-mono mt-1 font-medium">Play sound on alert state</span>
                             </div>
                             <div class="relative inline-block w-12 h-6 align-middle select-none">
                                 <input type="checkbox" name="chime_enabled" id="setting-chime" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-[var(--chassis-dark)] z-10 transition-all"/>
@@ -639,12 +639,12 @@
                         <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
                             <div class="flex justify-between items-center mb-1.5">
                                 <div>
-                                    <span class="block font-bold text-sm">Synthesizer Sound Pack</span>
-                                    <span class="text-xs text-gray-500 font-mono">Procedural Web Audio retro sound chip</span>
+                                    <label for="setting-soundpack" class="block font-bold text-sm cursor-pointer">Synthesizer Sound Pack</label>
+                                    <span class="text-xs text-gray-700 font-mono font-medium">Procedural Web Audio retro sound chip</span>
                                 </div>
-                                <button type="button" id="btn-preview-soundpack" class="btn-tactile text-[0.6rem] px-2 py-1 font-mono font-bold bg-amber-50 text-amber-900 border-amber-300">🔊 PREVIEW</button>
+                                <button type="button" id="btn-preview-soundpack" class="btn-tactile text-[0.65rem] px-2 py-1 font-mono font-bold bg-amber-50 text-amber-950 border-amber-400">🔊 PREVIEW</button>
                             </div>
-                            <select id="setting-soundpack" name="sound_pack" class="input-tactile cursor-pointer w-full text-xs font-mono">
+                            <select id="setting-soundpack" name="sound_pack" aria-label="Synthesizer Sound Pack" class="input-tactile cursor-pointer w-full text-xs font-mono">
                                 <option value="8bit">👾 Game Boy 8-Bit (Square Wave Arpeggios)</option>
                                 <option value="cyberpunk">🌌 Cyberpunk Terminal (FM Resonant Synth)</option>
                                 <option value="zen">🧘 Calm Zen Bell (Singing Bowl Resonance)</option>
@@ -655,7 +655,7 @@
                         <!-- Hardware LCD Screensaver Mode -->
                         <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
                             <label for="setting-screensaver" class="block font-bold text-sm mb-1">Hardware LCD Screensaver</label>
-                            <span class="text-xs text-gray-500 font-mono block mb-1.5">Animated retro canvas when device is idle</span>
+                            <span class="text-xs text-gray-700 font-mono block mb-1.5 font-medium">Animated retro canvas when device is idle</span>
                             <select id="setting-screensaver" name="screensaver_mode" class="input-tactile cursor-pointer w-full text-xs font-mono">
                                 <option value="off">Off (Standard LCD Clock &amp; Mascot)</option>
                                 <option value="matrix">🟩 Matrix Digital Rain (Phosphor Glyphs)</option>
@@ -669,9 +669,9 @@
                         <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
                             <label for="setting-brightness" class="block font-bold text-sm mb-2">Display & LED Intensity</label>
                             <div class="flex items-center gap-3">
-                                <span class="text-xs font-mono text-gray-500">MIN</span>
+                                <span class="text-xs font-mono text-gray-700 font-bold">MIN</span>
                                 <input type="range" id="setting-brightness" name="led_brightness" min="10" max="100" class="w-full h-2 bg-[var(--chassis-main)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-orange)]">
-                                <span class="text-xs font-mono text-gray-500">MAX</span>
+                                <span class="text-xs font-mono text-gray-700 font-bold">MAX</span>
                             </div>
                         </div>
 
@@ -681,7 +681,7 @@
                                 <label for="setting-snooze" class="block font-bold text-sm mb-1">Snooze Duration</label>
                                 <div class="flex items-center gap-2">
                                     <input type="number" id="setting-snooze" name="snooze_minutes" min="1" max="60" class="input-tactile text-center">
-                                    <span class="text-xs font-mono text-gray-500">MIN</span>
+                                    <span class="text-xs font-mono text-gray-700 font-bold">MIN</span>
                                 </div>
                             </div>
                             <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
@@ -712,7 +712,7 @@
                                 <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
                                 <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
                             </select>
-                            <span class="text-[0.6rem] font-mono text-gray-500 mt-1 block">Sent to hardware for RTC reminder-time calculations</span>
+                            <span class="text-[0.68rem] font-mono text-gray-700 mt-1 block font-medium">Sent to hardware for RTC reminder-time calculations</span>
                         </div>
 
                         <!-- Schedule-Aware Quiet Hours -->
@@ -723,14 +723,14 @@
                                     Quiet Hours Schedule
                                 </h3>
                                 <div class="flex items-center gap-2">
-                                    <span id="quiet-hours-status-badge" class="font-mono text-[0.6rem] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 font-bold">OFF</span>
+                                    <span id="quiet-hours-status-badge" class="font-mono text-[0.68rem] px-1.5 py-0.5 rounded bg-gray-100 text-gray-800 font-bold">OFF</span>
                                     <label class="relative inline-flex items-center cursor-pointer" title="Quiet Hours Master Switch">
                                         <input type="checkbox" id="setting-quiet-hours-enabled" name="quiet_hours_enabled" class="sr-only peer">
                                         <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
                                     </label>
                                 </div>
                             </div>
-                            <p class="text-xs text-gray-500 mb-2">Suppress chime audio and flashing LED alerts during specified windows. Directives still register silently.</p>
+                            <p class="text-xs text-gray-700 mb-2 font-medium">Suppress chime audio and flashing LED alerts during specified windows. Directives still register silently.</p>
                             
                             <!-- Defined Windows List -->
                             <div id="quiet-windows-list" class="space-y-1.5 mb-3">
@@ -739,23 +739,23 @@
 
                             <!-- Add Window Form -->
                             <div class="bg-[var(--chassis-light)] p-2.5 rounded border border-[var(--chassis-dark)]">
-                                <span class="hw-label text-[0.6rem] block mb-1.5">Add Quiet Window</span>
+                                <span class="hw-label text-[0.68rem] block mb-1.5">Add Quiet Window</span>
                                 <div class="flex gap-2 items-center flex-wrap mb-2">
                                     <div class="flex items-center gap-1">
-                                        <label for="quiet-start-time" class="text-[0.65rem] font-bold text-gray-600">From:</label>
+                                        <label for="quiet-start-time" class="text-[0.68rem] font-bold text-gray-700">From:</label>
                                         <input type="time" id="quiet-start-time" value="22:00" class="input-tactile text-xs h-7 w-24">
                                     </div>
                                     <div class="flex items-center gap-1">
-                                        <label for="quiet-end-time" class="text-[0.65rem] font-bold text-gray-600">To:</label>
+                                        <label for="quiet-end-time" class="text-[0.68rem] font-bold text-gray-700">To:</label>
                                         <input type="time" id="quiet-end-time" value="07:30" class="input-tactile text-xs h-7 w-24">
                                     </div>
-                                    <span class="text-[0.6rem] text-gray-500 italic">(supports overnight)</span>
+                                    <span class="text-[0.68rem] text-gray-700 italic font-medium">(supports overnight)</span>
                                 </div>
 
                                 <div class="mb-2">
                                     <div class="flex justify-between items-center mb-1">
-                                        <span class="text-[0.65rem] font-bold text-gray-600">Active Days:</span>
-                                        <div class="flex gap-1 text-[0.55rem] font-mono text-gray-500">
+                                        <span class="text-[0.68rem] font-bold text-gray-700">Active Days:</span>
+                                        <div class="flex gap-1 text-[0.68rem] font-mono text-gray-700 font-semibold">
                                             <button type="button" id="btn-quiet-days-all" class="hover:underline">All</button> |
                                             <button type="button" id="btn-quiet-days-weekdays" class="hover:underline">Weekdays</button> |
                                             <button type="button" id="btn-quiet-days-weekends" class="hover:underline">Weekends</button>
@@ -783,16 +783,16 @@
                                     <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                     External Calendar Sync (iCal / Google)
                                 </h3>
-                                <span class="hw-label text-[0.55rem] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200">AUTO-DIRECTIVES</span>
+                                <span class="hw-label text-[0.65rem] bg-blue-50 text-blue-900 px-1.5 py-0.5 rounded border border-blue-200 font-bold">AUTO-DIRECTIVES</span>
                             </div>
-                            <p class="text-xs text-gray-500 mb-2">Subscribe to public or secret .ics calendar feeds to automatically generate desk directives.</p>
+                            <p class="text-xs text-gray-700 mb-2 font-medium">Subscribe to public or secret .ics calendar feeds to automatically generate desk directives.</p>
                             <div class="flex gap-2 mb-2">
                                 <input type="url" id="calendar-feed-url" placeholder="https://calendar.google.com/calendar/ical/.../basic.ics" class="input-tactile text-xs flex-grow">
                                 <button type="button" id="btn-sync-calendar" class="btn-tactile btn-tactile-primary px-3 text-xs font-bold shrink-0">⟳ SYNC NOW</button>
                             </div>
-                            <div class="flex justify-between items-center text-[0.6rem] font-mono text-gray-400">
+                            <div class="flex justify-between items-center text-[0.68rem] font-mono text-gray-700 font-medium">
                                 <span id="calendar-sync-status">No calendar sync run yet</span>
-                                <button type="button" id="btn-save-calendar-feed" class="text-blue-600 hover:underline">Save as Default Feed</button>
+                                <button type="button" id="btn-save-calendar-feed" class="text-blue-800 hover:underline font-bold">Save as Default Feed</button>
                             </div>
                         </div>
 
@@ -802,20 +802,20 @@
                                 <svg class="w-4 h-4 text-[var(--accent-orange)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
                                 Cloud Endpoint URL
                             </h3>
-                            <p class="text-xs text-gray-500 mb-2">Target API endpoint for syncing directives outside local network.</p>
+                            <p class="text-xs text-gray-700 mb-2 font-medium">Target API endpoint for syncing directives outside local network.</p>
                             <div class="flex gap-2 mb-2">
                                 <input type="url" id="admin-backend-url" placeholder="https://api.supabase.co/... or /api" class="input-tactile text-sm flex-grow">
                                 <button id="btn-save-backend-url" type="button" class="btn-tactile px-3 font-bold">SET</button>
                             </div>
                             <div class="flex gap-2 items-center">
                                 <button id="btn-test-connection" type="button" class="btn-tactile px-3 py-1 text-xs flex-grow">Test Connection</button>
-                                <span id="connection-test-result" class="font-mono text-[0.6rem] text-gray-400">—</span>
+                                <span id="connection-test-result" class="font-mono text-[0.68rem] text-gray-700 font-medium">—</span>
                             </div>
                         </div>
 
                         <!-- Reset to defaults -->
                         <div class="pt-1">
-                            <button type="button" id="btn-settings-reset" class="btn-tactile w-full py-2 text-xs text-gray-500">↺ Reset to Defaults</button>
+                            <button type="button" id="btn-settings-reset" class="btn-tactile w-full py-2 text-xs text-gray-700 font-bold">↺ Reset to Defaults</button>
                         </div>
                     </form>
                 </div>
@@ -825,27 +825,27 @@
                     <div class="flex justify-between items-center mb-3">
                         <div>
                             <h2 class="hw-label text-sm">Weekly Analytics</h2>
-                            <p class="text-[0.65rem] text-gray-500 font-mono">7-Day Completion vs Missed Performance</p>
+                            <p class="text-[0.68rem] text-gray-700 font-mono font-medium">7-Day Completion vs Missed Performance</p>
                         </div>
-                        <span id="analytics-date-range" class="hw-label bg-[var(--chassis-light)] px-2 py-0.5 rounded border border-[var(--chassis-dark)] text-[0.6rem]">—</span>
+                        <span id="analytics-date-range" class="hw-label bg-[var(--chassis-light)] px-2 py-0.5 rounded border border-[var(--chassis-dark)] text-[0.68rem]">—</span>
                     </div>
 
                     <!-- KPI Metric Cards -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
                         <div class="bg-white p-2.5 border border-[var(--chassis-dark)] rounded shadow-sm text-center">
-                            <span class="hw-label text-[0.55rem] block text-gray-500">Completion Rate</span>
+                            <span class="hw-label text-[0.65rem] block text-gray-700">Completion Rate</span>
                             <span id="metric-completion-rate" class="text-lg font-bold font-mono text-green-600">0%</span>
                         </div>
                         <div class="bg-white p-2.5 border border-[var(--chassis-dark)] rounded shadow-sm text-center">
-                            <span class="hw-label text-[0.55rem] block text-gray-500">Completed (7d)</span>
+                            <span class="hw-label text-[0.65rem] block text-gray-700">Completed (7d)</span>
                             <span id="metric-completed-count" class="text-lg font-bold font-mono text-gray-800">0</span>
                         </div>
                         <div class="bg-white p-2.5 border border-[var(--chassis-dark)] rounded shadow-sm text-center">
-                            <span class="hw-label text-[0.55rem] block text-gray-500">Missed / Overdue</span>
+                            <span class="hw-label text-[0.65rem] block text-gray-700">Missed / Overdue</span>
                             <span id="metric-missed-count" class="text-lg font-bold font-mono text-red-600">0</span>
                         </div>
                         <div class="bg-white p-2.5 border border-[var(--chassis-dark)] rounded shadow-sm text-center">
-                            <span class="hw-label text-[0.55rem] block text-gray-500">Current Streak</span>
+                            <span class="hw-label text-[0.65rem] block text-gray-700">Current Streak</span>
                             <span id="metric-streak-count" class="text-lg font-bold font-mono text-amber-600">0d</span>
                         </div>
                     </div>
@@ -853,8 +853,8 @@
                     <!-- 7-Day Chart Container -->
                     <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm flex-grow flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="hw-label text-[0.6rem]">Directive Velocity</span>
-                            <div class="flex items-center gap-3 text-[0.6rem] font-mono">
+                            <span class="hw-label text-[0.68rem]">Directive Velocity</span>
+                            <div class="flex items-center gap-3 text-[0.68rem] font-mono">
                                 <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-green-500 rounded-sm inline-block"></span> Done</span>
                                 <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-red-400 rounded-sm inline-block"></span> Missed</span>
                             </div>
@@ -865,7 +865,7 @@
                             <!-- Populated dynamically by renderAnalytics() -->
                         </div>
 
-                        <div class="flex justify-between items-center text-[0.55rem] text-gray-400 font-mono pt-2">
+                        <div class="flex justify-between items-center text-[0.68rem] text-gray-700 font-mono pt-2 font-medium">
                             <span>Evaluated from historical directive timestamps</span>
                             <span id="analytics-best-day">Best performance: —</span>
                         </div>
@@ -877,9 +877,9 @@
                     <div class="flex justify-between items-center mb-3">
                         <div>
                             <h2 class="hw-label text-sm">Focus Sprint Engine</h2>
-                            <p class="text-[0.65rem] text-gray-500 font-mono">Tactile Pomodoro · Mascot Deep Focus Mode</p>
+                            <p class="text-[0.68rem] text-gray-700 font-mono font-medium">Tactile Pomodoro · Mascot Deep Focus Mode</p>
                         </div>
-                        <span id="focus-mode-badge" class="hw-label bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-200 text-[0.6rem]">IDLE</span>
+                        <span id="focus-mode-badge" class="hw-label bg-indigo-50 text-indigo-900 px-2 py-0.5 rounded border border-indigo-200 text-[0.68rem]">IDLE</span>
                     </div>
 
                     <!-- Retro Digital Focus Display -->
@@ -898,7 +898,7 @@
 
                     <!-- Focus Presets -->
                     <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm mb-3">
-                        <span class="hw-label text-[0.6rem] block mb-2 text-gray-600">Preset Sprint Profiles</span>
+                        <span class="hw-label text-[0.68rem] block mb-2 text-gray-800">Preset Sprint Profiles</span>
                         <div class="grid grid-cols-4 gap-1.5">
                             <button type="button" class="btn-tactile py-1.5 text-[0.65rem] pomodoro-preset active" data-minutes="25">25m Focus</button>
                             <button type="button" class="btn-tactile py-1.5 text-[0.65rem] pomodoro-preset" data-minutes="5">5m Break</button>
@@ -914,10 +914,10 @@
                                 <span class="text-base">⚔️</span>
                                 <div>
                                     <span class="font-bold text-xs text-red-950 block font-mono">CALAMITY BOSS BATTLE</span>
-                                    <span class="text-[0.6rem] text-gray-600 font-mono">Focus sprints &amp; completed tasks strike the monster</span>
+                                    <span class="text-[0.68rem] text-gray-800 font-mono font-medium">Focus sprints &amp; completed tasks strike the monster</span>
                                 </div>
                             </div>
-                            <button id="btn-toggle-boss" type="button" class="btn-tactile text-[0.6rem] px-2.5 py-1 font-mono font-bold bg-red-100 text-red-900 border-red-300">⚔️ SUMMON BOSS</button>
+                            <button id="btn-toggle-boss" type="button" class="btn-tactile text-[0.68rem] px-2.5 py-1 font-mono font-bold bg-red-100 text-red-950 border-red-300">⚔️ SUMMON BOSS</button>
                         </div>
                         <div id="boss-arena" class="hidden bg-white p-3 rounded-lg border border-red-200">
                             <div class="flex items-center justify-between mb-1.5">
@@ -925,7 +925,7 @@
                                     <span id="boss-sprite" class="text-2xl animate-bounce">👾</span>
                                     <div>
                                         <span id="boss-name" class="font-bold text-xs text-red-700 font-mono block">Procrastination Behemoth</span>
-                                        <span id="boss-subtitle" class="text-[0.6rem] text-gray-500 font-mono">Level 5 Calamity Beast</span>
+                                        <span id="boss-subtitle" class="text-[0.68rem] text-gray-700 font-mono font-medium">Level 5 Calamity Beast</span>
                                     </div>
                                 </div>
                                 <span id="boss-hp-text" class="font-mono text-xs font-bold text-red-600">100 / 100 HP</span>
@@ -933,7 +933,7 @@
                             <div class="w-full bg-gray-200 rounded-full h-3 border border-gray-300 overflow-hidden mb-2 relative">
                                 <div id="boss-hp-bar" class="h-full bg-gradient-to-r from-red-500 to-amber-500 transition-all duration-300" style="width: 100%"></div>
                             </div>
-                            <div class="flex items-center justify-between text-[0.6rem] font-mono text-gray-500">
+                            <div class="flex items-center justify-between text-[0.68rem] font-mono text-gray-700 font-medium">
                                 <span>Sprint: <strong class="text-amber-600">-25 HP</strong> · Done Task: <strong class="text-red-600">-35 HP (CRIT)</strong></span>
                                 <span>Defeated: <strong id="bosses-defeated-count" class="text-purple-700 font-bold">0</strong></span>
                             </div>
@@ -943,11 +943,11 @@
                     <!-- Session Rewards & Stats -->
                     <div class="grid grid-cols-2 gap-2 bg-[var(--chassis-light)] p-2.5 rounded border border-[var(--chassis-dark)]">
                         <div class="bg-white p-2 rounded border border-gray-300 text-center">
-                            <span class="hw-label text-[0.55rem] block text-gray-500">Sprints Today</span>
+                            <span class="hw-label text-[0.65rem] block text-gray-700">Sprints Today</span>
                             <span id="pomodoro-sessions-today" class="text-base font-bold font-mono text-gray-800">0</span>
                         </div>
                         <div class="bg-white p-2 rounded border border-gray-300 text-center">
-                            <span class="hw-label text-[0.55rem] block text-gray-500">Total Sprints</span>
+                            <span class="hw-label text-[0.65rem] block text-gray-700">Total Sprints</span>
                             <span id="pomodoro-sessions-total" class="text-base font-bold font-mono text-indigo-700">0</span>
                         </div>
                     </div>
@@ -958,16 +958,16 @@
                     <div class="flex justify-between items-center mb-3">
                         <div>
                             <h2 class="hw-label text-sm">Web Serial Device Link</h2>
-                            <p class="text-[0.65rem] text-gray-500 font-mono">Direct USB-C Link · 115200 Baud · Live Telemetry</p>
+                            <p class="text-[0.68rem] text-gray-700 font-mono font-medium">Direct USB-C Link · 115200 Baud · Live Telemetry</p>
                         </div>
-                        <span id="serial-baud-badge" class="hw-label bg-[var(--chassis-light)] px-2 py-0.5 rounded border border-[var(--chassis-dark)] text-[0.6rem]">115200 BAUD</span>
+                        <span id="serial-baud-badge" class="hw-label bg-[var(--chassis-light)] px-2 py-0.5 rounded border border-[var(--chassis-dark)] text-[0.68rem]">115200 BAUD</span>
                     </div>
 
                     <!-- Connection Banner -->
                     <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm flex justify-between items-center mb-3">
                         <div>
                             <span class="font-bold text-sm block">ESP32 USB-C Port</span>
-                            <span id="serial-status-text" class="text-xs font-mono text-gray-500">Disconnected (Click Connect to select COM port)</span>
+                            <span id="serial-status-text" class="text-xs font-mono text-gray-700 font-medium">Disconnected (Click Connect to select COM port)</span>
                         </div>
                         <div class="flex gap-2">
                             <button id="btn-serial-connect" type="button" class="btn-tactile btn-tactile-primary px-3 py-1.5 text-xs font-bold">⚡ CONNECT</button>
@@ -998,14 +998,14 @@
 
                     <!-- Quick Hardware Directives -->
                     <div class="bg-[var(--chassis-light)] p-2.5 border border-[var(--chassis-dark)] rounded">
-                        <span class="hw-label text-[0.6rem] block mb-1.5 text-gray-700">Quick Hardware Packets</span>
+                        <span class="hw-label text-[0.68rem] block mb-1.5 text-gray-800">Quick Hardware Packets</span>
                         <div class="flex flex-wrap gap-1.5">
-                            <button type="button" class="btn-tactile px-2 py-1 text-[0.6rem] serial-quick-cmd" data-cmd="STATUS">STATUS</button>
-                            <button type="button" class="btn-tactile px-2 py-1 text-[0.6rem] serial-quick-cmd" data-cmd="LED:RED">LED:RED</button>
-                            <button type="button" class="btn-tactile px-2 py-1 text-[0.6rem] serial-quick-cmd" data-cmd="LED:GREEN">LED:GREEN</button>
-                            <button type="button" class="btn-tactile px-2 py-1 text-[0.6rem] serial-quick-cmd" data-cmd="LED:OFF">LED:OFF</button>
-                            <button type="button" class="btn-tactile px-2 py-1 text-[0.6rem] serial-quick-cmd" data-cmd="CHIME">CHIME</button>
-                            <button type="button" class="btn-tactile px-2 py-1 text-[0.6rem] serial-quick-cmd" data-cmd="RESTART">RESTART</button>
+                            <button type="button" class="btn-tactile px-2 py-1 text-[0.68rem] serial-quick-cmd" data-cmd="STATUS">STATUS</button>
+                            <button type="button" class="btn-tactile px-2 py-1 text-[0.68rem] serial-quick-cmd" data-cmd="LED:RED">LED:RED</button>
+                            <button type="button" class="btn-tactile px-2 py-1 text-[0.68rem] serial-quick-cmd" data-cmd="LED:GREEN">LED:GREEN</button>
+                            <button type="button" class="btn-tactile px-2 py-1 text-[0.68rem] serial-quick-cmd" data-cmd="LED:OFF">LED:OFF</button>
+                            <button type="button" class="btn-tactile px-2 py-1 text-[0.68rem] serial-quick-cmd" data-cmd="CHIME">CHIME</button>
+                            <button type="button" class="btn-tactile px-2 py-1 text-[0.68rem] serial-quick-cmd" data-cmd="RESTART">RESTART</button>
                         </div>
                     </div>
                 </div>
@@ -1015,11 +1015,11 @@
                         <h2 class="hw-label text-sm">System Telemetry</h2>
                         <div class="flex items-center gap-2">
                             <!-- Export backup -->
-                            <a id="btn-export" href="/api/export" target="_blank" download class="btn-tactile px-2 py-1 text-[0.6rem]" title="Download data.json backup">⬇ Export</a>
+                            <a id="btn-export" href="/api/export" target="_blank" download class="btn-tactile px-2 py-1 text-[0.68rem]" title="Download data.json backup">⬇ Export</a>
                             <!-- Mode Toggle -->
                             <div class="flex items-center bg-[var(--chassis-light)] border border-[var(--chassis-dark)] rounded p-1">
-                                <button id="btn-mode-local" class="btn-tactile active px-2 py-1 text-[0.6rem]">LOCAL</button>
-                                <button id="btn-mode-cloud" class="btn-tactile px-2 py-1 text-[0.6rem] border-l-0">CLOUD</button>
+                                <button id="btn-mode-local" class="btn-tactile active px-2 py-1 text-[0.68rem]">LOCAL</button>
+                                <button id="btn-mode-cloud" class="btn-tactile px-2 py-1 text-[0.68rem] border-l-0">CLOUD</button>
                             </div>
                         </div>
                     </div>
@@ -1048,7 +1048,7 @@
                         <!-- Wi-Fi Provisioning -->
                         <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm border-l-4 border-l-blue-500">
                             <h3 class="font-bold text-sm mb-1 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.906 14.142 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path></svg> Network Setup</h3>
-                            <p class="text-xs text-gray-500 mb-2">Configure local Wi-Fi credentials for the device.</p>
+                            <p class="text-xs text-gray-700 mb-2 font-medium">Configure local Wi-Fi credentials for the device.</p>
                             <form id="form-wifi" class="space-y-2">
                                 <input type="text" id="wifi-ssid" placeholder="SSID (Network Name)" required class="input-tactile text-sm">
                                 <input type="password" id="wifi-pass" placeholder="Password" required class="input-tactile text-sm">
@@ -1077,14 +1077,14 @@
                                 <div class="bg-white p-2.5 rounded border border-red-200 flex justify-between items-center gap-2">
                                     <div>
                                         <span class="block font-bold text-xs text-gray-800">Force Cloud Sync</span>
-                                        <span class="text-[0.6rem] text-gray-500">Overwrites local directives cache with remote cloud state</span>
+                                        <span class="text-[0.68rem] text-gray-700 font-medium">Overwrites local directives cache with remote cloud state</span>
                                     </div>
                                     <button class="btn-tactile px-3 py-1.5 text-xs text-amber-700 hover:text-amber-900 shrink-0" id="btn-force-sync">Sync Now</button>
                                 </div>
                                 <div class="bg-white p-2.5 rounded border border-red-200 flex justify-between items-center gap-2">
                                     <div>
                                         <span class="block font-bold text-xs text-red-700">Factory Reset</span>
-                                        <span class="text-[0.6rem] text-red-500">Erases NVRAM: Wi-Fi credentials, directives, and settings</span>
+                                        <span class="text-[0.68rem] text-red-700 font-medium">Erases NVRAM: Wi-Fi credentials, directives, and settings</span>
                                     </div>
                                     <button id="btn-factory-reset" class="btn-tactile btn-tactile-danger px-3 py-1.5 text-xs font-bold shrink-0">RESET...</button>
                                 </div>
@@ -1103,25 +1103,25 @@
             <div class="flex justify-between items-center mb-4 border-b border-[var(--chassis-dark)] pb-2">
                 <div>
                     <h2 class="font-bold text-base text-gray-800 tracking-wider">HOLLOW CONTROL</h2>
-                    <p class="hw-label text-[0.55rem] text-gray-500">Security Gate // Passcode Required</p>
+                    <p class="hw-label text-[0.65rem] text-gray-700">Security Gate // Passcode Required</p>
                 </div>
                 <div class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" title="Awaiting Authentication"></div>
             </div>
             <form id="form-auth" class="space-y-4">
                 <div>
-                    <label for="auth-pin" class="hw-label text-[0.6rem] block mb-1">Enter Master PIN / Password</label>
+                    <label for="auth-pin" class="hw-label text-[0.65rem] block mb-1 text-gray-800">Enter Master PIN / Password</label>
                     <input type="password" id="auth-pin" required autocomplete="current-password" placeholder="••••" autofocus maxlength="32" class="input-tactile text-center text-xl tracking-widest font-mono h-12 w-full">
                 </div>
                 <div id="auth-error" class="hidden text-xs font-mono text-red-600 bg-red-100 p-2 rounded border border-red-300 text-center"></div>
                 <button type="submit" id="btn-auth-submit" class="btn-tactile btn-tactile-primary w-full py-3 text-xs font-bold tracking-wider uppercase">UNLOCK DASHBOARD</button>
-                <button type="button" id="btn-quick-unlock" class="btn-tactile w-full py-1.5 text-[0.65rem] font-bold bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100 flex items-center justify-center gap-1.5">
+                <button type="button" id="btn-quick-unlock" class="btn-tactile w-full py-1.5 text-[0.68rem] font-bold bg-amber-100 text-amber-950 border-amber-400 hover:bg-amber-200 flex items-center justify-center gap-1.5">
                     ⚡ QUICK UNLOCK (PIN: 1024)
                 </button>
                 <div class="flex gap-2 pt-1">
-                    <button type="button" id="btn-gate-open-guide" class="btn-tactile flex-1 py-1 text-[0.6rem] bg-white text-gray-700 hover:text-black font-bold">📖 Starter Guide</button>
-                    <button type="button" id="btn-gate-start-demo" class="btn-tactile flex-1 py-1 text-[0.6rem] bg-indigo-50 text-indigo-900 border-indigo-300 hover:bg-indigo-100 font-bold">✨ Try Live Demo</button>
+                    <button type="button" id="btn-gate-open-guide" class="btn-tactile flex-1 py-1 text-[0.68rem] bg-white text-gray-800 hover:text-black font-bold">📖 Starter Guide</button>
+                    <button type="button" id="btn-gate-start-demo" class="btn-tactile flex-1 py-1 text-[0.68rem] bg-indigo-50 text-indigo-950 border-indigo-300 hover:bg-indigo-100 font-bold">✨ Try Live Demo</button>
                 </div>
-                <div class="flex justify-between items-center text-[0.55rem] font-mono text-gray-500 pt-1">
+                <div class="flex justify-between items-center text-[0.68rem] font-mono text-gray-800 pt-1 font-semibold">
                     <span>Default PIN: 1024</span>
                     <span>Env: HOLLOW_PIN</span>
                 </div>
@@ -1135,7 +1135,7 @@
             <div class="flex justify-between items-center mb-3 border-b border-[var(--chassis-dark)] pb-2">
                 <div>
                     <h2 class="font-bold text-base text-gray-800 tracking-wider">HOLLOW CARE & SANCTUARY</h2>
-                    <p class="hw-label text-[0.55rem] text-gray-500">Mascot Evolution · Cosmetics · Vitality</p>
+                    <p class="hw-label text-[0.65rem] text-gray-700">Mascot Evolution · Cosmetics · Vitality</p>
                 </div>
                 <button id="btn-close-cosmetics" type="button" class="btn-tactile px-2 py-0.5 text-xs text-gray-600 hover:text-black">✕</button>
             </div>
@@ -2150,7 +2150,7 @@
             const windows = settings.quiet_hours_windows || [];
 
             if (!windows.length) {
-                list.innerHTML = '<li class="text-[0.65rem] text-gray-400 font-mono italic p-2 text-center">No quiet hour windows scheduled.</li>';
+                list.innerHTML = '<li class="text-[0.68rem] text-gray-700 font-mono italic p-2 text-center font-medium">No quiet hour windows scheduled.</li>';
                 return;
             }
 
@@ -2169,7 +2169,7 @@
                 li.innerHTML = `
                     <div>
                         <span class="font-mono font-bold text-gray-800">${escapeHtml(w.start)} — ${escapeHtml(w.end)}</span>
-                        <span class="text-[0.6rem] text-gray-500 font-mono block">${escapeHtml(dayTags)}</span>
+                        <span class="text-[0.68rem] text-gray-700 font-mono font-medium block">${escapeHtml(dayTags)}</span>
                     </div>
                     <button onclick="deleteQuietWindow('${w.id}')" class="btn-tactile px-2 py-1 text-xs text-red-600 hover:text-red-800" title="Delete window">✕</button>
                 `;
@@ -2722,14 +2722,14 @@
                             <span class="font-bold text-xs text-gray-800">${item.name}</span>
                             ${isEquipped ? '<span class="hw-label text-[0.5rem] bg-indigo-600 text-white px-1 rounded">EQUIPPED</span>' : ''}
                         </div>
-                        <p class="text-[0.6rem] text-gray-500">${item.desc}</p>
+                        <p class="text-[0.68rem] text-gray-700 font-medium">${item.desc}</p>
                     </div>
                     <div>
                         ${isUnlocked
                             ? `<button type="button" class="btn-tactile px-2 py-0.5 text-[0.6rem] btn-toggle-cosmetic ${isEquipped ? 'active' : ''}" data-id="${item.id}">
                                 ${isEquipped ? 'UNEQUIP' : 'EQUIP'}
                                </button>`
-                            : `<span class="hw-label text-[0.55rem] text-gray-400 border border-dashed border-gray-300 px-1 py-0.5 rounded">LV ${item.unlockLevel}</span>`
+                            : `<span class="hw-label text-[0.65rem] text-gray-700 font-semibold border border-dashed border-gray-400 px-1 py-0.5 rounded">LV ${item.unlockLevel}</span>`
                         }
                     </div>
                 `;
@@ -5270,7 +5270,7 @@
             document.title = overdue > 0 ? `(${overdue}) Hollow` : 'Hollow';
 
             if (sortedTasks.length === 0) {
-                els.taskList.innerHTML = '<li class="text-sm font-mono text-gray-500 p-4 text-center">NO TASKS · All clear.</li>';
+                els.taskList.innerHTML = '<li class="text-sm font-mono text-gray-700 font-semibold p-4 text-center">NO DIRECTIVES · All clear.</li>';
                 return;
             }
 
@@ -5301,7 +5301,7 @@
                 const timeString = due.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: settings.time_format === '12' });
                 const dateString = due.toLocaleDateString([], { month: 'short', day: 'numeric' });
                 const sourceLabel = task.source && task.source !== 'web'
-                    ? `<span class="text-[0.55rem] font-mono bg-gray-200 text-gray-500 px-1 rounded ml-1">[${task.source}]</span>`
+                    ? `<span class="text-[0.65rem] font-mono bg-gray-200 text-gray-800 font-medium px-1 rounded ml-1">[${task.source}]</span>`
                     : '';
                 const snoozeNotice = isSnoozed
                     ? ` <span class="text-amber-600 font-mono text-[0.6rem] font-semibold">[Snoozed until ${new Date(task.snoozed_until).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: settings.time_format === '12' })}]</span>`
@@ -5315,12 +5315,12 @@
 
                 li.innerHTML = `
                     <div class="flex items-center gap-3 flex-grow overflow-hidden">
-                        <button onclick="toggleTask('${task.id}')" class="flex-shrink-0 w-7 h-7 rounded border-2 border-[var(--chassis-dark)] flex items-center justify-center transition-colors ${task.done ? 'bg-[var(--chassis-dark)] text-white' : 'bg-white hover:bg-gray-50'}" aria-label="${task.done ? 'Mark pending' : 'Mark done'}">
+                        <button onclick="toggleTask('${task.id}')" class="flex-shrink-0 w-7 h-7 rounded border-2 border-[var(--chassis-dark)] flex items-center justify-center transition-colors ${task.done ? 'bg-gray-800 text-white font-bold' : 'bg-white hover:bg-gray-50'}" aria-label="${task.done ? 'Mark pending' : 'Mark done'}">
                             ${task.done ? '✓' : ''}
                         </button>
                         <div class="min-w-0 cursor-pointer flex-grow" onclick="startEdit('${task.id}')" title="Click to edit directive">
                             <p class="font-bold text-sm truncate ${task.done ? 'line-through text-gray-600' : (isOverdue ? 'text-red-700' : (isSnoozed ? 'text-amber-800' : ''))}">${escapeHtml(task.title)}${sourceLabel}</p>
-                            <p class="text-xs font-mono ${isOverdue ? 'text-red-500 font-bold' : (isSnoozed ? 'text-amber-600' : 'text-gray-500')}">${dateString} ${timeString}${isOverdue ? ' ⚠ OVERDUE' : ''}${snoozeNotice}</p>
+                            <p class="text-xs font-mono ${isOverdue ? 'text-red-700 font-bold' : (isSnoozed ? 'text-amber-700 font-semibold' : 'text-gray-700 font-medium')}">${dateString} ${timeString}${isOverdue ? ' ⚠ OVERDUE' : ''}${snoozeNotice}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-1 ml-2">
@@ -5378,19 +5378,19 @@
                     const h  = await apiFetch('/health');
                     const ms = Date.now() - t0;
                     grid.innerHTML = `
-                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">API Context</dt><dd class="font-mono text-xs mt-1 text-green-600">${h.context}</dd></div>
-                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Database</dt><dd class="font-mono text-xs mt-1">${h.db}</dd></div>
-                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Uptime</dt><dd class="font-mono text-xs mt-1">${h.uptime}</dd></div>
-                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Firmware</dt><dd class="font-mono text-xs mt-1">${h.firmware}</dd></div>
-                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Tasks (total)</dt><dd class="font-mono text-xs mt-1">${h.task_count}</dd></div>
-                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Pending</dt><dd class="font-mono text-xs mt-1 ${h.task_pending > 0 ? 'text-amber-600' : 'text-green-600'}">${h.task_pending}</dd></div>
-                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded col-span-2"><dt class="hw-label text-[0.6rem]">API Latency</dt><dd class="font-mono text-xs mt-1">${ms}ms</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.68rem]">API Context</dt><dd class="font-mono text-xs mt-1 text-green-600">${h.context}</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.68rem]">Database</dt><dd class="font-mono text-xs mt-1">${h.db}</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.68rem]">Uptime</dt><dd class="font-mono text-xs mt-1">${h.uptime}</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.68rem]">Firmware</dt><dd class="font-mono text-xs mt-1">${h.firmware}</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.68rem]">Tasks (total)</dt><dd class="font-mono text-xs mt-1">${h.task_count}</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.68rem]">Pending</dt><dd class="font-mono text-xs mt-1 ${h.task_pending > 0 ? 'text-amber-600' : 'text-green-600'}">${h.task_pending}</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded col-span-2"><dt class="hw-label text-[0.68rem]">API Latency</dt><dd class="font-mono text-xs mt-1">${ms}ms</dd></div>
                     `;
                     fetchAndRenderLog();
                 } catch (err) {
                     grid.innerHTML = `
-                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded col-span-2"><dt class="hw-label text-[0.6rem]">API Status</dt><dd class="font-mono text-xs mt-1 text-red-600">Unreachable — ${err.message}</dd></div>
-                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Mode</dt><dd class="font-mono text-xs mt-1">Offline / localStorage</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded col-span-2"><dt class="hw-label text-[0.68rem]">API Status</dt><dd class="font-mono text-xs mt-1 text-red-600">Unreachable — ${err.message}</dd></div>
+                        <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.68rem]">Mode</dt><dd class="font-mono text-xs mt-1">Offline / localStorage</dd></div>
                     `;
                 }
             } else {
@@ -5402,13 +5402,13 @@
                 } catch(_) { pingMs = 'timeout'; }
 
                 grid.innerHTML = `
-                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded col-span-2"><dt class="hw-label text-[0.6rem]">API Endpoint</dt><dd class="font-mono text-xs mt-1 truncate">${getApiBase()}</dd></div>
-                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Status</dt><dd class="font-mono text-xs mt-1 ${lastSyncedAt ? 'text-green-600' : 'text-red-600'}">${lastSyncedAt ? 'Connected' : 'Not synced'}</dd></div>
-                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Last Sync</dt><dd class="font-mono text-xs mt-1">${lastSyncedAt ? new Date(lastSyncedAt).toLocaleTimeString() : '—'}</dd></div>
-                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Ping Latency</dt><dd class="font-mono text-xs mt-1">${pingMs}</dd></div>
-                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Tasks Cached</dt><dd class="font-mono text-xs mt-1">${tasks.length}</dd></div>
-                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Sync Interval</dt><dd class="font-mono text-xs mt-1">${settings.sync_interval_sec}s</dd></div>
-                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.6rem]">Pending Retries</dt><dd class="font-mono text-xs mt-1 ${retryQueue.length > 0 ? 'text-amber-600' : 'text-green-600'}">${retryQueue.length}</dd></div>
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded col-span-2"><dt class="hw-label text-[0.68rem]">API Endpoint</dt><dd class="font-mono text-xs mt-1 truncate">${getApiBase()}</dd></div>
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.68rem]">Status</dt><dd class="font-mono text-xs mt-1 ${lastSyncedAt ? 'text-green-600' : 'text-red-600'}">${lastSyncedAt ? 'Connected' : 'Not synced'}</dd></div>
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.68rem]">Last Sync</dt><dd class="font-mono text-xs mt-1">${lastSyncedAt ? new Date(lastSyncedAt).toLocaleTimeString() : '—'}</dd></div>
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.68rem]">Ping Latency</dt><dd class="font-mono text-xs mt-1">${pingMs}</dd></div>
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.68rem]">Tasks Cached</dt><dd class="font-mono text-xs mt-1">${tasks.length}</dd></div>
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.68rem]">Sync Interval</dt><dd class="font-mono text-xs mt-1">${settings.sync_interval_sec}s</dd></div>
+                    <div class="bg-white p-2 border border-[var(--chassis-dark)] rounded"><dt class="hw-label text-[0.68rem]">Pending Retries</dt><dd class="font-mono text-xs mt-1 ${retryQueue.length > 0 ? 'text-amber-600' : 'text-green-600'}">${retryQueue.length}</dd></div>
                 `;
             }
         }
