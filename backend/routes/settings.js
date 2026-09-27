@@ -59,6 +59,10 @@ router.patch('/', (req, res) => {
     pomodoro_sessions_completed: { type: 'number',  min: 0,  max: 99999 },
     calendar_feeds:              { type: 'array' },
     calendar_sync_enabled:       { type: 'boolean' },
+    sound_pack:                  { type: 'string', values: ['8bit', 'cyberpunk', 'zen', 'mechanical'] },
+    screensaver_mode:            { type: 'string', values: ['off', 'matrix', 'starfield', 'nixie', 'life'] },
+    flappy_high_score:           { type: 'number', min: 0, max: 999999 },
+    bosses_defeated:             { type: 'number', min: 0, max: 99999 },
   };
 
   const patch = {};

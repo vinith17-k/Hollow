@@ -320,6 +320,33 @@
             color: #fff;
             box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
         }
+
+        /* Calamity Boss Floating Damage Text */
+        .damage-number {
+            position: absolute;
+            pointer-events: none;
+            font-family: 'Space Mono', monospace;
+            font-weight: 900;
+            color: #ef4444;
+            text-shadow: 0 0 6px rgba(239, 68, 68, 0.8), 0 2px 4px rgba(0,0,0,0.8);
+            animation: float-damage 0.9s ease-out forwards;
+            z-index: 50;
+        }
+        @keyframes float-damage {
+            0% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+            50% { transform: translate(-50%, -24px) scale(1.3); }
+            100% { opacity: 0; transform: translate(-50%, -48px) scale(0.9); }
+        }
+        .boss-hit-shake {
+            animation: boss-shake 0.35s ease-in-out;
+        }
+        @keyframes boss-shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px) rotate(-3deg); filter: brightness(1.6); }
+            40% { transform: translateX(6px) rotate(3deg); filter: brightness(1.8) hue-rotate(90deg); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-2 sm:p-6 lg:p-8">
@@ -335,8 +362,14 @@
         <!-- LEFT COLUMN: Simulator Screen -->
         <section aria-labelledby="sim-title" class="w-full lg:w-1/3 flex flex-col items-center">
             <div class="w-full flex justify-between items-end mb-2 px-1">
-                <h2 id="sim-title" class="hw-label text-left">Display Out</h2>
-                <span class="hw-label opacity-50">DC-01</span>
+                <div class="flex items-center gap-1.5">
+                    <h2 id="sim-title" class="hw-label text-left">Display Out</h2>
+                    <span class="hw-label opacity-50">DC-01</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button id="btn-toggle-screensaver" type="button" class="btn-tactile text-[0.55rem] px-1.5 py-0.5" title="Cycle Screensaver Mode (Matrix / Starfield / Nixie / Game of Life)">📺 SCREENSAVER</button>
+                    <button id="btn-toggle-arcade" type="button" class="btn-tactile text-[0.55rem] px-1.5 py-0.5 bg-amber-100 text-amber-900 border-amber-300 font-bold" title="Launch Flappy Bat Break Arcade!">🎮 ARCADE</button>
+                </div>
             </div>
             
             <div class="bg-[var(--screen-bezel)] p-4 rounded-xl shadow-[inset_0_4px_10px_rgba(0,0,0,0.8)] w-full aspect-[4/5] max-h-[500px] flex flex-col justify-between border-b border-r border-[#333] border-t-4 border-l-4 border-black relative">
@@ -346,6 +379,22 @@
                 <div class="bg-[var(--screen-bg)] w-full h-full rounded shadow-inner p-3 flex flex-col relative overflow-hidden" id="sim-screen">
                     <!-- Scanline Overlay -->
                     <div class="absolute inset-0 pointer-events-none opacity-20 bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.4)_50%)] bg-[length:100%_4px] z-10"></div>
+                    
+                    <!-- Ambient Screensaver Canvas Layer -->
+                    <canvas id="lcd-screensaver-canvas" class="hidden absolute inset-0 w-full h-full z-15 pointer-events-auto cursor-pointer" title="Click or turn knob to wake up"></canvas>
+
+                    <!-- Flappy Bat Retro Arcade Overlay Layer -->
+                    <div id="lcd-arcade-container" class="hidden absolute inset-0 w-full h-full z-25 bg-[#080d0a] flex flex-col justify-between p-2.5 font-mono select-none">
+                        <div class="flex justify-between items-center text-[0.65rem] text-emerald-400 border-b border-emerald-900/50 pb-1">
+                            <span class="font-bold flex items-center gap-1">🦇 FLAPPY BAT</span>
+                            <span>SCORE: <strong id="arcade-score" class="text-amber-300">0</strong> | BEST: <strong id="arcade-best" class="text-emerald-300">0</strong></span>
+                            <button type="button" id="btn-close-arcade" class="text-gray-400 hover:text-white text-[0.6rem] px-1">✕</button>
+                        </div>
+                        <canvas id="arcade-canvas" width="240" height="240" class="w-full flex-grow my-1 border border-emerald-950/80 rounded bg-[#040805]"></canvas>
+                        <div class="text-center text-[0.55rem] text-emerald-500/80">
+                            CLICK KNOB or SPACE to Flap! Turn Knob to Glide.
+                        </div>
+                    </div>
                     
                     <!-- Top Bar -->
                     <div class="flex justify-between items-start lcd-text text-xs z-0 relative">
@@ -524,21 +573,31 @@
                         </div>
                     </div>
 
-                    <!-- Add Task Form -->
-                    <form id="form-add-task" class="flex gap-2 mb-3 bg-[var(--chassis-light)] p-2 rounded border border-[var(--chassis-dark)] shadow-sm flex-wrap">
-                        <div class="flex-grow min-w-[120px]">
-                            <label for="new-task-title" class="sr-only">Task Title</label>
-                            <input type="text" id="new-task-title" required placeholder="New Directive..." class="input-tactile h-full" maxlength="32">
+                    <!-- Add Task Form with Smart Natural Language Parser -->
+                    <form id="form-add-task" class="flex flex-col gap-1.5 mb-3 bg-[var(--chassis-light)] p-2 rounded border border-[var(--chassis-dark)] shadow-sm">
+                        <div class="flex gap-2 flex-wrap sm:flex-nowrap">
+                            <div class="flex-grow min-w-[120px]">
+                                <label for="new-task-title" class="sr-only">Task Title</label>
+                                <input type="text" id="new-task-title" required placeholder="Directive (e.g. 'Review PR in 45m #high')..." class="input-tactile h-full" maxlength="64">
+                            </div>
+                            <div class="w-32">
+                                <label for="new-task-date" class="sr-only">Due Date</label>
+                                <input type="date" id="new-task-date" class="input-tactile h-full" title="Due date (defaults to today)">
+                            </div>
+                            <div class="w-28">
+                                <label for="new-task-time" class="sr-only">Due Time</label>
+                                <input type="time" id="new-task-time" required class="input-tactile h-full">
+                            </div>
+                            <button type="submit" class="btn-tactile btn-tactile-primary px-3 text-lg" aria-label="Add Task">+</button>
                         </div>
-                        <div class="w-32">
-                            <label for="new-task-date" class="sr-only">Due Date</label>
-                            <input type="date" id="new-task-date" class="input-tactile h-full" title="Due date (defaults to today)">
+                        <!-- Live Smart Natural Language Parse Preview -->
+                        <div id="nl-parse-pill" class="hidden flex items-center justify-between bg-amber-50 border border-amber-300 rounded px-2.5 py-1 text-[0.65rem] font-mono text-amber-900 shadow-sm">
+                            <div class="flex items-center gap-1.5 truncate">
+                                <span class="text-amber-700 font-bold">✨ PARSED:</span>
+                                <span id="nl-parsed-text" class="truncate font-semibold text-gray-800">Title: "Deploy API" · Today 4:30 PM · High Priority</span>
+                            </div>
+                            <button type="button" id="btn-apply-nl" class="btn-tactile text-[0.6rem] px-2 py-0.5 bg-amber-200 text-amber-950 font-bold shrink-0">✓ APPLY</button>
                         </div>
-                        <div class="w-28">
-                            <label for="new-task-time" class="sr-only">Due Time</label>
-                            <input type="time" id="new-task-time" required class="input-tactile h-full">
-                        </div>
-                        <button type="submit" class="btn-tactile btn-tactile-primary px-3 text-lg" aria-label="Add Task">+</button>
                     </form>
 
                     <!-- Task List -->
@@ -561,6 +620,36 @@
                                 <input type="checkbox" name="chime_enabled" id="setting-chime" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-[var(--chassis-dark)] z-10 transition-all"/>
                                 <label for="setting-chime" class="toggle-label block overflow-hidden h-6 rounded-full bg-[var(--chassis-dark)] cursor-pointer transition-colors"></label>
                             </div>
+                        </div>
+
+                        <!-- Chime Soundpack & Synthesizer -->
+                        <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <div>
+                                    <span class="block font-bold text-sm">Synthesizer Sound Pack</span>
+                                    <span class="text-xs text-gray-500 font-mono">Procedural Web Audio retro sound chip</span>
+                                </div>
+                                <button type="button" id="btn-preview-soundpack" class="btn-tactile text-[0.6rem] px-2 py-1 font-mono font-bold bg-amber-50 text-amber-900 border-amber-300">🔊 PREVIEW</button>
+                            </div>
+                            <select id="setting-soundpack" name="sound_pack" class="input-tactile cursor-pointer w-full text-xs font-mono">
+                                <option value="8bit">👾 Game Boy 8-Bit (Square Wave Arpeggios)</option>
+                                <option value="cyberpunk">🌌 Cyberpunk Terminal (FM Resonant Synth)</option>
+                                <option value="zen">🧘 Calm Zen Bell (Singing Bowl Resonance)</option>
+                                <option value="mechanical">⚙️ Mechanical Tactile (Relay Clicks)</option>
+                            </select>
+                        </div>
+
+                        <!-- Hardware LCD Screensaver Mode -->
+                        <div class="bg-white p-3 border border-[var(--chassis-dark)] rounded shadow-sm">
+                            <label for="setting-screensaver" class="block font-bold text-sm mb-1">Hardware LCD Screensaver</label>
+                            <span class="text-xs text-gray-500 font-mono block mb-1.5">Animated retro canvas when device is idle</span>
+                            <select id="setting-screensaver" name="screensaver_mode" class="input-tactile cursor-pointer w-full text-xs font-mono">
+                                <option value="off">Off (Standard LCD Clock &amp; Mascot)</option>
+                                <option value="matrix">🟩 Matrix Digital Rain (Phosphor Glyphs)</option>
+                                <option value="starfield">🌌 3D Starfield Warp (Deep Space)</option>
+                                <option value="nixie">🕰️ Retro Nixie Tube Clock (Vacuum Filaments)</option>
+                                <option value="life">🧬 Conway's Game of Life (Cellular Automaton)</option>
+                            </select>
                         </div>
 
                         <!-- Brightness Slider -->
@@ -802,6 +891,39 @@
                             <button type="button" class="btn-tactile py-1.5 text-[0.65rem] pomodoro-preset" data-minutes="5">5m Break</button>
                             <button type="button" class="btn-tactile py-1.5 text-[0.65rem] pomodoro-preset" data-minutes="15">15m Rest</button>
                             <button type="button" class="btn-tactile py-1.5 text-[0.65rem] pomodoro-preset" data-minutes="45">45m Deep</button>
+                        </div>
+                    </div>
+
+                    <!-- Calamity Boss Quest Module -->
+                    <div class="bg-gradient-to-r from-red-950/20 via-purple-950/20 to-red-950/20 border-2 border-red-500/30 rounded-xl p-3 mb-3 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-base">⚔️</span>
+                                <div>
+                                    <span class="font-bold text-xs text-red-950 block font-mono">CALAMITY BOSS BATTLE</span>
+                                    <span class="text-[0.6rem] text-gray-600 font-mono">Focus sprints &amp; completed tasks strike the monster</span>
+                                </div>
+                            </div>
+                            <button id="btn-toggle-boss" type="button" class="btn-tactile text-[0.6rem] px-2.5 py-1 font-mono font-bold bg-red-100 text-red-900 border-red-300">⚔️ SUMMON BOSS</button>
+                        </div>
+                        <div id="boss-arena" class="hidden bg-white p-3 rounded-lg border border-red-200">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <div class="flex items-center gap-2">
+                                    <span id="boss-sprite" class="text-2xl animate-bounce">👾</span>
+                                    <div>
+                                        <span id="boss-name" class="font-bold text-xs text-red-700 font-mono block">Procrastination Behemoth</span>
+                                        <span id="boss-subtitle" class="text-[0.6rem] text-gray-500 font-mono">Level 5 Calamity Beast</span>
+                                    </div>
+                                </div>
+                                <span id="boss-hp-text" class="font-mono text-xs font-bold text-red-600">100 / 100 HP</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3 border border-gray-300 overflow-hidden mb-2 relative">
+                                <div id="boss-hp-bar" class="h-full bg-gradient-to-r from-red-500 to-amber-500 transition-all duration-300" style="width: 100%"></div>
+                            </div>
+                            <div class="flex items-center justify-between text-[0.6rem] font-mono text-gray-500">
+                                <span>Sprint: <strong class="text-amber-600">-25 HP</strong> · Done Task: <strong class="text-red-600">-35 HP (CRIT)</strong></span>
+                                <span>Defeated: <strong id="bosses-defeated-count" class="text-purple-700 font-bold">0</strong></span>
+                            </div>
                         </div>
                     </div>
 
@@ -1468,29 +1590,295 @@
             return `${h}:${m}`;
         }
 
-        // ── Web Audio Chime Synthesizer (Simulates I2S buzzer/speaker) ─────────────
-        function playChimeAudio() {
-            try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (!AudioCtx) return;
-                const ctx = new AudioCtx();
-                const now = ctx.currentTime;
-                const osc = ctx.createOscillator();
+        // ── Web Audio Procedural Sound Synthesizer & Sound Packs ───────────────────
+        const HollowAudioEngine = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume().catch(() => {});
+                }
+                return this.ctx;
+            },
+            playTone(type = 'chime') {
+                if (typeof isMuted !== 'undefined' && isMuted) return;
+                const ctx = this.init();
+                if (!ctx) return;
+                const pack = (typeof settings !== 'undefined' && settings.sound_pack) ? settings.sound_pack : '8bit';
+                try {
+                    const now = ctx.currentTime;
+                    switch (pack) {
+                        case '8bit':
+                            this.play8Bit(ctx, now, type);
+                            break;
+                        case 'cyberpunk':
+                            this.playCyberpunk(ctx, now, type);
+                            break;
+                        case 'zen':
+                            this.playZen(ctx, now, type);
+                            break;
+                        case 'mechanical':
+                            this.playMechanical(ctx, now, type);
+                            break;
+                        default:
+                            this.play8Bit(ctx, now, type);
+                    }
+                } catch (_) {}
+            },
+            play8Bit(ctx, now, type) {
+                if (type === 'tick') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(1200, now);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.02);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.02);
+                    return;
+                }
+                if (type === 'flap') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(320, now);
+                    osc.frequency.exponentialRampToValueAtTime(740, now + 0.08);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                    return;
+                }
+                if (type === 'hit') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(240, now);
+                    osc.frequency.exponentialRampToValueAtTime(40, now + 0.18);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.18);
+                    return;
+                }
+                if (type === 'boss_victory' || type === 'level_up') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'square';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                        gain.gain.setValueAtTime(0.15, now + idx * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.22);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + idx * 0.08);
+                        osc.stop(now + idx * 0.08 + 0.22);
+                    });
+                    return;
+                }
+                // default 'chime' / 'complete'
+                const freqs = type === 'complete' ? [440, 554.37, 659.25, 880] : [523.25, 659.25, 783.99, 1046.50];
+                freqs.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+                    gain.gain.setValueAtTime(0.15, now + idx * 0.07);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.18);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + idx * 0.07);
+                    osc.stop(now + idx * 0.07 + 0.18);
+                });
+            },
+            playCyberpunk(ctx, now, type) {
+                if (type === 'tick') {
+                    const osc = ctx.createOscillator();
+                    const filter = ctx.createBiquadFilter();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(2800, now);
+                    filter.type = 'highpass';
+                    filter.frequency.setValueAtTime(2000, now);
+                    gain.gain.setValueAtTime(0.09, now);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.025);
+                    osc.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.025);
+                    return;
+                }
+                if (type === 'flap') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.09);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.09);
+                    return;
+                }
+                if (type === 'hit') {
+                    const osc = ctx.createOscillator();
+                    const filter = ctx.createBiquadFilter();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, now);
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(400, now);
+                    filter.Q.setValueAtTime(8, now);
+                    gain.gain.setValueAtTime(0.22, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                    return;
+                }
+                // Cyberpunk chime / complete / boss_victory
+                const osc1 = ctx.createOscillator();
+                const osc2 = ctx.createOscillator();
+                const filter = ctx.createBiquadFilter();
                 const gain = ctx.createGain();
-
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(880, now);
-                osc.frequency.setValueAtTime(1760, now + 0.12);
-
-                gain.gain.setValueAtTime(0.25, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-
-                osc.connect(gain);
+                osc1.type = 'sawtooth';
+                osc2.type = 'sawtooth';
+                const baseFreq = type === 'boss_victory' ? 220 : (type === 'complete' ? 293.66 : 370);
+                osc1.frequency.setValueAtTime(baseFreq, now);
+                osc2.frequency.setValueAtTime(baseFreq * 1.505, now);
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(300, now);
+                filter.frequency.exponentialRampToValueAtTime(3200, now + 0.15);
+                filter.frequency.exponentialRampToValueAtTime(600, now + 0.5);
+                filter.Q.setValueAtTime(6, now);
+                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                osc1.connect(filter);
+                osc2.connect(filter);
+                filter.connect(gain);
                 gain.connect(ctx.destination);
+                osc1.start(now);
+                osc2.start(now);
+                osc1.stop(now + 0.5);
+                osc2.stop(now + 0.5);
+            },
+            playZen(ctx, now, type) {
+                if (type === 'tick') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(980, now);
+                    gain.gain.setValueAtTime(0.06, now);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.03);
+                    return;
+                }
+                if (type === 'flap') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.exponentialRampToValueAtTime(580, now + 0.08);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                    return;
+                }
+                if (type === 'hit') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(110, now);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                    return;
+                }
+                // Zen Bell / Bowl (Harmonic overtone sine waves)
+                const freqs = type === 'boss_victory' ? [432, 864, 1296] : [528, 1056, 1584];
+                freqs.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now);
+                    const initVol = 0.15 / (idx + 1);
+                    gain.gain.setValueAtTime(initVol, now);
+                    gain.gain.exponentialRampToValueAtTime(0.0005, now + 0.85);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.85);
+                });
+            },
+            playMechanical(ctx, now, type) {
+                if (type === 'tick' || type === 'flap') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(type === 'flap' ? 1400 : 2400, now);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.018);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.018);
+                    return;
+                }
+                if (type === 'hit') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(85, now);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.12);
+                    return;
+                }
+                // Mechanical dual brass strike
+                [0, 0.08].forEach((offset, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(i === 0 ? 1760 : 2349, now + offset);
+                    gain.gain.setValueAtTime(0.2, now + offset);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.35);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + offset);
+                    osc.stop(now + offset + 0.35);
+                });
+            }
+        };
 
-                osc.start(now);
-                osc.stop(now + 0.45);
-            } catch (_) {}
+        function playChimeAudio(type = 'chime') {
+            HollowAudioEngine.playTone(type);
         }
 
         // ── Auth Helpers ───────────────────────────────────────────────────────────
@@ -1864,6 +2252,12 @@
                 clearTimeout(pressTimer);
                 if (isLongPress) return;
 
+                if (typeof isArcadeActive !== 'undefined' && isArcadeActive) {
+                    arcadeFlap();
+                    return;
+                }
+                wakeScreensaver();
+
                 clickCount++;
                 if (clickCount === 1) {
                     clickTimer = setTimeout(() => {
@@ -1892,6 +2286,11 @@
                 }
                 if (els.taskList) {
                     els.taskList.scrollBy({ top: delta * 50, behavior: 'smooth' });
+                }
+                HollowAudioEngine.playTone('tick');
+                wakeScreensaver();
+                if (typeof isArcadeActive !== 'undefined' && isArcadeActive) {
+                    arcadeSteer(delta);
                 }
             }, { passive: false });
         }
@@ -2352,9 +2751,10 @@
 
                     manualStateOverride = null;
                     hardwareLoop();
-                    playChimeAudio();
+                    playChimeAudio('complete');
                     showToast('🎯 Focus Sprint Complete! +50 XP awarded!');
                     sendDesktopNotification('Hollow Focus Complete!', 'Deep work session complete. Take a well-deserved breather.');
+                    if (typeof damageBoss === 'function') damageBoss(35, 'DEEP FOCUS STRIKE!');
 
                     if (startBtn) startBtn.disabled = false;
                     if (pauseBtn) pauseBtn.disabled = true;
@@ -2841,6 +3241,10 @@
                 setupFocusHandlers();
                 setupSerialHandlers();
                 setupCalendarHandlers();
+                setupNaturalLanguageParser();
+                setupScreensaver();
+                setupFlappyArcade();
+                setupBossBattle();
                 startMicroAnimations();
                 renderXPBar();
                 renderPomodoroDisplay();
@@ -3220,6 +3624,797 @@
             }
         }
 
+        // ── Feature: Smart Natural Language Directive Parser ──────────────────────
+        function parseNaturalLanguageDirective(input) {
+            if (!input || typeof input !== 'string') return null;
+            let text = input.trim();
+            let parsedDate = null;
+            let isHighPriority = false;
+            let timeStr = null;
+            let dateStr = null;
+            let summaryParts = [];
+
+            // 1. Priority tags (#high, #urgent, #p1, #crit)
+            const prioMatch = text.match(/\s*#(high|urgent|p1|crit|critical)\b/i);
+            if (prioMatch) {
+                isHighPriority = true;
+                text = text.replace(prioMatch[0], '').trim();
+                summaryParts.push('🔥 High Priority');
+            }
+
+            // 2. Relative times: "in 15m", "in 30 mins", "in 2 hours", "in 1h 30m"
+            const relHM = text.match(/\s*\bin\s+(\d+)\s*h\s*(\d+)\s*(?:m|min|mins)?\b/i);
+            const relH = text.match(/\s*\bin\s+(\d+)\s*(?:h|hr|hrs|hour|hours)\b/i);
+            const relM = text.match(/\s*\bin\s+(\d+)\s*(?:m|min|mins|minute|minutes)\b/i);
+
+            const now = new Date();
+
+            if (relHM) {
+                const h = parseInt(relHM[1], 10);
+                const m = parseInt(relHM[2], 10);
+                parsedDate = new Date(now.getTime() + (h * 60 + m) * 60 * 1000);
+                text = text.replace(relHM[0], '').trim();
+                summaryParts.unshift(`⚡ Due in ${h}h ${m}m (${String(parsedDate.getHours()).padStart(2, '0')}:${String(parsedDate.getMinutes()).padStart(2, '0')})`);
+            } else if (relH) {
+                const h = parseInt(relH[1], 10);
+                parsedDate = new Date(now.getTime() + h * 60 * 60 * 1000);
+                text = text.replace(relH[0], '').trim();
+                summaryParts.unshift(`⚡ Due in ${h}h (${String(parsedDate.getHours()).padStart(2, '0')}:${String(parsedDate.getMinutes()).padStart(2, '0')})`);
+            } else if (relM) {
+                const m = parseInt(relM[1], 10);
+                parsedDate = new Date(now.getTime() + m * 60 * 1000);
+                text = text.replace(relM[0], '').trim();
+                summaryParts.unshift(`⚡ Due in ${m}m (${String(parsedDate.getHours()).padStart(2, '0')}:${String(parsedDate.getMinutes()).padStart(2, '0')})`);
+            } else {
+                // 3. Absolute times: "tomorrow at 3pm", "at 4:30pm", "at 14:00", "tomorrow"
+                const tomAt = text.match(/\s*\btomorrow(?:\s+(?:at|@)\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?)?\b/i);
+                const atMatch = text.match(/\s*\b(?:at|@)\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/i);
+
+                if (tomAt) {
+                    text = text.replace(tomAt[0], '').trim();
+                    const target = new Date(now);
+                    target.setDate(target.getDate() + 1);
+                    let h = tomAt[1] ? parseInt(tomAt[1], 10) : 9;
+                    const min = tomAt[2] ? parseInt(tomAt[2], 10) : 0;
+                    const ampm = tomAt[3] ? tomAt[3].toLowerCase() : null;
+                    if (ampm === 'pm' && h < 12) h += 12;
+                    if (ampm === 'am' && h === 12) h = 0;
+                    target.setHours(h, min, 0, 0);
+                    parsedDate = target;
+                    summaryParts.unshift(`📅 Tomorrow at ${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`);
+                } else if (atMatch) {
+                    text = text.replace(atMatch[0], '').trim();
+                    let h = parseInt(atMatch[1], 10);
+                    const min = atMatch[2] ? parseInt(atMatch[2], 10) : 0;
+                    const ampm = atMatch[3] ? atMatch[3].toLowerCase() : null;
+                    if (ampm === 'pm' && h < 12) h += 12;
+                    if (ampm === 'am' && h === 12) h = 0;
+                    const target = new Date(now);
+                    target.setHours(h, min, 0, 0);
+                    if (target < now) {
+                        target.setDate(target.getDate() + 1);
+                        summaryParts.unshift(`📅 Tomorrow at ${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`);
+                    } else {
+                        summaryParts.unshift(`🕒 Today at ${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`);
+                    }
+                    parsedDate = target;
+                }
+            }
+
+            if (!parsedDate && !isHighPriority) return null;
+
+            if (parsedDate) {
+                timeStr = `${String(parsedDate.getHours()).padStart(2, '0')}:${String(parsedDate.getMinutes()).padStart(2, '0')}`;
+                dateStr = `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}-${String(parsedDate.getDate()).padStart(2, '0')}`;
+            }
+
+            return {
+                cleanTitle: text,
+                parsedDate,
+                timeStr,
+                dateStr,
+                isHighPriority,
+                summary: summaryParts.join(' • ')
+            };
+        }
+
+        let lastParsedNL = null;
+
+        function setupNaturalLanguageParser() {
+            const titleInp = document.getElementById('new-task-title');
+            const pillEl = document.getElementById('nl-parse-pill');
+            const textEl = document.getElementById('nl-parsed-text');
+            const applyBtn = document.getElementById('btn-apply-nl');
+            const timeInp = document.getElementById('new-task-time');
+            const dateInp = document.getElementById('new-task-date');
+
+            if (!titleInp || !pillEl) return;
+
+            titleInp.addEventListener('input', () => {
+                const parsed = parseNaturalLanguageDirective(titleInp.value);
+                if (parsed && (parsed.timeStr || parsed.isHighPriority)) {
+                    lastParsedNL = parsed;
+                    if (textEl) textEl.textContent = `Clean: "${parsed.cleanTitle || 'Directive'}" • ${parsed.summary}`;
+                    pillEl.classList.remove('hidden');
+                } else {
+                    lastParsedNL = null;
+                    pillEl.classList.add('hidden');
+                }
+            });
+
+            applyBtn?.addEventListener('click', () => {
+                if (!lastParsedNL) return;
+                if (lastParsedNL.cleanTitle) titleInp.value = lastParsedNL.cleanTitle;
+                if (lastParsedNL.timeStr && timeInp) timeInp.value = lastParsedNL.timeStr;
+                if (lastParsedNL.dateStr && dateInp) dateInp.value = lastParsedNL.dateStr;
+                pillEl.classList.add('hidden');
+                showToast(`⚡ Natural language parsed & applied!`);
+                HollowAudioEngine.playTone('tick');
+            });
+        }
+
+        // ── Feature: Ambient LCD Screensaver Modes ────────────────────────────────
+        let isScreensaverActive = false;
+        let screensaverMode = 'off';
+        let screensaverAnimId = null;
+        let idleTimer = null;
+        const IDLE_TIMEOUT_MS = 75000;
+
+        function wakeScreensaver() {
+            if (isScreensaverActive) {
+                isScreensaverActive = false;
+                if (screensaverAnimId) cancelAnimationFrame(screensaverAnimId);
+                const cvs = document.getElementById('lcd-screensaver-canvas');
+                if (cvs) cvs.classList.add('hidden');
+                HollowAudioEngine.playTone('tick');
+            }
+            resetIdleTimer();
+        }
+
+        function resetIdleTimer() {
+            if (idleTimer) clearTimeout(idleTimer);
+            const activeMode = (typeof settings !== 'undefined' && settings.screensaver_mode) ? settings.screensaver_mode : 'off';
+            if (activeMode !== 'off') {
+                idleTimer = setTimeout(() => {
+                    startScreensaver(activeMode);
+                }, IDLE_TIMEOUT_MS);
+            }
+        }
+
+        function startScreensaver(mode) {
+            if (typeof isArcadeActive !== 'undefined' && isArcadeActive) return;
+            const cvs = document.getElementById('lcd-screensaver-canvas');
+            if (!cvs) return;
+            cvs.width = 240;
+            cvs.height = 240;
+            cvs.classList.remove('hidden');
+            isScreensaverActive = true;
+            screensaverMode = mode;
+
+            if (screensaverAnimId) cancelAnimationFrame(screensaverAnimId);
+
+            const ctx = cvs.getContext('2d');
+
+            if (mode === 'matrix') {
+                runMatrixScreensaver(ctx, cvs);
+            } else if (mode === 'starfield') {
+                runStarfieldScreensaver(ctx, cvs);
+            } else if (mode === 'nixie') {
+                runNixieScreensaver(ctx, cvs);
+            } else if (mode === 'life') {
+                runLifeScreensaver(ctx, cvs);
+            }
+        }
+
+        function runMatrixScreensaver(ctx, cvs) {
+            const cols = 24;
+            const ypos = Array(cols).fill(0);
+            const chars = '0123456789ABCDEF日ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍ';
+
+            function render() {
+                if (!isScreensaverActive || screensaverMode !== 'matrix') return;
+                ctx.fillStyle = 'rgba(4, 10, 6, 0.15)';
+                ctx.fillRect(0, 0, cvs.width, cvs.height);
+
+                ctx.font = '10px monospace';
+                for (let i = 0; i < cols; i++) {
+                    const char = chars[Math.floor(Math.random() * chars.length)];
+                    const x = i * 10 + 2;
+                    const y = ypos[i] * 10;
+
+                    ctx.fillStyle = '#bbf7d0';
+                    ctx.shadowColor = '#22c55e';
+                    ctx.shadowBlur = 6;
+                    ctx.fillText(char, x, y);
+                    ctx.shadowBlur = 0;
+
+                    if (y > 240 + Math.random() * 50) {
+                        ypos[i] = 0;
+                    } else {
+                        ypos[i]++;
+                    }
+                }
+                screensaverAnimId = requestAnimationFrame(render);
+            }
+            ctx.fillStyle = '#040a06';
+            ctx.fillRect(0, 0, cvs.width, cvs.height);
+            render();
+        }
+
+        function runStarfieldScreensaver(ctx, cvs) {
+            const stars = Array.from({ length: 120 }, () => ({
+                x: (Math.random() - 0.5) * 240,
+                y: (Math.random() - 0.5) * 240,
+                z: Math.random() * 240
+            }));
+
+            function render() {
+                if (!isScreensaverActive || screensaverMode !== 'starfield') return;
+                ctx.fillStyle = 'rgba(5, 5, 12, 0.25)';
+                ctx.fillRect(0, 0, cvs.width, cvs.height);
+
+                const cx = cvs.width / 2;
+                const cy = cvs.height / 2;
+
+                stars.forEach(star => {
+                    star.z -= 2.8;
+                    if (star.z <= 0) {
+                        star.z = 240;
+                        star.x = (Math.random() - 0.5) * 240;
+                        star.y = (Math.random() - 0.5) * 240;
+                    }
+
+                    const k = 120 / star.z;
+                    const px = star.x * k + cx;
+                    const py = star.y * k + cy;
+
+                    if (px >= 0 && px <= 240 && py >= 0 && py <= 240) {
+                        const size = Math.max(0.8, (1 - star.z / 240) * 3);
+                        ctx.fillStyle = star.z < 60 ? '#c7d2fe' : '#818cf8';
+                        ctx.beginPath();
+                        ctx.arc(px, py, size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+                screensaverAnimId = requestAnimationFrame(render);
+            }
+            ctx.fillStyle = '#05050c';
+            ctx.fillRect(0, 0, cvs.width, cvs.height);
+            render();
+        }
+
+        function runNixieScreensaver(ctx, cvs) {
+            function render() {
+                if (!isScreensaverActive || screensaverMode !== 'nixie') return;
+                ctx.fillStyle = '#080503';
+                ctx.fillRect(0, 0, cvs.width, cvs.height);
+
+                ctx.strokeStyle = '#29180f';
+                ctx.lineWidth = 1;
+                for (let x = 10; x < 240; x += 15) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, 240);
+                    ctx.stroke();
+                }
+
+                const d = new Date();
+                const hh = String(d.getHours()).padStart(2, '0');
+                const mm = String(d.getMinutes()).padStart(2, '0');
+                const ss = String(d.getSeconds()).padStart(2, '0');
+                const timeStr = `${hh}:${mm}:${ss}`;
+
+                ctx.shadowColor = '#ea580c';
+                ctx.shadowBlur = 18;
+                ctx.font = 'bold 36px "Space Mono", monospace';
+                ctx.fillStyle = '#ffedd5';
+                ctx.textAlign = 'center';
+                ctx.fillText(timeStr, 120, 125);
+
+                ctx.shadowBlur = 4;
+                ctx.fillStyle = '#f97316';
+                ctx.fillText(timeStr, 120, 125);
+                ctx.shadowBlur = 0;
+
+                ctx.font = '10px monospace';
+                ctx.fillStyle = '#7c2d12';
+                ctx.fillText('⚡ NIXIE VACUUM CHRONOMETER ⚡', 120, 175);
+
+                screensaverAnimId = requestAnimationFrame(render);
+            }
+            render();
+        }
+
+        function runLifeScreensaver(ctx, cvs) {
+            const cols = 30;
+            const rows = 30;
+            const cellSize = 8;
+            let grid = Array.from({ length: rows }, () =>
+                Array.from({ length: cols }, () => Math.random() > 0.72 ? 1 : 0)
+            );
+            let stepCount = 0;
+
+            function render() {
+                if (!isScreensaverActive || screensaverMode !== 'life') return;
+                stepCount++;
+                if (stepCount % 6 === 0) {
+                    const next = grid.map(arr => [...arr]);
+                    let liveCount = 0;
+                    for (let r = 0; r < rows; r++) {
+                        for (let c = 0; c < cols; c++) {
+                            let neighbors = 0;
+                            for (let dr = -1; dr <= 1; dr++) {
+                                for (let dc = -1; dc <= 1; dc++) {
+                                    if (dr === 0 && dc === 0) continue;
+                                    const nr = (r + dr + rows) % rows;
+                                    const nc = (c + dc + cols) % cols;
+                                    neighbors += grid[nr][nc];
+                                }
+                            }
+                            if (grid[r][c] === 1 && (neighbors < 2 || neighbors > 3)) next[r][c] = 0;
+                            else if (grid[r][c] === 0 && neighbors === 3) next[r][c] = 1;
+                            if (next[r][c] === 1) liveCount++;
+                        }
+                    }
+                    grid = next;
+                    if (liveCount < 10) {
+                        grid = Array.from({ length: rows }, () =>
+                            Array.from({ length: cols }, () => Math.random() > 0.72 ? 1 : 0)
+                        );
+                    }
+                }
+
+                ctx.fillStyle = 'rgba(2, 10, 12, 0.4)';
+                ctx.fillRect(0, 0, cvs.width, cvs.height);
+
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        if (grid[r][c] === 1) {
+                            ctx.fillStyle = '#06b6d4';
+                            ctx.fillRect(c * cellSize + 1, r * cellSize + 1, cellSize - 2, cellSize - 2);
+                        }
+                    }
+                }
+
+                screensaverAnimId = requestAnimationFrame(render);
+            }
+            ctx.fillStyle = '#020a0c';
+            ctx.fillRect(0, 0, cvs.width, cvs.height);
+            render();
+        }
+
+        function setupScreensaver() {
+            const toggleBtn = document.getElementById('btn-toggle-screensaver');
+            const selectEl = document.getElementById('setting-screensaver');
+            const cvs = document.getElementById('lcd-screensaver-canvas');
+
+            cvs?.addEventListener('click', wakeScreensaver);
+
+            const modes = ['matrix', 'starfield', 'nixie', 'life'];
+            let cycleIdx = 0;
+
+            toggleBtn?.addEventListener('click', () => {
+                if (isScreensaverActive) {
+                    cycleIdx = (cycleIdx + 1) % modes.length;
+                }
+                const chosen = modes[cycleIdx];
+                startScreensaver(chosen);
+                showToast(`📺 Screensaver active: ${chosen.toUpperCase()} mode.`);
+            });
+
+            selectEl?.addEventListener('change', (e) => {
+                settings.screensaver_mode = e.target.value;
+                resetIdleTimer();
+            });
+
+            ['pointerdown', 'keydown', 'wheel'].forEach(evt => {
+                window.addEventListener(evt, () => {
+                    wakeScreensaver();
+                }, { passive: true });
+            });
+
+            resetIdleTimer();
+        }
+
+        // ── Feature: Flappy Bat Rotary Break Arcade ───────────────────────────────
+        let isArcadeActive = false;
+        let arcadeAnimId = null;
+        let arcadeState = 'start';
+        let arcadeScore = 0;
+        let arcadePipes = [];
+        let arcadeFrame = 0;
+        let bat = {
+            x: 45,
+            y: 110,
+            vy: 0,
+            gravity: 0.35,
+            flapPower: -5.0,
+            wingPhase: 0
+        };
+
+        function arcadeFlap() {
+            if (arcadeState === 'start') {
+                arcadeState = 'playing';
+                bat.vy = bat.flapPower;
+                HollowAudioEngine.playTone('flap');
+            } else if (arcadeState === 'playing') {
+                bat.vy = bat.flapPower;
+                HollowAudioEngine.playTone('flap');
+            } else if (arcadeState === 'gameover') {
+                resetArcadeGame();
+                arcadeState = 'playing';
+                bat.vy = bat.flapPower;
+                HollowAudioEngine.playTone('flap');
+            }
+        }
+
+        function arcadeSteer(delta) {
+            if (arcadeState === 'playing') {
+                bat.vy += (delta < 0 ? -1.5 : 1.2);
+                HollowAudioEngine.playTone('tick');
+            }
+        }
+
+        function resetArcadeGame() {
+            bat.y = 110;
+            bat.vy = 0;
+            arcadeScore = 0;
+            arcadePipes = [];
+            arcadeFrame = 0;
+            const scoreEl = document.getElementById('arcade-score');
+            if (scoreEl) scoreEl.textContent = '0';
+        }
+
+        function triggerArcadeGameOver() {
+            arcadeState = 'gameover';
+            HollowAudioEngine.playTone('hit');
+
+            const best = settings.flappy_high_score || 0;
+            if (arcadeScore > best) {
+                settings.flappy_high_score = arcadeScore;
+                const bestEl = document.getElementById('arcade-best');
+                if (bestEl) bestEl.textContent = arcadeScore;
+                HollowAudioEngine.playTone('level_up');
+                showToast(`🏆 NEW HIGH SCORE: ${arcadeScore}!`);
+                apiFetch('/settings', {
+                    method: 'PATCH',
+                    body: JSON.stringify({ flappy_high_score: arcadeScore })
+                }).catch(() => {});
+            }
+
+            settings.xp = (settings.xp || 0) + 10;
+            renderXPBar();
+            apiFetch('/settings', {
+                method: 'PATCH',
+                body: JSON.stringify({ xp: settings.xp })
+            }).catch(() => {});
+            showToast('🎮 Mental break complete! +10 XP awarded.');
+        }
+
+        function runArcadeLoop() {
+            const cvs = document.getElementById('arcade-canvas');
+            if (!cvs || !isArcadeActive) return;
+            const ctx = cvs.getContext('2d');
+            arcadeFrame++;
+
+            ctx.fillStyle = '#050a07';
+            ctx.fillRect(0, 0, 240, 240);
+
+            ctx.strokeStyle = '#0e1f14';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 240; i += 20) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0); ctx.lineTo(i, 240);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i); ctx.lineTo(240, i);
+                ctx.stroke();
+            }
+
+            if (arcadeState === 'playing') {
+                bat.vy += bat.gravity;
+                bat.y += bat.vy;
+                bat.wingPhase += 0.25;
+
+                if (arcadeFrame % 85 === 0) {
+                    const gap = 76;
+                    const minTop = 30;
+                    const maxTop = 130;
+                    const topH = Math.floor(Math.random() * (maxTop - minTop)) + minTop;
+                    arcadePipes.push({
+                        x: 240,
+                        topH,
+                        botY: topH + gap,
+                        passed: false
+                    });
+                }
+
+                for (let i = arcadePipes.length - 1; i >= 0; i--) {
+                    const p = arcadePipes[i];
+                    p.x -= 2.0;
+
+                    if (!p.passed && p.x + 24 < bat.x) {
+                        p.passed = true;
+                        arcadeScore++;
+                        const scoreEl = document.getElementById('arcade-score');
+                        if (scoreEl) scoreEl.textContent = arcadeScore;
+                        HollowAudioEngine.playTone('tick');
+                    }
+
+                    const batBox = { x: bat.x - 10, y: bat.y - 8, w: 20, h: 16 };
+                    if (batBox.x + batBox.w > p.x && batBox.x < p.x + 24 && batBox.y < p.topH) {
+                        triggerArcadeGameOver();
+                        break;
+                    }
+                    if (batBox.x + batBox.w > p.x && batBox.x < p.x + 24 && batBox.y + batBox.h > p.botY) {
+                        triggerArcadeGameOver();
+                        break;
+                    }
+
+                    if (p.x < -30) arcadePipes.splice(i, 1);
+                }
+
+                if (bat.y < 8 || bat.y > 232) {
+                    triggerArcadeGameOver();
+                }
+            }
+
+            arcadePipes.forEach(p => {
+                ctx.fillStyle = '#065f46';
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 2;
+
+                ctx.fillRect(p.x, 0, 24, p.topH);
+                ctx.strokeRect(p.x, 0, 24, p.topH);
+                ctx.fillStyle = '#34d399';
+                ctx.fillRect(p.x + 4, p.topH - 6, 16, 6);
+
+                ctx.fillStyle = '#065f46';
+                ctx.fillRect(p.x, p.botY, 24, 240 - p.botY);
+                ctx.strokeRect(p.x, p.botY, 24, 240 - p.botY);
+                ctx.fillStyle = '#34d399';
+                ctx.fillRect(p.x + 4, p.botY, 16, 6);
+            });
+
+            ctx.save();
+            ctx.translate(bat.x, bat.y);
+            const tilt = Math.max(-0.6, Math.min(0.6, bat.vy * 0.08));
+            ctx.rotate(tilt);
+
+            ctx.fillStyle = '#1e1b4b';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 10, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#312e81';
+            ctx.beginPath();
+            ctx.moveTo(-6, -6); ctx.lineTo(-9, -14); ctx.lineTo(-3, -7); ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(6, -6); ctx.lineTo(9, -14); ctx.lineTo(3, -7); ctx.fill();
+
+            const wingY = Math.sin(bat.wingPhase) * 6;
+            ctx.fillStyle = '#4338ca';
+            ctx.beginPath();
+            ctx.moveTo(-6, -2);
+            ctx.quadraticCurveTo(-18, -12 + wingY, -16, 4 + wingY);
+            ctx.lineTo(-6, 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(6, -2);
+            ctx.quadraticCurveTo(18, -12 + wingY, 16, 4 + wingY);
+            ctx.lineTo(6, 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#fbbf24';
+            ctx.shadowColor = '#f59e0b';
+            ctx.shadowBlur = 4;
+            ctx.beginPath();
+            ctx.arc(-3, -2, 2, 0, Math.PI * 2);
+            ctx.arc(3, -2, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.restore();
+
+            if (arcadeState === 'start') {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, 240, 240);
+
+                ctx.font = 'bold 16px "Space Mono", monospace';
+                ctx.fillStyle = '#34d399';
+                ctx.textAlign = 'center';
+                ctx.fillText('🦇 FLAPPY BAT 🦇', 120, 80);
+
+                ctx.font = '11px "Space Mono", monospace';
+                ctx.fillStyle = '#e2e8f0';
+                ctx.fillText('CLICK KNOB or SPACE', 120, 120);
+                ctx.fillText('TO FLAP & FLY!', 120, 138);
+
+                ctx.font = '10px monospace';
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillText('Turn knob to glide', 120, 175);
+            } else if (arcadeState === 'gameover') {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+                ctx.fillRect(0, 0, 240, 240);
+
+                ctx.font = 'bold 18px "Space Mono", monospace';
+                ctx.fillStyle = '#ef4444';
+                ctx.textAlign = 'center';
+                ctx.fillText('💥 CRASH! 💥', 120, 75);
+
+                ctx.font = '12px "Space Mono", monospace';
+                ctx.fillStyle = '#f8fafc';
+                ctx.fillText(`SCORE: ${arcadeScore}`, 120, 110);
+                ctx.fillStyle = '#34d399';
+                ctx.fillText(`BEST: ${settings.flappy_high_score || arcadeScore}`, 120, 130);
+
+                ctx.font = '11px monospace';
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillText('+10 XP GAINED!', 120, 160);
+
+                ctx.font = '10px monospace';
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillText('TAP TO RETRY', 120, 190);
+            }
+
+            arcadeAnimId = requestAnimationFrame(runArcadeLoop);
+        }
+
+        function setupFlappyArcade() {
+            const toggleBtn = document.getElementById('btn-toggle-arcade');
+            const closeBtn = document.getElementById('btn-close-arcade');
+            const container = document.getElementById('lcd-arcade-container');
+            const cvs = document.getElementById('arcade-canvas');
+            const bestEl = document.getElementById('arcade-best');
+
+            if (bestEl) bestEl.textContent = settings.flappy_high_score || 0;
+
+            function openArcade() {
+                wakeScreensaver();
+                isArcadeActive = true;
+                container?.classList.remove('hidden');
+                resetArcadeGame();
+                arcadeState = 'start';
+                if (arcadeAnimId) cancelAnimationFrame(arcadeAnimId);
+                runArcadeLoop();
+                HollowAudioEngine.playTone('chime');
+            }
+
+            function closeArcade() {
+                isArcadeActive = false;
+                if (arcadeAnimId) cancelAnimationFrame(arcadeAnimId);
+                container?.classList.add('hidden');
+                HollowAudioEngine.playTone('tick');
+            }
+
+            toggleBtn?.addEventListener('click', () => {
+                if (isArcadeActive) closeArcade();
+                else openArcade();
+            });
+
+            closeBtn?.addEventListener('click', closeArcade);
+            cvs?.addEventListener('click', arcadeFlap);
+
+            document.addEventListener('keydown', (e) => {
+                if (isArcadeActive && (e.code === 'Space' || e.code === 'ArrowUp')) {
+                    e.preventDefault();
+                    arcadeFlap();
+                }
+            });
+        }
+
+        // ── Feature: Calamity Boss Battle Focus Sprints ────────────────────────────
+        const BOSSES = [
+            { id: 'procrastination', name: 'Procrastination Behemoth', subtitle: 'Infinite Distraction Demon', maxHp: 100, sprite: '👾' },
+            { id: 'burnout', name: 'Burnout Specter', subtitle: 'Energy-Draining Phantom', maxHp: 125, sprite: '👻' },
+            { id: 'chimera', name: 'Context-Switch Chimera', subtitle: 'Attention-Fragmenting Beast', maxHp: 150, sprite: '🐲' }
+        ];
+
+        let bossActive = false;
+        let currentBossIdx = 0;
+        let currentBossHp = 100;
+
+        function renderBossUI() {
+            const arena = document.getElementById('boss-arena');
+            const spriteEl = document.getElementById('boss-sprite');
+            const nameEl = document.getElementById('boss-name');
+            const subEl = document.getElementById('boss-subtitle');
+            const hpTextEl = document.getElementById('boss-hp-text');
+            const hpBarEl = document.getElementById('boss-hp-bar');
+            const defCountEl = document.getElementById('bosses-defeated-count');
+
+            if (defCountEl) defCountEl.textContent = settings.bosses_defeated || 0;
+
+            const boss = BOSSES[currentBossIdx];
+            if (!boss) return;
+
+            if (spriteEl) spriteEl.textContent = boss.sprite;
+            if (nameEl) nameEl.textContent = boss.name;
+            if (subEl) subEl.textContent = `${boss.subtitle} (Level ${currentBossIdx + 5})`;
+
+            const pct = Math.max(0, Math.round((currentBossHp / boss.maxHp) * 100));
+            if (hpTextEl) hpTextEl.textContent = `${currentBossHp} / ${boss.maxHp} HP`;
+            if (hpBarEl) hpBarEl.style.width = `${pct}%`;
+        }
+
+        function damageBoss(amount, label = 'STRIKE!') {
+            if (!bossActive) return;
+            const boss = BOSSES[currentBossIdx];
+            if (!boss) return;
+
+            currentBossHp = Math.max(0, currentBossHp - amount);
+            renderBossUI();
+
+            HollowAudioEngine.playTone('hit');
+
+            const spriteEl = document.getElementById('boss-sprite');
+            if (spriteEl) {
+                spriteEl.classList.remove('boss-hit-shake');
+                void spriteEl.offsetWidth;
+                spriteEl.classList.add('boss-hit-shake');
+            }
+
+            const arena = document.getElementById('boss-arena');
+            if (arena) {
+                const dmgEl = document.createElement('div');
+                dmgEl.className = 'damage-number';
+                dmgEl.style.left = '50%';
+                dmgEl.style.top = '35%';
+                dmgEl.textContent = `-${amount} ${label}`;
+                arena.appendChild(dmgEl);
+                setTimeout(() => dmgEl.remove(), 950);
+            }
+
+            if (currentBossHp <= 0) {
+                HollowAudioEngine.playTone('boss_victory');
+                settings.bosses_defeated = (settings.bosses_defeated || 0) + 1;
+                settings.xp = (settings.xp || 0) + 150;
+                renderXPBar();
+
+                showToast(`👑 ${boss.name.toUpperCase()} DEFEATED! +150 BONUS XP AWARDED! 👑`);
+
+                apiFetch('/settings', {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        bosses_defeated: settings.bosses_defeated,
+                        xp: settings.xp
+                    })
+                }).catch(() => {});
+
+                setTimeout(() => {
+                    currentBossIdx = (currentBossIdx + 1) % BOSSES.length;
+                    currentBossHp = BOSSES[currentBossIdx].maxHp;
+                    renderBossUI();
+                    showToast(`⚠️ WARNING: A new calamity awakens — ${BOSSES[currentBossIdx].name}!`);
+                }, 1200);
+            }
+        }
+
+        function setupBossBattle() {
+            const toggleBtn = document.getElementById('btn-toggle-boss');
+            const arena = document.getElementById('boss-arena');
+            const defCountEl = document.getElementById('bosses-defeated-count');
+
+            if (defCountEl) defCountEl.textContent = settings.bosses_defeated || 0;
+
+            toggleBtn?.addEventListener('click', () => {
+                bossActive = !bossActive;
+                if (bossActive) {
+                    arena?.classList.remove('hidden');
+                    toggleBtn.textContent = '⚔️ DISMISS BOSS';
+                    toggleBtn.className = 'btn-tactile text-[0.6rem] px-2.5 py-1 font-mono font-bold bg-amber-100 text-amber-900 border-amber-300';
+                    renderBossUI();
+                    HollowAudioEngine.playTone('level_up');
+                    showToast(`👹 Calamity Boss summoned: ${BOSSES[currentBossIdx].name}! Complete tasks to attack!`);
+                } else {
+                    arena?.classList.add('hidden');
+                    toggleBtn.textContent = '⚔️ SUMMON BOSS';
+                    toggleBtn.className = 'btn-tactile text-[0.6rem] px-2.5 py-1 font-mono font-bold bg-red-100 text-red-900 border-red-300';
+                    HollowAudioEngine.playTone('tick');
+                }
+            });
+        }
+
         // ── Auth Handling & Initialization ────────────────────────────────────────
         let appInitialized = false;
 
@@ -3334,6 +4529,10 @@
             setupCalendarHandlers();
             setupDemoHandlers();
             setupGuideHandlers();
+            setupNaturalLanguageParser();
+            setupScreensaver();
+            setupFlappyArcade();
+            setupBossBattle();
             startMicroAnimations();
             renderTasks();
             updateSettingsUI();
@@ -3472,24 +4671,38 @@
                 const dateInput  = document.getElementById('new-task-date');
                 const timeInput  = document.getElementById('new-task-time');
 
-                const [hours, minutes] = timeInput.value.split(':');
-                let dueDate;
+                // Auto-apply natural language directives if present in title
+                const nl = parseNaturalLanguageDirective(titleInput.value);
+                let taskTitle = titleInput.value.trim();
+                let dueDate = null;
                 let isRollover = false;
 
-                if (dateInput && dateInput.value) {
-                    const [y, mo, d] = dateInput.value.split('-');
-                    dueDate = new Date(y, mo - 1, d, hours, minutes);
-                } else {
-                    const now = new Date();
-                    dueDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
-                    if (dueDate < now) {
-                        dueDate.setDate(dueDate.getDate() + 1);
-                        isRollover = true;
+                if (nl) {
+                    if (nl.cleanTitle) taskTitle = nl.cleanTitle;
+                    if (nl.parsedDate && (!timeInput.value || nl.timeStr)) {
+                        dueDate = nl.parsedDate;
+                    }
+                    const pillEl = document.getElementById('nl-parse-pill');
+                    if (pillEl) pillEl.classList.add('hidden');
+                }
+
+                if (!dueDate) {
+                    const [hours, minutes] = (timeInput.value || '12:00').split(':');
+                    if (dateInput && dateInput.value) {
+                        const [y, mo, d] = dateInput.value.split('-');
+                        dueDate = new Date(y, mo - 1, d, hours, minutes);
+                    } else {
+                        const now = new Date();
+                        dueDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+                        if (dueDate < now) {
+                            dueDate.setDate(dueDate.getDate() + 1);
+                            isRollover = true;
+                        }
                     }
                 }
 
                 const newTask = {
-                    title:    titleInput.value.trim(),
+                    title:    taskTitle,
                     due_time: dueDate.toISOString(),
                     source:   'web',
                 };
@@ -3504,7 +4717,7 @@
                     updateSyncTimestamp();
                     cacheToLocal();
                     if (isRollover) {
-                        showToast(`ℹ Scheduled for tomorrow at ${timeInput.value}`);
+                        showToast(`ℹ Scheduled for tomorrow at ${timeInput.value || 'specified time'}`);
                     }
                 } catch (err) {
                     tasks.push({ ...newTask, id: 't_' + Date.now(), done: false, updated_at: new Date().toISOString() });
@@ -3527,6 +4740,9 @@
                     if (!pending.length) { showToast('All directives already completed!'); return; }
                     pending.forEach(t => t.done = true);
                     renderTasks(); hardwareLoop();
+                    if (typeof damageBoss === 'function') {
+                        damageBoss(25 * pending.length, 'DIRECTIVE PURGE!');
+                    }
                     try {
                         await Promise.all(pending.map(t =>
                             apiFetch(`/tasks/${t.id}`, { method: 'PATCH', body: JSON.stringify({ done: true }) })
@@ -3540,6 +4756,20 @@
                     }
                 });
             }
+
+            // Sound Pack Preview & Change Listeners
+            document.getElementById('btn-preview-soundpack')?.addEventListener('click', () => {
+                const spSelect = document.getElementById('setting-soundpack');
+                const pack = spSelect ? spSelect.value : (settings.sound_pack || '8bit');
+                settings.sound_pack = pack;
+                HollowAudioEngine.playTone('complete');
+                showToast(`🔊 Sound Pack preview: ${pack.toUpperCase()}`);
+            });
+
+            document.getElementById('setting-soundpack')?.addEventListener('change', (e) => {
+                settings.sound_pack = e.target.value;
+                HollowAudioEngine.playTone('chime');
+            });
 
             // Settings Autosave — debounced 500ms + restarts auto-sync if interval changes
             const saveSettingsHandler = (e) => {
@@ -3980,6 +5210,14 @@
                 calInput.value = typeof firstFeed === 'string' ? firstFeed : (firstFeed.url || '');
             }
             renderXPBar();
+            const spSelect = document.getElementById('setting-soundpack');
+            if (spSelect && settings.sound_pack) spSelect.value = settings.sound_pack;
+            const ssSelect = document.getElementById('setting-screensaver');
+            if (ssSelect && settings.screensaver_mode) ssSelect.value = settings.screensaver_mode;
+            const bestEl = document.getElementById('arcade-best');
+            if (bestEl) bestEl.textContent = settings.flappy_high_score || 0;
+            const defCountEl = document.getElementById('bosses-defeated-count');
+            if (defCountEl) defCountEl.textContent = settings.bosses_defeated || 0;
             applySettingsToSimulator();
         }
 
@@ -4056,6 +5294,9 @@
             const newDone = !prevDone;
             task.done = newDone;
             renderTasks(); hardwareLoop();
+            if (newDone && typeof damageBoss === 'function') {
+                damageBoss(25, 'TASK CRIT!');
+            }
             try {
                 const updated = await apiFetch(`/tasks/${id}`, {
                     method: 'PATCH',

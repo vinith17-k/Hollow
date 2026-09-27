@@ -42,6 +42,12 @@ const DEFAULT_DATA = {
     // ── Feature C: Calendar / iCal ───────────────────────────────────────────
     calendar_feeds:        [],
     calendar_sync_enabled: false,
+
+    // ── Feature D: Audio Packs, Screensavers & Arcade Gamification ───────────
+    sound_pack:            '8bit',
+    screensaver_mode:      'off',
+    flappy_high_score:     0,
+    bosses_defeated:       0,
   },
 };
 
