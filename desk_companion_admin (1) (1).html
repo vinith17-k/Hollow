@@ -361,7 +361,7 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-2 sm:p-6 lg:p-8">
 
-    <div class="bg-[var(--chassis-main)] w-full max-w-6xl rounded-2xl shadow-2xl border-t-2 border-l-2 border-white/50 border-b-4 border-r-4 border-[var(--chassis-dark)] p-4 sm:p-6 flex flex-col lg:flex-row gap-6 relative">
+    <div class="bg-[var(--chassis-main)] w-full max-w-6xl rounded-2xl shadow-2xl border-t-2 border-l-2 border-white/50 border-b-4 border-r-4 border-[var(--chassis-dark)] p-4 sm:p-6 flex flex-col lg:flex-row gap-6 relative m-auto">
         
         <!-- Chassis Screws -->
         <div class="absolute top-4 left-4 w-2 h-2 rounded-full bg-[var(--chassis-dark)] shadow-inner"></div>
@@ -371,12 +371,12 @@
 
         <!-- LEFT COLUMN: Simulator Screen -->
         <section aria-labelledby="sim-title" class="w-full lg:w-1/3 flex flex-col items-center">
-            <div class="w-full flex justify-between items-end mb-2 px-1">
+            <div class="w-full flex justify-between items-center mb-2 px-1 flex-wrap gap-1.5">
                 <div class="flex items-center gap-1.5">
                     <h2 id="sim-title" class="hw-label text-left">Display Out</h2>
                     <span class="hw-label opacity-50">DC-01</span>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1 flex-wrap">
                     <button id="btn-popout-device" type="button" class="btn-tactile text-[0.55rem] px-1.5 py-0.5 bg-indigo-100 text-indigo-900 border-indigo-300 font-bold" title="Open Full-Size Standalone Hardware Device Window!">🪟 POP-OUT</button>
                     <button id="btn-toggle-screensaver" type="button" class="btn-tactile text-[0.55rem] px-1.5 py-0.5" title="Cycle Screensaver Mode (Matrix / Starfield / Nixie / Game of Life)">📺 SCREENSAVER</button>
                     <button id="btn-toggle-arcade" type="button" class="btn-tactile text-[0.55rem] px-1.5 py-0.5 bg-amber-100 text-amber-900 border-amber-300 font-bold" title="Launch Flappy Bat Break Arcade!">🎮 ARCADE</button>
@@ -392,10 +392,10 @@
                     <div class="absolute inset-0 pointer-events-none opacity-20 bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.4)_50%)] bg-[length:100%_4px] z-10"></div>
                     
                     <!-- Ambient Screensaver Canvas Layer -->
-                    <canvas id="lcd-screensaver-canvas" class="hidden absolute inset-0 w-full h-full z-15 pointer-events-auto cursor-pointer" title="Click or turn knob to wake up"></canvas>
+                    <canvas id="lcd-screensaver-canvas" class="hidden absolute inset-0 w-full h-full z-[15] pointer-events-auto cursor-pointer" title="Click or turn knob to wake up"></canvas>
 
                     <!-- Flappy Bat Retro Arcade Overlay Layer -->
-                    <div id="lcd-arcade-container" class="hidden absolute inset-0 w-full h-full z-25 bg-[#080d0a] flex flex-col justify-between p-2.5 font-mono select-none">
+                    <div id="lcd-arcade-container" class="hidden absolute inset-0 w-full h-full z-[25] bg-[#080d0a] flex flex-col justify-between p-2.5 font-mono select-none">
                         <div class="flex justify-between items-center text-[0.65rem] text-emerald-400 border-b border-emerald-900/50 pb-1">
                             <span class="font-bold flex items-center gap-1">🦇 FLAPPY BAT</span>
                             <span>SCORE: <strong id="arcade-score" class="text-amber-300">0</strong> | BEST: <strong id="arcade-best" class="text-emerald-300">0</strong></span>
@@ -499,7 +499,7 @@
                     <span class="hw-label text-[0.6rem] bg-[var(--chassis-light)] px-1.5 py-0.5 rounded border border-[var(--chassis-dark)]">DC-01</span>
                 </div>
                 <!-- Persistent Device Connectivity Banner -->
-                <div class="flex items-center gap-2.5 bg-white px-3 py-1 rounded border border-[var(--chassis-dark)] shadow-sm">
+                <div class="flex items-center gap-2 bg-white px-3 py-1 rounded border border-[var(--chassis-dark)] shadow-sm flex-wrap">
                     <div class="flex items-center gap-1.5" title="ESP32 Device Connection">
                         <div id="device-status-dot" class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse transition-colors"></div>
                         <span id="device-status-text" class="font-mono text-xs font-bold text-green-700">ONLINE</span>
@@ -558,7 +558,7 @@
 
             <!-- Tab Navigation -->
             <div class="flex items-center gap-2 mb-3 flex-wrap">
-                <nav class="flex gap-2 overflow-x-auto pb-1 flex-grow" role="tablist" aria-label="Dashboard Sections">
+                <nav class="flex gap-2 overflow-x-auto pb-1 flex-grow custom-scroll" role="tablist" aria-label="Dashboard Sections">
                     <button role="tab" aria-selected="true" aria-controls="panel-tasks" id="tab-tasks" class="btn-tactile active px-4 py-2 min-w-[70px]" tabindex="0">Tasks</button>
                     <button role="tab" aria-selected="false" aria-controls="panel-focus" id="tab-focus" class="btn-tactile px-4 py-2 min-w-[70px]" tabindex="-1">Focus</button>
                     <button role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" class="btn-tactile px-4 py-2 min-w-[70px]" tabindex="-1">Config</button>
@@ -1130,7 +1130,7 @@
 
     <!-- Mascot Care & Cosmetics Modal -->
     <div id="cosmetics-modal" class="hidden fixed inset-0 bg-[#0d0e0d]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-[var(--chassis-main)] border-2 border-white/50 border-b-4 border-r-4 border-[var(--chassis-dark)] p-5 rounded-2xl shadow-2xl max-w-md w-full relative">
+        <div class="bg-[var(--chassis-main)] border-2 border-white/50 border-b-4 border-r-4 border-[var(--chassis-dark)] p-5 rounded-2xl shadow-2xl max-w-md w-full relative max-h-[92vh] overflow-y-auto custom-scroll">
             <div class="flex justify-between items-center mb-3 border-b border-[var(--chassis-dark)] pb-2">
                 <div>
                     <h2 class="font-bold text-base text-gray-800 tracking-wider">HOLLOW CARE & SANCTUARY</h2>
@@ -1568,7 +1568,7 @@
         </div>
     </div>
 
-    <div id="toast-container" class="fixed bottom-4 right-4 bg-[var(--screen-bezel)] text-[var(--screen-text)] p-3 rounded-lg border border-[#333] shadow-xl flex items-center gap-4 z-50">
+    <div id="toast-container" class="fixed bottom-4 right-4 bg-[var(--screen-bezel)] text-[var(--screen-text)] p-3 rounded-lg border border-[#333] shadow-xl flex items-center gap-4 z-[80] max-w-[90vw] sm:max-w-md">
         <span id="toast-msg" class="font-mono text-sm"></span>
         <button id="toast-action" class="btn-tactile px-2 py-1 bg-[#333] text-white border-none hover:bg-[#444] hidden">UNDO</button>
     </div>
